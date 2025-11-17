@@ -1,0 +1,116 @@
+.row {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  padding: 0 var(--spacing-xl);
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-white);
+}
+
+.viewAll {
+  color: var(--primary-yellow);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  transition: color var(--transition-base);
+}
+
+.viewAll:hover {
+  color: var(--accent-red);
+}
+
+.scrollContainer {
+  position: relative;
+  padding: 0 var(--spacing-xl);
+}
+
+.grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(200px, 1fr);
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-yellow) transparent;
+  padding-bottom: var(--spacing-md);
+}
+
+.grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.grid::-webkit-scrollbar-thumb {
+  background: var(--primary-yellow);
+  border-radius: var(--radius-sm);
+}
+
+.grid::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-red);
+}
+
+.scrollButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: none;
+  color: var(--text-white);
+  font-size: var(--fs-2xl);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  z-index: 2;
+}
+
+.scrollButton:hover {
+  background: var(--primary-yellow);
+  color: var(--bg-black);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scrollButton.left {
+  left: var(--spacing-sm);
+}
+
+.scrollButton.right {
+  right: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 var(--spacing-md);
+  }
+
+  .scrollContainer {
+    padding: 0 var(--spacing-md);
+  }
+
+  .grid {
+    grid-auto-columns: minmax(150px, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .scrollButton {
+    display: none;
+  }
+}

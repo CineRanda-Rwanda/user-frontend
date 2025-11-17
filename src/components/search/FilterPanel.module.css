@@ -1,0 +1,239 @@
+.toggleButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.toggleButton:hover {
+  border-color: var(--primary);
+  background: var(--hover-bg);
+}
+
+.badge {
+  background: var(--primary);
+  color: white;
+  font-size: var(--fs-xs);
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: var(--bg-primary);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+.panel.open {
+  right: 0;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.header h3 {
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.resetButton {
+  padding: 0.5rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--primary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover {
+  background: var(--hover-bg);
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--primary);
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+.filterSection {
+  margin-bottom: 2rem;
+}
+
+.filterSection h4 {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.buttonGroup button {
+  padding: 0.625rem 1.25rem;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.buttonGroup button:hover {
+  border-color: var(--primary);
+  color: var(--text-primary);
+}
+
+.buttonGroup button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.checkbox:hover {
+  background: var(--hover-bg);
+}
+
+.checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.checkbox span {
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+}
+
+.checkbox input:checked + span {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.yearRange {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.yearRange span {
+  color: var(--text-gray);
+  font-size: var(--fs-sm);
+}
+
+.yearInput {
+  flex: 1;
+  padding: 0.625rem;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  transition: border-color 0.2s ease;
+}
+
+.yearInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.yearInput::placeholder {
+  color: var(--text-gray);
+}
+
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .panel.open {
+    right: 0;
+  }
+}
