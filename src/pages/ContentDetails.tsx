@@ -116,6 +116,19 @@ const ContentDetails: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSeasonSelect = (seasonNumber: number) => {
+    if (!content?.seasons) return;
+    const selectedSeason = content.seasons.find((season) => season.seasonNumber === seasonNumber);
+    setActiveSeason(seasonNumber);
+    const firstEpisode = selectedSeason?.episodes?.[0] || null;
+    setActiveEpisode(firstEpisode);
+
+    const panel = document.getElementById(`season-${seasonNumber}`);
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -166,6 +179,13 @@ const ContentDetails: React.FC = () => {
             </button>
 
             <div className={styles.heroGrid}>
+              <div className={styles.heroVisual}>
+                <div className={styles.heroPoster}>
+                  <img src={content.posterImageUrl} alt={`${content.title} poster`} />
+                  <div className={styles.posterGlow} />
+                </div>
+              </div>
+
               <div className={styles.heroDetails}>
                 {isSeries && (
                   <div className={styles.badgeRow}>
@@ -189,6 +209,24 @@ const ContentDetails: React.FC = () => {
                   )}
                   <span className={styles.hdChip}>HD</span>
                 </div>
+
+                {isSeries && content.seasons && content.seasons.length > 0 && (
+                  <div className={styles.seasonPicker}>
+                    <label htmlFor="seasonSelect">Quick Season</label>
+                    <select
+                      id="seasonSelect"
+                      className={styles.seasonSelect}
+                      value={activeSeason}
+                      onChange={(event) => handleSeasonSelect(Number(event.target.value))}
+                    >
+                      {content.seasons.map((season) => (
+                        <option key={season._id} value={season.seasonNumber}>
+                          {`Season ${season.seasonNumber}${season.seasonTitle ? ` · ${season.seasonTitle}` : ''}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <p className={styles.description}>{heroDescription}</p>
 
@@ -264,7 +302,7 @@ const ContentDetails: React.FC = () => {
             </div>
 
             {content.seasons.map((season) => (
-              <div key={season._id} className={styles.seasonPanel}>
+              <div key={season._id} id={`season-${season.seasonNumber}`} className={styles.seasonPanel}>
                 <div className={styles.seasonHeader}>
                   <div className={styles.seasonChip}>Season {season.seasonNumber}</div>
                   <p className={styles.sectionSubtitle}>{season.episodes?.length || 0} Episodes</p>
