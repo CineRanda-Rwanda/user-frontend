@@ -74,6 +74,14 @@ const AppRoutes = () => {
               }
             />
             <Route
+              path="/browse"
+              element={
+                <PublicRoute>
+                  <Browse />
+                </PublicRoute>
+              }
+            />
+            <Route
               path="/home"
               element={
                 <PublicRoute>
