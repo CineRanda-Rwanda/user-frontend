@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import Layout from '@/components/layout/Layout'
 import SearchBar from '@/components/search/SearchBar'
 import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
@@ -11,7 +13,8 @@ import { Content } from '@/types/content'
 import styles from './Search.module.css'
 
 const Search: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [results, setResults] = useState<Content[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,12 +43,21 @@ const Search: React.FC = () => {
           contentAPI.getGenres(),
           contentAPI.getCategories()
         ])
-        setGenres(genresRes.data.data.genres || [])
-        setCategories(categoriesRes.data.data.categories || [])
-      } catch (err) {
-        console.error('Failed to load filters:', err)
+        
+        // Extract genres and categories from response
+        const genresData = genresRes.data?.data || genresRes.data || []
+        const categoriesData = categoriesRes.data?.data || categoriesRes.data || []
+        
+        setGenres(Array.isArray(genresData) ? genresData : [])
+        setCategories(Array.isArray(categoriesData) ? categoriesData : [])
+      } catch (error) {
+        console.error('Failed to load genres/categories:', error)
+        // Set empty arrays on error
+        setGenres([])
+        setCategories([])
       }
     }
+    
     loadFilters()
   }, [])
 
@@ -68,35 +80,45 @@ const Search: React.FC = () => {
 
     try {
       let response
+      let data: Content[] = []
+      let pagination: any = {}
 
       // If there's a search query, use search endpoint
       if (query.trim()) {
-        response = await contentAPI.searchMovies(query, currentPage, 20)
+        response = await contentAPI.searchContent(query, currentPage, 20)
+        // Handle search response structure: { status, results, data: { content: [] } }
+        data = response.data?.data?.results || response.data?.data?.content || []
+        pagination = response.data?.data?.pagination || response.data?.pagination || {}
       } 
       // Otherwise, use filtering endpoints
       else if (currentFilters.contentType === 'Movie') {
-        response = await contentAPI.getPublishedMovies(currentPage, 20)
+        response = await contentAPI.getContentByType('Movie', currentPage, 20)
+        // API returns: { status, results, data: { content: [] } }
+        data = response.data?.data?.content || []
+        pagination = response.data?.data?.pagination || response.data?.pagination || {}
       } else if (currentFilters.contentType === 'Series') {
-        response = await contentAPI.getPublishedSeries(currentPage, 20)
+        response = await contentAPI.getContentByType('Series', currentPage, 20)
+        // API returns: { status, results, data: { content: [] } }
+        data = response.data?.data?.content || []
+        pagination = response.data?.data?.pagination || response.data?.pagination || {}
       } else {
         // Get both movies and series
         const [moviesRes, seriesRes] = await Promise.all([
-          contentAPI.getPublishedMovies(currentPage, 10),
-          contentAPI.getPublishedSeries(currentPage, 10)
+          contentAPI.getContentByType('Movie', currentPage, 10),
+          contentAPI.getContentByType('Series', currentPage, 10)
         ])
-        const combinedResults = [
-          ...(moviesRes.data.data.movies || []),
-          ...(seriesRes.data.data.series || [])
-        ]
-        setResults(combinedResults)
-        setTotalResults(combinedResults.length)
-        setHasMore(false)
-        setLoading(false)
-        return
+        const movies = moviesRes.data?.data?.content || []
+        const series = seriesRes.data?.data?.content || []
+        data = [...movies, ...series]
+        // Approximate pagination for combined results
+        const moviesPagination = moviesRes.data?.data?.pagination || moviesRes.data?.pagination || {}
+        const seriesPagination = seriesRes.data?.data?.pagination || seriesRes.data?.pagination || {}
+        pagination = {
+          total: (moviesPagination.total || moviesPagination.totalResults || 0) + (seriesPagination.total || seriesPagination.totalResults || 0),
+          page: currentPage,
+          pages: Math.max(moviesPagination.pages || moviesPagination.totalPages || 1, seriesPagination.pages || seriesPagination.totalPages || 1)
+        }
       }
-
-      const data = response.data.data.movies || response.data.data.series || []
-      const pagination = response.data.pagination
       
       // Apply client-side filters
       let filteredData = data
@@ -118,11 +140,11 @@ const Search: React.FC = () => {
       // Filter by price
       if (currentFilters.priceRange === 'free') {
         filteredData = filteredData.filter((item: Content) => 
-          item.priceInCoins === 0 && item.priceInRwf === 0
+          item.priceInRwf === 0
         )
       } else if (currentFilters.priceRange === 'paid') {
         filteredData = filteredData.filter((item: Content) => 
-          item.priceInCoins > 0 || item.priceInRwf > 0
+          (item.priceInRwf || 0) > 0
         )
       }
 
@@ -142,29 +164,34 @@ const Search: React.FC = () => {
       const sortedData = [...filteredData].sort((a, b) => {
         switch (currentSort) {
           case 'newest':
-            return b.releaseYear - a.releaseYear
+            return (b.releaseYear || 0) - (a.releaseYear || 0)
           case 'oldest':
-            return a.releaseYear - b.releaseYear
+            return (a.releaseYear || 0) - (b.releaseYear || 0)
           case 'title-asc':
-            return a.title.localeCompare(b.title)
+            return (a.title || '').localeCompare(b.title || '')
           case 'title-desc':
-            return b.title.localeCompare(a.title)
+            return (b.title || '').localeCompare(a.title || '')
           case 'rating-high':
             return (b.averageRating || 0) - (a.averageRating || 0)
           case 'rating-low':
             return (a.averageRating || 0) - (b.averageRating || 0)
           case 'price-low':
-            return (a.priceInCoins || 0) - (b.priceInCoins || 0)
+            return (a.priceInRwf || 0) - (b.priceInRwf || 0)
           case 'price-high':
-            return (b.priceInCoins || 0) - (a.priceInCoins || 0)
+            return (b.priceInRwf || 0) - (a.priceInRwf || 0)
           default:
             return 0
         }
       })
 
       setResults(currentPage === 1 ? sortedData : [...results, ...sortedData])
-      setTotalResults(pagination?.total || sortedData.length)
-      setHasMore(pagination ? pagination.page < pagination.pages : false)
+      
+      // Handle different pagination structures
+      const total = pagination.total || pagination.totalResults || sortedData.length
+      const totalPages = pagination.pages || pagination.totalPages || 1
+      
+      setTotalResults(total)
+      setHasMore(currentPage < totalPages)
     } catch (err: any) {
       console.error('Search failed:', err)
       setError(err.response?.data?.message || 'Failed to search content')
@@ -216,10 +243,11 @@ const Search: React.FC = () => {
     filters.categories.length > 0 || filters.priceRange !== 'all')
 
   return (
+    <Layout>
     <div className={styles.searchPage}>
       <div className={styles.header}>
         <div className={styles.searchSection}>
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar value={searchQuery} onSearch={handleSearch} />
         </div>
 
         <div className={styles.controls}>
@@ -297,6 +325,7 @@ const Search: React.FC = () => {
         )}
       </div>
     </div>
+    </Layout>
   )
 }
 

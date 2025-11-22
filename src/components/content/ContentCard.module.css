@@ -84,3 +84,37 @@
   font-weight: var(--fw-bold);
   text-transform: uppercase;
 }
+
+.buttonContainer {
+  position: relative;
+  margin-top: var(--spacing-xs);
+}
+
+.watchButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: rgba(234, 179, 8, 0.95);
+  border: 1px solid rgba(234, 179, 8, 1);
+  color: black;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  justify-content: center;
+}
+
+.watchButton:hover {
+  background: rgba(234, 179, 8, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4);
+}
+
+.watchButton svg {
+  width: 18px;
+  height: 18px;
+}

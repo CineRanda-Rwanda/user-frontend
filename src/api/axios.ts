@@ -25,8 +25,14 @@ api.interceptors.request.use(
 
 // Response interceptor - Handle errors and token refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Debug successful responses
+    console.log('API Response:', response.config.url, response.data)
+    return response
+  },
   async (error: AxiosError) => {
+    console.error('API Error:', error.config?.url, error.response?.status, error.response?.data)
+    
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
     // Handle 401 Unauthorized - Try to refresh token

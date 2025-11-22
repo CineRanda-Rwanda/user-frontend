@@ -1,19 +1,23 @@
 // User types
-export interface CoinWallet {
-  balance: number
+export interface WalletTransaction {
+  amount: number
+  type: string
+  description: string
+  createdAt: string
   _id: string
-  transactions: Array<{
-    amount: number
-    type: string
-    description: string
-    createdAt: string
-    _id: string
-  }>
+}
+
+export interface Wallet {
+  balance: number
+  bonusBalance: number
+  totalBalance?: number
+  transactions: WalletTransaction[]
+  _id: string
 }
 
 export interface User {
   _id: string
-  username: string
+  username?: string
   email?: string
   phoneNumber: string
   firstName?: string
@@ -25,14 +29,16 @@ export interface User {
   isEmailVerified: boolean
   phoneVerified: boolean
   loginCount: number
-  coinWallet: CoinWallet
-  balance: number // RWF balance
+  wallet: Wallet
+  balance: number // RWF balance (legacy?)
   isTwoFactorEnabled: boolean
   pendingVerification: boolean
   preferredLanguage?: 'english' | 'french' | 'kinyarwanda'
   theme?: 'light' | 'dark'
   watchHistory: WatchHistory[]
   purchasedContent: string[]
+  purchasedEpisodes: string[]
+  purchasedSeasons: string[]
   transactions: any[]
   lastActive?: string
   createdAt: string

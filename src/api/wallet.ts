@@ -1,26 +1,22 @@
 import axios from './axios';
 
 export interface WalletBalance {
-  balance: number; // RWF balance
-  coinBalance?: number;
+  balance: number;
+  bonusBalance: number;
+  totalBalance: number;
 }
 
 export interface Transaction {
   _id: string;
   amount: number;
-  type: 'welcome-bonus' | 'admin-adjustment' | 'purchase' | 'refund' | 'topup';
+  type: string;
   description: string;
   createdAt: string;
 }
 
-export interface CoinWallet {
-  balance: number;
-  _id: string;
-  transactions: Transaction[];
-}
-
 export interface TopUpRequest {
   amount: number;
+  provider?: string;
 }
 
 export interface TopUpResponse {
@@ -29,36 +25,25 @@ export interface TopUpResponse {
 }
 
 /**
- * Get current wallet balance (RWF and coins)
+ * Get current wallet balance
  */
 export const getWalletBalance = async (): Promise<WalletBalance> => {
-  // Get RWF balance from wallet endpoint
-  const walletResponse = await axios.get('/payments/wallet/balance');
-  const rwfBalance = walletResponse.data.data.balance;
-  
-  // Get coin balance from user profile
-  const profileResponse = await axios.get('/auth/profile');
-  const coinBalance = profileResponse.data.data.user.coinWallet.balance;
-  
-  return {
-    balance: rwfBalance,
-    coinBalance: coinBalance
-  };
+  const response = await axios.get('/payments/wallet/balance');
+  return response.data.data.wallet;
 };
 
 /**
  * Initiate wallet top-up via Flutterwave
  */
-export const topUpWallet = async (amount: number): Promise<TopUpResponse> => {
-  const response = await axios.post('/payments/wallet/topup', { amount });
+export const topUpWallet = async (amount: number, provider: string = 'flutterwave'): Promise<TopUpResponse> => {
+  const response = await axios.post('/payments/wallet/topup', { amount, provider });
   return response.data.data;
 };
 
 /**
- * Get user's coin wallet transactions
- * Note: This comes from the user profile endpoint
+ * Get user's wallet transactions
  */
-export const getCoinTransactions = async (): Promise<Transaction[]> => {
+export const getWalletTransactions = async (): Promise<Transaction[]> => {
   const response = await axios.get('/auth/profile');
-  return response.data.data.user.coinWallet.transactions;
+  return response.data.data.user.wallet.transactions;
 };

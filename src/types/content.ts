@@ -89,6 +89,12 @@ export interface Content {
   discountedSeriesPriceInRwf?: number
   discountedSeriesPriceInCoins?: number
   totalEpisodes?: number
+  finalSeriesPrice?: {
+    price: number
+    discount: number
+    originalPrice: number
+    currency: string
+  }
   
   // User access info
   isPurchased?: boolean

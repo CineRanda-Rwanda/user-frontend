@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiStar } from 'react-icons/fi'
 import { Content } from '@/types/content'
-import { formatCurrency } from '@/utils/formatters'
+import { useAuth } from '@/contexts/AuthContext'
 import styles from './ContentCard.module.css'
 
 interface ContentCardProps {
@@ -13,10 +13,11 @@ interface ContentCardProps {
 
 const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, hidePrice = false }) => {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const handleClick = () => {
-    // Route based on content type
-    const route = content.type === 'Movie' ? '/movies' : '/series'
+    // Navigate to the appropriate listing page with the content selected in the Hero section
+    const route = content.contentType === 'Series' ? '/series' : '/movies'
     navigate(`${route}?selected=${content._id}`)
   }
 
@@ -33,8 +34,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
         <div className={styles.badge}>New</div>
       )}
 
-      {!hidePrice && content.priceInCoins > 0 && (
-        <div className={styles.price}>{content.priceInCoins} coins</div>
+      {!hidePrice && content.priceInRwf > 0 && (
+        <div className={styles.price}>{content.priceInRwf} RWF</div>
       )}
 
       <div className={styles.overlay}>
@@ -49,11 +50,6 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
           <span>•</span>
           <span>{content.contentType}</span>
         </div>
-        {content.priceInRwf > 0 && (
-          <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-gray)' }}>
-            {formatCurrency(content.priceInRwf)} RWF
-          </div>
-        )}
       </div>
     </div>
   )

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { getWalletBalance, topUpWallet, getCoinTransactions } from '../../api/wallet';
+import { getWalletBalance, topUpWallet, getWalletTransactions } from '../../api/wallet';
 import type { WalletBalance, Transaction } from '../../api/wallet';
 import { toast } from 'react-toastify';
 
 const Wallet: React.FC = () => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
-  const [coinTransactions, setCoinTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -17,12 +17,12 @@ const Wallet: React.FC = () => {
   const loadWalletData = async () => {
     try {
       setLoading(true);
-      const [balanceData, transactions] = await Promise.all([
+      const [balanceData, transactionsData] = await Promise.all([
         getWalletBalance(),
-        getCoinTransactions(),
+        getWalletTransactions(),
       ]);
       setBalance(balanceData);
-      setCoinTransactions(transactions);
+      setTransactions(transactionsData);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to load wallet data');
     } finally {
@@ -41,7 +41,11 @@ const Wallet: React.FC = () => {
       const response = await topUpWallet(amount);
       toast.success('Redirecting to payment...');
       // Open Flutterwave payment link in new window
-      window.open(response.paymentLink, '_blank');
+      if (response.paymentLink) {
+        window.open(response.paymentLink, '_blank');
+      } else {
+        toast.error('Payment link not generated');
+      }
       setShowTopUpModal(false);
       setTopUpAmount('');
     } catch (error: any) {
@@ -93,13 +97,13 @@ const Wallet: React.FC = () => {
           </button>
         </div>
 
-        {/* Coin Balance */}
+        {/* Bonus Balance */}
         <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-6 text-white shadow-xl">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium opacity-90">Coin Balance</p>
-              <p className="text-4xl font-bold mt-2">{balance?.coinBalance || 0}</p>
-              <p className="text-sm mt-1 opacity-80">Cineranda Coins</p>
+              <p className="text-sm font-medium opacity-90">Bonus Balance</p>
+              <p className="text-4xl font-bold mt-2">{balance?.bonusBalance || 0}</p>
+              <p className="text-sm mt-1 opacity-80">Bonus Credits</p>
             </div>
             <div className="bg-white/20 p-3 rounded-lg">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,31 +112,31 @@ const Wallet: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 text-sm opacity-90">
-            <p>Earn coins through promotions</p>
+            <p>Earn bonus through promotions</p>
           </div>
         </div>
       </div>
 
       {/* Transaction History */}
       <div className="bg-gray-900 rounded-lg p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Coin Transaction History</h3>
+        <h3 className="text-xl font-bold text-white mb-4">Transaction History</h3>
         
-        {coinTransactions.length === 0 ? (
+        {transactions.length === 0 ? (
           <p className="text-gray-400 text-center py-8">No transactions yet</p>
         ) : (
           <div className="space-y-3">
-            {coinTransactions.map((transaction) => (
+            {transactions.map((transaction) => (
               <div
                 key={transaction._id}
                 className="flex justify-between items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition"
               >
                 <div className="flex-1">
-                  <p className="text-white font-medium">{transaction.description}</p>
+                  <p className="text-white font-medium">{transaction.description || 'Transaction'}</p>
                   <p className="text-sm text-gray-400 mt-1">{formatDate(transaction.createdAt)}</p>
                 </div>
                 <div className="text-right">
                   <p className={`text-lg font-bold ${transaction.amount >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {transaction.amount >= 0 ? '+' : ''}{transaction.amount} Coins
+                    {transaction.amount >= 0 ? '+' : ''}{transaction.amount} RWF
                   </p>
                   <p className="text-sm text-gray-400 capitalize">{transaction.type.replace('-', ' ')}</p>
                 </div>

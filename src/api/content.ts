@@ -1,21 +1,25 @@
 import api from './axios'
 
 export const contentAPI = {
-  // Get all published movies
+  // Get all published movies (public)
   getPublishedMovies: (page: number = 1, limit: number = 10) =>
-    api.get('/content/movies', { params: { page, limit } }),
+    api.get('/content/public/movies', { params: { page, limit } }),
 
   // Get all published series
   getPublishedSeries: (page: number = 1, limit: number = 10) =>
-    api.get('/content/series', { params: { page, limit } }),
+    api.get('/content/public/type/Series', { params: { page, limit } }),
 
-  // Get content by type (Movie or Series)
+  // Get content by type (Movie or Series) - PUBLIC
   getContentByType: (type: 'Movie' | 'Series', page: number = 1, limit: number = 10) =>
-    api.get(`/content/type/${type}`, { params: { page, limit } }),
+    api.get(`/content/public/type/${type}`, { params: { page, limit } }),
 
   // Get movie by ID
   getMovieById: (id: string) =>
-    api.get(`/content/movies/${id}`),
+    api.get(`/content/${id}`),
+
+  // Get movie trailer (public)
+  getMovieTrailer: (id: string) =>
+    api.get(`/content/movies/${id}/trailer`),
 
   // Get series by ID with all seasons and episodes
   getSeriesById: (id: string) =>
@@ -24,12 +28,11 @@ export const contentAPI = {
   // Get content by ID (tries movie first, then series)
   getContentById: async (id: string) => {
     try {
-      return await api.get(`/content/movies/${id}`);
+      // Try fetching as movie/generic content first
+      return await api.get(`/content/${id}`);
     } catch (error: any) {
-      if (error.response?.status === 404) {
-        return await api.get(`/content/series/${id}`);
-      }
-      throw error;
+      // If it fails or if we need to be specific about series
+      return await api.get(`/content/series/${id}`);
     }
   },
 
@@ -41,37 +44,33 @@ export const contentAPI = {
   getEpisodeDetails: (seriesId: string, episodeId: string) =>
     api.get(`/content/series/${seriesId}/episodes/${episodeId}`),
 
-  // Search movies
-  searchMovies: (query: string, page: number = 1, limit: number = 10) =>
-    api.get('/content/movies/search', { params: { query, page, limit } }),
+  // Get episode trailer (public)
+  getEpisodeTrailer: (seriesId: string, seasonNumber: number, episodeId: string) =>
+    api.get(`/content/series/${seriesId}/seasons/${seasonNumber}/episodes/${episodeId}/trailer`),
 
-  // Get movies by genre
+  // Search content (public)
+  searchContent: (query: string, page: number = 1, limit: number = 10) =>
+    api.get('/content/search', { params: { q: query, page, limit } }),
+
+  // Get movies by genre (public)
   getMoviesByGenre: (genreId: string, page: number = 1, limit: number = 10) =>
-    api.get(`/content/movies/genre/${genreId}`, { params: { page, limit } }),
+    api.get(`/content/public/movies/genre/${genreId}`, { params: { page, limit } }),
 
-  // Get movies by category
+  // Get movies by category (public)
   getMoviesByCategory: (categoryId: string, page: number = 1, limit: number = 10) =>
-    api.get(`/content/movies/category/${categoryId}`, { params: { page, limit } }),
+    api.get(`/content/public/movies/category/${categoryId}`, { params: { page, limit } }),
 
-  // Get series by genre
-  getSeriesByGenre: (genreId: string, page: number = 1, limit: number = 10) =>
-    api.get(`/content/series/genre/${genreId}`, { params: { page, limit } }),
-
-  // Get series by category
-  getSeriesByCategory: (categoryId: string, page: number = 1, limit: number = 10) =>
-    api.get(`/content/series/category/${categoryId}`, { params: { page, limit } }),
-
-  // Get featured movies
-  getFeaturedMovies: () =>
-    api.get('/content/movies/featured'),
-
-  // Get all genres
+  // Get all genres (public)
   getGenres: () =>
     api.get('/genres'),
 
-  // Get all categories
+  // Get all categories (public)
   getCategories: () =>
     api.get('/categories'),
+
+  // Get featured categories (public)
+  getFeaturedCategories: () =>
+    api.get('/categories/featured'),
 
   // Get user's unlocked content (purchased movies and series)
   getUnlockedContent: () =>

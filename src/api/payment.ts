@@ -6,13 +6,12 @@ export interface PurchaseContentRequest {
 
 export interface PurchaseEpisodeRequest {
   contentId: string;
-  seasonNumber: number;
   episodeId: string;
 }
 
 export interface PurchaseSeasonRequest {
   contentId: string;
-  seasonNumber: number;
+  seasonId: string;
 }
 
 export interface PurchaseResponse {

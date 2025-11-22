@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { FiSearch, FiBell, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiDollarSign } from 'react-icons/fi'
 import { getInitials } from '@/utils/formatters'
@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [walletBalance, setWalletBalance] = useState<{ balance: number; coinBalance?: number } | null>(null)
+  const [walletBalance, setWalletBalance] = useState<{ balance: number; bonusBalance?: number } | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -55,10 +55,10 @@ const Navbar: React.FC = () => {
 
       {/* Desktop Navigation */}
       <div className={styles.nav}>
-        <Link to="/">Home</Link>
-        <Link to="/movies">Movies</Link>
-        <Link to="/series">Series</Link>
-        {isAuthenticated && <Link to="/my-library">My Library</Link>}
+        <NavLink to="/" className={({ isActive }) => isActive ? styles.active : ''}>Home</NavLink>
+        <NavLink to="/movies" className={({ isActive }) => isActive ? styles.active : ''}>Movies</NavLink>
+        <NavLink to="/series" className={({ isActive }) => isActive ? styles.active : ''}>Series</NavLink>
+        {isAuthenticated && <NavLink to="/my-library" className={({ isActive }) => isActive ? styles.active : ''}>My Library</NavLink>}
       </div>
 
       {/* Search Bar */}
@@ -93,7 +93,7 @@ const Navbar: React.FC = () => {
               >
                 <FiDollarSign />
                 <span className={styles.walletBalance}>
-                  {walletBalance.coinBalance || 0} coins
+                  {walletBalance.balance || 0} RWF
                 </span>
               </button>
             )}

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Loader from './components/common/Loader'
+import ScrollToTop from './components/common/ScrollToTop'
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Auth/Login'))
@@ -16,6 +17,7 @@ const Search = lazy(() => import('./pages/Search'))
 const MyLibrary = lazy(() => import('./pages/MyLibrary'))
 const Profile = lazy(() => import('./pages/Profile'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+const TrailerPlayer = lazy(() => import('./pages/TrailerPlayer'))
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -41,6 +43,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppRoutes = () => {
   return (
     <div className="app">
+      <ScrollToTop />
       <Suspense fallback={<Loader fullScreen text="Loading..." />}>
         <Routes>
             {/* Public Routes */}
@@ -99,9 +102,17 @@ const AppRoutes = () => {
             <Route
               path="/content/:id"
               element={
-                <ProtectedRoute>
+                <PublicRoute>
                   <ContentDetails />
-                </ProtectedRoute>
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/trailer"
+              element={
+                <PublicRoute>
+                  <TrailerPlayer />
+                </PublicRoute>
               }
             />
             <Route
@@ -115,9 +126,9 @@ const AppRoutes = () => {
             <Route
               path="/search"
               element={
-                <ProtectedRoute>
+                <PublicRoute>
                   <Search />
-                </ProtectedRoute>
+                </PublicRoute>
               }
             />
             <Route

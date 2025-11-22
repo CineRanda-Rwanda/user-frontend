@@ -33,7 +33,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         try {
           const { data } = await userAPI.getCurrentUser()
-          setUser(data)
+          const userData = data.data?.user || data.user || data
+          setUser(userData as any)
         } catch (error) {
           console.error('Failed to load user:', error)
           localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
@@ -60,7 +61,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (refreshToken) {
           localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
         }
-        setUser(user)
+        setUser(user as any)
         
         toast.success('Welcome back!')
         navigate('/browse')
@@ -102,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (refreshToken) {
           localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
         }
-        setUser(user)
+        setUser(user as any)
         
         toast.success('Registration completed successfully!')
         navigate('/browse')
@@ -127,7 +128,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshUser = async () => {
     try {
       const { data } = await userAPI.getCurrentUser()
-      setUser(data)
+      const userData = data.data?.user || data.user || data
+      setUser(userData as any)
     } catch (error) {
       console.error('Failed to refresh user:', error)
     }
@@ -136,7 +138,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateProfile = async (profileData: Partial<User>) => {
     try {
       const { data } = await userAPI.updateProfile(profileData)
-      setUser(data)
+      const userData = data.data?.user || data.user || data
+      setUser(userData as any)
     } catch (error) {
       console.error('Failed to update profile:', error)
       throw error

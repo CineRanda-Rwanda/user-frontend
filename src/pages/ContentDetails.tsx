@@ -1,413 +1,332 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { contentAPI } from '../api/content';
-import { purchaseContentWithWallet, purchaseEpisodeWithWallet } from '../api/payment';
-import { getWalletBalance } from '../api/wallet';
-import { submitRating, getRatings } from '../api/ratings';
-import { Content } from '../types/content';
-import { WalletBalance } from '../api/wallet';
-import { Rating } from '../api/ratings';
+import { Content, Episode } from '../types/content';
+import { FiPlay, FiPlus, FiArrowLeft, FiInfo } from 'react-icons/fi';
+import Layout from '../components/layout/Layout';
+import ContentCard from '../components/content/ContentCard';
+import Loader from '../components/common/Loader';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { FiStar, FiPlay, FiDollarSign, FiLock, FiCheck, FiClock } from 'react-icons/fi';
+import styles from './ContentDetails.module.css';
 
 const ContentDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   const [content, setContent] = useState<Content | null>(null);
-  const [wallet, setWallet] = useState<WalletBalance | null>(null);
-  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [relatedContent, setRelatedContent] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState(false);
-  const [userRating, setUserRating] = useState(5);
-  const [userReview, setUserReview] = useState('');
+  const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
+  const [activeSeason, setActiveSeason] = useState<number>(1);
 
   useEffect(() => {
     if (id) {
       loadContentDetails();
+      loadRelatedContent();
     }
   }, [id]);
 
   const loadContentDetails = async () => {
     try {
       setLoading(true);
-      const [contentResponse, walletData, ratingsData] = await Promise.all([
-        contentAPI.getContentById(id!),
-        getWalletBalance().catch(err => {
-          console.error('Wallet load error:', err);
-          return { balance: 0, coinBalance: 0 };
-        }),
-        getRatings(id!).catch(err => {
-          console.error('Ratings load error:', err);
-          return { ratings: [], pagination: { page: 1, pages: 1, total: 0, limit: 10 } };
-        }),
-      ]);
-      
-      // Handle different response structures with safe navigation
-      const contentData = contentResponse?.data?.data?.movie || 
-                         contentResponse?.data?.data?.series || 
-                         contentResponse?.data?.data || 
-                         contentResponse?.data;
-      
-      if (!contentData) {
-        throw new Error('Content not found');
-      }
-      
+      const contentResponse = await contentAPI.getContentById(id!);
+      const contentData =
+        contentResponse?.data?.data?.movie ||
+        contentResponse?.data?.data?.series ||
+        contentResponse?.data?.data ||
+        contentResponse?.data;
+
+      if (!contentData) throw new Error('Content not found');
       setContent(contentData);
-      setWallet(walletData);
-      setRatings(Array.isArray(ratingsData?.ratings) ? ratingsData.ratings : []);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to load content details');
+
+      if (contentData.contentType === 'Series' && contentData.seasons?.length > 0) {
+        const firstSeason = contentData.seasons[0];
+        setActiveSeason(firstSeason.seasonNumber);
+        if (firstSeason.episodes?.length > 0) {
+          setActiveEpisode(firstSeason.episodes[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading content:', error);
       navigate('/browse');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePurchase = async () => {
-    if (!content || !wallet) return;
-
-    // Check balance
-    const price = content.priceInRwf;
-    if (wallet.balance < price) {
-      toast.error('Insufficient balance. Please top up your wallet.');
-      navigate('/profile?tab=wallet');
-      return;
-    }
-
+  const loadRelatedContent = async () => {
     try {
-      setPurchasing(true);
-      await purchaseContentWithWallet(content._id);
-      toast.success('Content purchased successfully!');
-      setShowPurchaseModal(false);
-      loadContentDetails(); // Reload to update purchase status
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Purchase failed');
-    } finally {
-      setPurchasing(false);
+      const response = await contentAPI.getPublishedMovies(1, 10);
+      const movies = response?.data?.data?.movies || response?.data?.data || [];
+      setRelatedContent(Array.isArray(movies) ? movies.slice(0, 5) : []);
+    } catch (error) {
+      console.error('Error loading related content:', error);
     }
   };
 
-  const handleSubmitRating = async () => {
+  const handlePlayFullVideo = () => {
     if (!content) return;
-
-    try {
-      await submitRating({
-        movieId: content._id,
-        rating: userRating,
-        review: userReview,
-      });
-      toast.success('Rating submitted successfully!');
-      setShowRatingModal(false);
-      setUserRating(5);
-      setUserReview('');
-      loadContentDetails(); // Reload ratings
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to submit rating');
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/watch/${content._id}` } });
+      return;
     }
+
+    if (content.contentType === 'Series' && activeEpisode) {
+      navigate(`/watch/${content._id}?season=${activeSeason}&episode=${activeEpisode.episodeNumber}`);
+    } else {
+      navigate(`/watch/${content._id}`);
+    }
+  };
+
+  const handleTrailer = async () => {
+    try {
+      let link = '';
+
+      if (content?.contentType === 'Series' && activeEpisode?.trailerYoutubeLink) {
+        link = activeEpisode.trailerYoutubeLink;
+      } else if (content?.trailerYoutubeLink) {
+        link = content.trailerYoutubeLink;
+      } else if (content?._id) {
+        const response = await contentAPI.getMovieTrailer(content._id);
+        link =
+          response?.data?.data?.movie?.trailerYoutubeLink ||
+          response?.data?.data?.series?.trailerYoutubeLink ||
+          '';
+      }
+
+      if (link) {
+        const title =
+          content?.contentType === 'Series' && activeEpisode
+            ? `${content.title} - S${activeSeason}:E${activeEpisode.episodeNumber}`
+            : content?.title || 'Trailer';
+        navigate(`/trailer?url=${encodeURIComponent(link)}&title=${encodeURIComponent(title)}`);
+      } else {
+        toast.error('Trailer not available');
+      }
+    } catch (error) {
+      toast.error('Failed to load trailer');
+    }
+  };
+
+  const handleEpisodeClick = (episode: Episode, seasonNumber: number) => {
+    setActiveEpisode(episode);
+    setActiveSeason(seasonNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+      <div className={styles.loading}>
+        <Loader fullScreen={false} text="Loading title..." />
       </div>
     );
   }
 
   if (!content) return null;
 
-  const isPurchased = content.isPurchased || content.userAccess?.isPurchased;
-  const isFree = content.isFree || content.priceInRwf === 0;
+  const isSeries = content.contentType === 'Series';
+  const heroTitle =
+    isSeries && activeEpisode
+      ? `${content.title} - S${activeSeason}:E${activeEpisode.episodeNumber} - ${activeEpisode.title}`
+      : content.title;
+  const heroDescription = isSeries && activeEpisode ? activeEpisode.description : content.description;
+  const heroDuration = isSeries && activeEpisode ? `${activeEpisode.duration} min` : `${content.duration ?? 0} min`;
+  const totalSeasons = content.seasons?.length || 0;
+  const totalEpisodes = content.seasons?.reduce((acc, season) => acc + (season.episodes?.length || 0), 0) || 0;
+  const genreNames = Array.isArray(content.genres) ? content.genres.map((g) => g.name) : [];
+  const primaryGenres = genreNames.slice(0, 3).join(' • ') || 'Drama';
+  const primaryCreator = content.director || content.cast?.[0] || 'Cineranda Studio';
+  const primaryLanguage = content.language || content.countryOfOrigin || 'Kinyarwanda';
+
+  const getEpisodeArtwork = (episode?: Episode | null) => {
+    if (!content) return '';
+    const episodeLike: any = episode || {};
+    return (
+      episodeLike.thumbnailUrl ||
+      episodeLike.thumbnailImageUrl ||
+      episodeLike.coverImageUrl ||
+      content.posterImageUrl
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Hero Section */}
-      <div 
-        className="relative h-[70vh] bg-cover bg-center"
-        style={{ 
-          backgroundImage: `url(${content.posterImageUrl})`,
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
-        
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">{content.title}</h1>
-            
-            <div className="flex flex-wrap items-center gap-4 text-white mb-6">
-              <div className="flex items-center gap-2 bg-yellow-500 text-black px-3 py-1 rounded">
-                <FiStar fill="currentColor" />
-                <span className="font-semibold">{content.averageRating?.toFixed(1) || 'N/A'}</span>
-              </div>
-              <span>{content.releaseYear}</span>
-              <span>•</span>
-              <span>{content.contentType}</span>
-              {content.duration && (
-                <>
-                  <span>•</span>
-                  <span>{content.duration} min</span>
-                </>
-              )}
-              <span>•</span>
-              <span className="capitalize">{content.language || 'English'}</span>
-            </div>
-
-            <p className="text-xl text-gray-300 max-w-3xl mb-8">{content.description}</p>
-
-            <div className="flex flex-wrap gap-4">
-              {(isPurchased || isFree) ? (
-                <button
-                  onClick={() => navigate(`/watch/${content._id}`)}
-                  className="flex items-center gap-2 px-8 py-4 bg-yellow-500 text-black rounded-lg font-bold text-lg hover:bg-yellow-600 transition"
-                >
-                  <FiPlay /> Watch Now
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowPurchaseModal(true)}
-                  className="flex items-center gap-2 px-8 py-4 bg-yellow-500 text-black rounded-lg font-bold text-lg hover:bg-yellow-600 transition"
-                >
-                  <FiDollarSign /> Purchase - {content.priceInRwf} RWF
-                </button>
-              )}
-              
-              {(isPurchased || isFree) && (
-                <button
-                  onClick={() => setShowRatingModal(true)}
-                  className="flex items-center gap-2 px-8 py-4 bg-gray-800 text-white rounded-lg font-bold text-lg hover:bg-gray-700 transition"
-                >
-                  <FiStar /> Rate & Review
-                </button>
-              )}
-            </div>
+    <Layout>
+      <div className={styles.page}>
+        <section className={styles.hero}>
+          <div className={styles.heroBackground}>
+            <img src={content.posterImageUrl} alt={content.title} className={styles.heroImage} />
+            <div className={styles.heroOverlay} />
           </div>
-        </div>
-      </div>
 
-      {/* Details Section */}
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Pricing Info */}
-            {!isPurchased && !isFree && (
-              <div className="bg-gray-900 rounded-lg p-6">
-                <h3 className="text-2xl font-bold text-white mb-4">Pricing</h3>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold text-yellow-500">{content.priceInRwf}</span>
-                    <span className="text-gray-400">RWF</span>
-                  </div>
-                  <div className="text-gray-400">or</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold text-red-500">{content.priceInCoins}</span>
-                    <span className="text-gray-400">Coins</span>
-                  </div>
-                </div>
-                {wallet && (
-                  <div className="mt-4 text-sm text-gray-400">
-                    Your balance: {wallet.balance} RWF • {wallet.coinBalance} Coins
+          <div className={styles.heroContent}>
+            <button onClick={() => navigate(-1)} className={styles.backButton}>
+              <FiArrowLeft size={22} />
+            </button>
+
+            <div className={styles.heroGrid}>
+              <div className={styles.heroDetails}>
+                {isSeries && (
+                  <div className={styles.badgeRow}>
+                    <span>Series</span>
+                    {genreNames.slice(0, 2).map((name) => (
+                      <span key={name}>{name}</span>
+                    ))}
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Cast & Crew */}
-            {content.cast && content.cast.length > 0 && (
-              <div className="bg-gray-900 rounded-lg p-6">
-                <h3 className="text-2xl font-bold text-white mb-4">Cast</h3>
-                <div className="flex flex-wrap gap-2">
-                  {content.cast.map((actor, index) => (
-                    <span key={index} className="px-4 py-2 bg-gray-800 text-white rounded-full">
-                      {actor}
-                    </span>
-                  ))}
+                <h1 className={styles.heroTitle}>{heroTitle}</h1>
+
+                <div className={styles.metaRow}>
+                  <span>{content.releaseYear}</span>
+                  <span className={styles.metaDot} />
+                  <span>{heroDuration}</span>
+                  <span className={styles.metaDot} />
+                  <span>{primaryGenres}</span>
+                  {isSeries && activeEpisode && (
+                    <span className={styles.metaChip}>S{activeSeason} · EP {activeEpisode.episodeNumber}</span>
+                  )}
+                  <span className={styles.hdChip}>HD</span>
+                </div>
+
+                <p className={styles.description}>{heroDescription}</p>
+
+                <div className={styles.ctaRow}>
+                  <button onClick={handlePlayFullVideo} className={styles.primaryCta}>
+                    <FiPlay size={22} />
+                    Watch Now
+                  </button>
+                  <button onClick={handleTrailer} className={styles.secondaryCta}>
+                    <FiInfo size={22} />
+                    Trailer
+                  </button>
+                  <button className={styles.circleCta}>
+                    <FiPlus size={22} />
+                  </button>
+                </div>
+
+                <div className={styles.statGrid}>
+                  <div className={styles.statCard}>
+                    <p className={styles.statLabel}>Creator</p>
+                    <p className={styles.statValue}>{primaryCreator}</p>
+                  </div>
+                  <div className={styles.statCard}>
+                    <p className={styles.statLabel}>Language</p>
+                    <p className={styles.statValue}>{primaryLanguage}</p>
+                  </div>
+                  <div className={styles.statCard}>
+                    <p className={styles.statLabel}>Rating</p>
+                    <p className={styles.statValue}>{content.averageRating?.toFixed(1) || content.ageRating || 'PG-13'}</p>
+                  </div>
+                  <div className={styles.statCard}>
+                    <p className={styles.statLabel}>Episodes</p>
+                    <p className={styles.statValue}>{totalEpisodes}</p>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Genres */}
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-2xl font-bold text-white mb-4">Genres</h3>
-              <div className="flex flex-wrap gap-2">
-                {content.genres.map((genre) => (
-                  <span key={genre._id} className="px-4 py-2 bg-yellow-500 text-black rounded-full font-semibold">
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Ratings & Reviews */}
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Ratings & Reviews ({ratings.length})
-              </h3>
-              {ratings.length === 0 ? (
-                <p className="text-gray-400 text-center py-8">No reviews yet. Be the first to review!</p>
-              ) : (
-                <div className="space-y-4">
-                  {ratings.slice(0, 5).map((rating) => (
-                    <div key={rating._id} className="border-b border-gray-800 pb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1 text-yellow-500">
-                          {[...Array(5)].map((_, i) => (
-                            <FiStar key={i} fill={i < rating.rating ? 'currentColor' : 'none'} />
-                          ))}
-                        </div>
-                        <span className="text-white font-semibold">@{rating.user.username}</span>
-                      </div>
-                      <p className="text-gray-300">{rating.review}</p>
-                    </div>
-                  ))}
-                </div>
+              {isSeries && (
+                <aside className={styles.upNextCard}>
+                  <div className={styles.upNextImage}>
+                    <img src={getEpisodeArtwork(activeEpisode)} alt={activeEpisode?.title || content.title} />
+                  </div>
+                  <p className={styles.upNextMeta}>Up Next</p>
+                  <p className={styles.upNextTitle}>{activeEpisode?.title || content.title}</p>
+                  <p className={styles.upNextDesc}>
+                    {activeEpisode?.description || 'Dive into the next chapter of this exclusive series.'}
+                  </p>
+                  <div className={styles.upNextStats}>
+                    <span>Duration</span>
+                    <span>{(activeEpisode?.duration || content.duration || 0)} min</span>
+                  </div>
+                  <button onClick={handlePlayFullVideo} className={styles.upNextButton}>
+                    Continue Episode
+                  </button>
+                </aside>
               )}
             </div>
           </div>
+        </section>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Details</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Status</span>
-                  {isPurchased ? (
-                    <span className="text-green-500 flex items-center gap-1">
-                      <FiCheck /> Purchased
-                    </span>
-                  ) : isFree ? (
-                    <span className="text-blue-500 flex items-center gap-1">
-                      <FiCheck /> Free
-                    </span>
-                  ) : (
-                    <span className="text-yellow-500 flex items-center gap-1">
-                      <FiLock /> Locked
-                    </span>
-                  )}
+        {isSeries && content.seasons && content.seasons.length > 0 && (
+          <section className={styles.seasonsSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <div className={styles.badgeRow}>
+                  <span>Cineranda Originals</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Views</span>
-                  <span className="text-white">{content.viewCount?.toLocaleString() || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Rating Count</span>
-                  <span className="text-white">{content.ratingCount || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Age Rating</span>
-                  <span className="text-white">{content.ageRating || 'NR'}</span>
-                </div>
+                <h3 className={styles.sectionTitle}>Seasons & Episodes</h3>
               </div>
+              <p className={styles.sectionSubtitle}>
+                {totalSeasons} Seasons · {totalEpisodes} Episodes
+              </p>
             </div>
 
-            {content.trailerYoutubeLink && (
-              <div className="bg-gray-900 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Trailer</h3>
-                <a
-                  href={content.trailerYoutubeLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-red-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-red-700 transition"
-                >
-                  Watch on YouTube
-                </a>
+            {content.seasons.map((season) => (
+              <div key={season._id} className={styles.seasonPanel}>
+                <div className={styles.seasonHeader}>
+                  <div className={styles.seasonChip}>Season {season.seasonNumber}</div>
+                  <p className={styles.sectionSubtitle}>{season.episodes?.length || 0} Episodes</p>
+                </div>
+
+                <div className={styles.episodesList}>
+                  {season.episodes?.map((episode) => {
+                    const isActive = activeEpisode?._id === episode._id;
+                    const episodeClassName = `${styles.episodeCard} ${isActive ? styles.episodeCardActive : ''}`;
+                    return (
+                      <button
+                        type="button"
+                        key={episode._id}
+                        onClick={() => handleEpisodeClick(episode, season.seasonNumber)}
+                        className={episodeClassName}
+                      >
+                        <div className={styles.episodeThumb}>
+                          <img src={getEpisodeArtwork(episode)} alt={episode.title} className={styles.episodeImage} />
+                          <div className={styles.episodeGrad} />
+                          <div className={styles.episodeBadges}>
+                            <span className={styles.episodeBadge}>EP {episode.episodeNumber}</span>
+                            <span className={styles.episodeBadge}>{episode.duration}m</span>
+                          </div>
+                        </div>
+
+                        <div className={styles.episodeBody}>
+                          <div className={styles.episodeHeading}>
+                            <div>
+                              <p className={styles.sectionSubtitle}>Episode {episode.episodeNumber}</p>
+                              <h5 className={styles.episodeTitle}>{episode.title}</h5>
+                            </div>
+                            {isActive && <span className={styles.nowPlaying}>Now Playing</span>}
+                          </div>
+                          <p>{episode.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+            ))}
+          </section>
+        )}
+
+        <section className={styles.relatedSection}>
+          <div className={styles.relatedHeader}>
+            <div>
+              <div className={styles.badgeRow}>
+                <span>More To Love</span>
+              </div>
+              <h3 className={styles.relatedTitle}>Recommended For You</h3>
+            </div>
+            <span className={styles.relatedSubtitle}>Hand-picked from the Cineranda vault</span>
           </div>
-        </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {relatedContent.map((item) => (
+              <ContentCard key={item._id} content={item} hidePrice />
+            ))}
+          </div>
+        </section>
       </div>
-
-      {/* Purchase Modal */}
-      {showPurchaseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">Confirm Purchase</h3>
-            <p className="text-gray-300 mb-6">
-              Are you sure you want to purchase "{content.title}" for {content.priceInRwf} RWF?
-            </p>
-            {wallet && wallet.balance < content.priceInRwf && (
-              <div className="bg-red-900/30 border border-red-500 rounded-lg p-4 mb-4">
-                <p className="text-red-400">
-                  Insufficient balance. You need {content.priceInRwf - wallet.balance} more RWF.
-                </p>
-              </div>
-            )}
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowPurchaseModal(false)}
-                className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePurchase}
-                disabled={purchasing || (wallet && wallet.balance < content.priceInRwf)}
-                className="flex-1 px-4 py-3 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {purchasing ? 'Processing...' : 'Confirm'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Rating Modal */}
-      {showRatingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">Rate & Review</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Your Rating</label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setUserRating(star)}
-                    className="text-3xl transition hover:scale-110"
-                  >
-                    <FiStar
-                      className={star <= userRating ? 'text-yellow-500' : 'text-gray-600'}
-                      fill={star <= userRating ? 'currentColor' : 'none'}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Your Review</label>
-              <textarea
-                value={userReview}
-                onChange={(e) => setUserReview(e.target.value)}
-                rows={4}
-                className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="Share your thoughts about this content..."
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowRatingModal(false)}
-                className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitRating}
-                disabled={!userReview.trim()}
-                className="flex-1 px-4 py-3 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Submit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </Layout>
   );
 };
 
