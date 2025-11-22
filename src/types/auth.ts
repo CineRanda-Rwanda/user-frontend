@@ -10,6 +10,13 @@ export interface RegisterRequest {
   pin: string
 }
 
+export interface VerifyRegistrationRequest {
+  username: string
+  phoneNumber: string
+  pin: string
+  verificationCode: string
+}
+
 export interface WalletTransaction {
   amount: number
   type: string

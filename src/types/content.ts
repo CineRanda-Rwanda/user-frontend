@@ -68,6 +68,8 @@ export interface Content {
   genres: Genre[]
   categories: Category[]
   cast?: string[]
+  director?: string
+  countryOfOrigin?: string
   language?: string
   ageRating?: string
   rating?: number

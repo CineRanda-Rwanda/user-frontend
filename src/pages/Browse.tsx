@@ -10,7 +10,6 @@ import ContinueWatching from '@/components/content/ContinueWatching'
 import AnimatedCarousel from '@/components/content/AnimatedCarousel'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
-import styles from './Browse.module.css'
 
 const Browse: React.FC = () => {
   const { isAuthenticated } = useAuth()
@@ -23,7 +22,7 @@ const Browse: React.FC = () => {
 
   useEffect(() => {
     loadContent()
-  }, [])
+  }, [isAuthenticated])
 
   const loadContent = async () => {
     try {
@@ -32,18 +31,20 @@ const Browse: React.FC = () => {
       console.log('Is Authenticated:', isAuthenticated)
 
       // Load all content in parallel using the new API structure
-      const promises = [
+      const [moviesRes, seriesRes] = await Promise.all([
         contentAPI.getContentByType('Movie', 1, 20),
         contentAPI.getContentByType('Series', 1, 20),
-      ]
+      ])
 
-      // Only load continue watching if user is authenticated
+      let continueWatchingRes: WatchHistoryItem[] = []
       if (isAuthenticated) {
-        promises.push(getContinueWatching().catch(() => []))
+        try {
+          continueWatchingRes = await getContinueWatching()
+        } catch (error) {
+          console.error('Error loading continue watching:', error)
+          continueWatchingRes = []
+        }
       }
-
-      const results = await Promise.all(promises)
-      const [moviesRes, seriesRes, continueWatchingRes] = results
 
       // Debug: Log the responses
       console.log('Movies Response:', moviesRes)
@@ -83,9 +84,7 @@ const Browse: React.FC = () => {
       console.log('State updated - Featured:', sortedContent.slice(0, 10).length, 'Movies:', safeMovies.length, 'Series:', safeSeries.length)
       
       // Set continue watching if authenticated
-      if (isAuthenticated && continueWatchingRes) {
-        setContinueWatching(continueWatchingRes)
-      }
+      setContinueWatching(isAuthenticated ? continueWatchingRes : [])
     } catch (error) {
       console.error('Error in loadContent:', error)
       toast.error('Failed to load content')

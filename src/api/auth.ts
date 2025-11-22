@@ -1,14 +1,14 @@
 import api from './axios'
-import { LoginRequest, RegisterRequest, AuthResponse, RefreshTokenRequest } from '@/types/auth'
+import { LoginRequest, RegisterRequest, AuthResponse, RefreshTokenRequest, VerifyRegistrationRequest } from '@/types/auth'
 
 export const authAPI = {
   // Register new user - Step 1: Send OTP
   register: (data: RegisterRequest) =>
     api.post('/auth/register', data),
 
-  // Register - Step 2: Verify OTP
-  verifyRegistration: (phoneNumber: string, verificationCode: string) =>
-    api.post<AuthResponse>('/auth/verify-registration', { phoneNumber, verificationCode }),
+  // Register - Step 2: Verify OTP (requires original credentials)
+  verifyRegistration: (payload: VerifyRegistrationRequest) =>
+    api.post<AuthResponse>('/auth/verify-registration', payload),
 
   // Login user (identifier can be username or phone)
   login: (data: LoginRequest) =>

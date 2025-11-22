@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { authAPI } from '@/api/auth'
 import { userAPI } from '@/api/user'
 import { User } from '@/types/user'
-import { LoginRequest, RegisterRequest } from '@/types/auth'
+import { LoginRequest, RegisterRequest, VerifyRegistrationRequest } from '@/types/auth'
 import { STORAGE_KEYS } from '@/utils/constants'
 import { toast } from 'react-toastify'
 
@@ -13,7 +13,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<any>
-  verifyRegistration: (phoneNumber: string, verificationCode: string) => Promise<void>
+  verifyRegistration: (payload: VerifyRegistrationRequest) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
   updateProfile: (data: Partial<User>) => Promise<void>
@@ -89,9 +89,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  const verifyRegistration = async (phoneNumber: string, verificationCode: string) => {
+  const verifyRegistration = async (payload: VerifyRegistrationRequest) => {
     try {
-      const { data } = await authAPI.verifyRegistration(phoneNumber, verificationCode)
+      const { data } = await authAPI.verifyRegistration(payload)
       
       // Handle the response format from API
       const user = data.data?.user

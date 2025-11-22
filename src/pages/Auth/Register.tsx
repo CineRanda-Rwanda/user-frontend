@@ -72,9 +72,20 @@ const Register: React.FC = () => {
       return
     }
 
+    if (!formData.username || !formData.pin || !formData.phoneNumber) {
+      setGeneralError('Registration details missing. Please restart the process.')
+      setStep('register')
+      return
+    }
+
     setLoading(true)
     try {
-      await verifyRegistration(formData.phoneNumber, verificationCode)
+      await verifyRegistration({
+        username: formData.username,
+        phoneNumber: formData.phoneNumber,
+        pin: formData.pin,
+        verificationCode
+      })
     } catch (error: any) {
       setGeneralError(error.response?.data?.message || 'Verification failed. Please try again.')
     } finally {
