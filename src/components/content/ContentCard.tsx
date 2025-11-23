@@ -1,8 +1,8 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiStar } from 'react-icons/fi'
+import { FiStar, FiLock, FiUnlock } from 'react-icons/fi'
 import { Content } from '@/types/content'
-import { useAuth } from '@/contexts/AuthContext'
+import { formatCurrency } from '@/utils/formatters'
 import styles from './ContentCard.module.css'
 
 interface ContentCardProps {
@@ -13,7 +13,9 @@ interface ContentCardProps {
 
 const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, hidePrice = false }) => {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const isPremium = (content.priceInRwf || 0) > 0
+  const isUnlockedPremium = isPremium && (content.isPurchased || content.userAccess?.isPurchased)
+  const isLocked = isPremium && !isUnlockedPremium && !content.isFree
 
   const handleClick = () => {
     // Navigate to the appropriate listing page with the content selected in the Hero section
@@ -34,8 +36,20 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
         <div className={styles.badge}>New</div>
       )}
 
+      {isLocked && (
+        <div className={styles.lockBadge} title="Locked">
+          <FiLock size={16} />
+        </div>
+      )}
+
+      {isUnlockedPremium && (
+        <div className={styles.unlockBadge} title="Unlocked">
+          <FiUnlock size={16} />
+        </div>
+      )}
+
       {!hidePrice && content.priceInRwf > 0 && (
-        <div className={styles.price}>{content.priceInRwf} RWF</div>
+        <div className={styles.price}>{formatCurrency(content.priceInRwf)}</div>
       )}
 
       <div className={styles.overlay}>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getWalletBalance, topUpWallet, getWalletTransactions } from '../../api/wallet';
 import type { WalletBalance, Transaction } from '../../api/wallet';
 import { toast } from 'react-toastify';
+import { formatCurrency } from '../../utils/formatters';
 
 const Wallet: React.FC = () => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
@@ -33,7 +34,7 @@ const Wallet: React.FC = () => {
   const handleTopUp = async () => {
     const amount = Number(topUpAmount);
     if (!amount || amount < 100) {
-      toast.error('Minimum top-up amount is 100 RWF');
+      toast.error('Minimum top-up amount is 100 FRW');
       return;
     }
 
@@ -75,12 +76,12 @@ const Wallet: React.FC = () => {
     <div className="space-y-6">
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* RWF Balance */}
+        {/* FRW Balance */}
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-6 text-white shadow-xl">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium opacity-90">RWF Balance</p>
-              <p className="text-4xl font-bold mt-2">{balance?.balance.toLocaleString() || 0}</p>
+              <p className="text-sm font-medium opacity-90">FRW Balance</p>
+              <p className="text-4xl font-bold mt-2">{formatCurrency(balance?.balance || 0)}</p>
               <p className="text-sm mt-1 opacity-80">Rwandan Francs</p>
             </div>
             <div className="bg-white/20 p-3 rounded-lg">
@@ -102,7 +103,7 @@ const Wallet: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium opacity-90">Bonus Balance</p>
-              <p className="text-4xl font-bold mt-2">{balance?.bonusBalance || 0}</p>
+              <p className="text-4xl font-bold mt-2">{formatCurrency(balance?.bonusBalance || 0)}</p>
               <p className="text-sm mt-1 opacity-80">Bonus Credits</p>
             </div>
             <div className="bg-white/20 p-3 rounded-lg">
@@ -136,7 +137,7 @@ const Wallet: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className={`text-lg font-bold ${transaction.amount >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {transaction.amount >= 0 ? '+' : ''}{transaction.amount} RWF
+                    {transaction.amount >= 0 ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
                   </p>
                   <p className="text-sm text-gray-400 capitalize">{transaction.type.replace('-', ' ')}</p>
                 </div>
@@ -165,7 +166,7 @@ const Wallet: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Amount (RWF)
+                  Amount (FRW)
                 </label>
                 <input
                   type="number"
@@ -175,7 +176,7 @@ const Wallet: React.FC = () => {
                   min="100"
                   className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
-                <p className="text-sm text-gray-400 mt-1">Minimum: 100 RWF</p>
+                <p className="text-sm text-gray-400 mt-1">Minimum: 100 FRW</p>
               </div>
 
               <div className="flex gap-2">
@@ -185,7 +186,7 @@ const Wallet: React.FC = () => {
                     onClick={() => setTopUpAmount(amount.toString())}
                     className="flex-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-sm"
                   >
-                    {amount}
+                    {formatCurrency(amount)}
                   </button>
                 ))}
               </div>

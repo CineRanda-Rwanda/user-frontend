@@ -29,7 +29,7 @@ export const contentAPI = {
   getContentById: async (id: string) => {
     try {
       // Try fetching as movie/generic content first
-      return await api.get(`/content/${id}`);
+      return await api.get(`/content/${id}`, { suppressErrorToast: true });
     } catch (error: any) {
       // If it fails or if we need to be specific about series
       return await api.get(`/content/series/${id}`);
@@ -47,6 +47,10 @@ export const contentAPI = {
   // Get episode trailer (public)
   getEpisodeTrailer: (seriesId: string, seasonNumber: number, episodeId: string) =>
     api.get(`/content/series/${seriesId}/seasons/${seasonNumber}/episodes/${episodeId}/trailer`),
+
+  // Get secure playback URL for content or specific episodes (per API docs: /content/:id/watch)
+  getStreamUrl: (contentId: string, params?: { episodeId?: string; seasonNumber?: number; episodeNumber?: number }) =>
+    api.get(`/content/${contentId}/watch`, params ? { params } : undefined),
 
   // Search content (public)
   searchContent: (query: string, page: number = 1, limit: number = 10) =>

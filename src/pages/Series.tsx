@@ -42,6 +42,10 @@ const Series: React.FC = () => {
         return
       }
 
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+
       // Check if it's already in the list
       const found = series.find(s => s._id === selectedId)
       if (found) {

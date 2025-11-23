@@ -42,6 +42,10 @@ const Movies: React.FC = () => {
         return
       }
 
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+
       // Check if it's already in the list
       const found = movies.find(m => m._id === selectedId)
       if (found) {

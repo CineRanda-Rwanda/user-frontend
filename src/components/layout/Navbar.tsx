@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { FiSearch, FiBell, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiDollarSign } from 'react-icons/fi'
-import { getInitials } from '@/utils/formatters'
+import { getInitials, formatCurrency } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
 import styles from './Navbar.module.css'
 
@@ -58,7 +58,12 @@ const Navbar: React.FC = () => {
         <NavLink to="/" className={({ isActive }) => isActive ? styles.active : ''}>Home</NavLink>
         <NavLink to="/movies" className={({ isActive }) => isActive ? styles.active : ''}>Movies</NavLink>
         <NavLink to="/series" className={({ isActive }) => isActive ? styles.active : ''}>Series</NavLink>
-        {isAuthenticated && <NavLink to="/my-library" className={({ isActive }) => isActive ? styles.active : ''}>My Library</NavLink>}
+        {isAuthenticated && (
+          <>
+            <NavLink to="/my-library" className={({ isActive }) => isActive ? styles.active : ''}>My Library</NavLink>
+            <NavLink to="/wallet" className={({ isActive }) => isActive ? styles.active : ''}>Wallet</NavLink>
+          </>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -88,12 +93,12 @@ const Navbar: React.FC = () => {
             {walletBalance && (
               <button 
                 className={styles.walletButton} 
-                onClick={() => navigate('/profile')}
-                title="Wallet Balance"
+                onClick={() => navigate('/wallet')}
+                title="Wallet"
               >
                 <FiDollarSign />
                 <span className={styles.walletBalance}>
-                  {walletBalance.balance || 0} RWF
+                  {formatCurrency(walletBalance.balance)}
                 </span>
               </button>
             )}
@@ -200,6 +205,9 @@ const Navbar: React.FC = () => {
               <>
                 <Link to="/my-library" onClick={() => setIsMobileMenuOpen(false)}>
                   My Library
+                </Link>
+                <Link to="/wallet" onClick={() => setIsMobileMenuOpen(false)}>
+                  Wallet
                 </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                   Profile

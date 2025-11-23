@@ -1,370 +1,570 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { FiArrowLeft, FiPlay, FiChevronRight, FiLock, FiUnlock } from 'react-icons/fi'
+import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
+import videojs from 'video.js'
+
+type VideoJsPlayer = ReturnType<typeof videojs>
+import { toast } from 'react-toastify'
 import { contentAPI } from '../api/content'
 import { purchaseContentWithWallet } from '../api/payment'
 import { getWalletBalance, WalletBalance } from '../api/wallet'
-import { Content } from '../types/content'
-import { toast } from 'react-toastify'
+import { Content, Episode } from '../types/content'
+import Loader from '../components/common/Loader'
+import { formatCurrency } from '../utils/formatters'
+import styles from './Watch.module.css'
 
-interface Episode {
-  _id: string
-  episodeNumber: number
-  title: string
-  description: string
-  duration: number
-  videoUrl?: string
-  isFree?: boolean
-  isUnlocked?: boolean
-}
+const resolveContentIdentifier = (item?: Partial<Content> | null) =>
+  item?._id || (item as { id?: string })?.id || ''
 
 const Watch: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+
   const [content, setContent] = useState<Content | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedSeason, setSelectedSeason] = useState(1)
-  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null)
-  const [showEpisodes, setShowEpisodes] = useState(true)
-  
-  // Purchase State
+  const [loadingContent, setLoadingContent] = useState(true)
+  const [activeSeason, setActiveSeason] = useState<number>(1)
+  const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null)
+  const [episodesOpen, setEpisodesOpen] = useState(true)
+
   const [wallet, setWallet] = useState<WalletBalance | null>(null)
   const [purchasing, setPurchasing] = useState(false)
 
-  useEffect(() => {
-    loadContent()
-    loadWallet()
-  }, [id])
+  const [streamSource, setStreamSource] = useState('')
+  const [streamLoading, setStreamLoading] = useState(false)
+  const [streamError, setStreamError] = useState<string | null>(null)
 
-  const loadWallet = async () => {
+  const [autoNextCountdown, setAutoNextCountdown] = useState<number | null>(null)
+  const [pendingNextEpisode, setPendingNextEpisode] = useState<{ episode: Episode; seasonNumber: number } | null>(null)
+
+  const videoNodeRef = useRef<HTMLVideoElement | null>(null)
+  const playerRef = useRef<VideoJsPlayer | null>(null)
+
+  const orderedSeasons = useMemo(() => {
+    if (!content?.seasons) return []
+    return [...content.seasons].sort((a, b) => a.seasonNumber - b.seasonNumber)
+  }, [content?.seasons])
+
+  const isSeries = content?.contentType === 'Series'
+  const isContentUnlocked = Boolean(
+    content?.isFree ||
+      content?.priceInRwf === 0 ||
+      content?.isPurchased ||
+      content?.userAccess?.isPurchased
+  )
+
+  const isEpisodeUnlocked = useCallback(
+    (episode?: Episode | null) => {
+      if (!content) return false
+      if (isContentUnlocked) return true
+      if (!episode) return false
+      if (episode.isFree || episode.isUnlocked) return true
+
+      const unlockedEpisodes = content.userAccess?.unlockedEpisodes || []
+      if (unlockedEpisodes.includes(episode._id)) return true
+
+      const seasonWithEpisode = content.seasons?.find((season) =>
+        season.episodes?.some((entry) => entry._id === episode._id)
+      )
+
+      if (seasonWithEpisode?.userAccess?.isPurchased) return true
+      if (seasonWithEpisode?.userAccess?.unlockedEpisodes?.includes(episode._id)) return true
+
+      return false
+    },
+    [content, isContentUnlocked]
+  )
+
+  const canPlayCurrent = Boolean(
+    content && (isSeries ? activeEpisode && isEpisodeUnlocked(activeEpisode) : isContentUnlocked)
+  )
+
+  const loadWallet = useCallback(async () => {
     try {
       const balance = await getWalletBalance()
       setWallet(balance)
     } catch (error) {
       console.error('Failed to load wallet', error)
     }
-  }
+  }, [])
 
-  const loadContent = async () => {
+  const loadContent = useCallback(async () => {
+    if (!id) return
     try {
-      setLoading(true)
-      const response = await contentAPI.getContentById(id!)
-      const contentData = response?.data?.data?.movie || 
-                         response?.data?.data?.series || 
-                         response?.data?.data || 
-                         response?.data
+      setLoadingContent(true)
+      const response = await contentAPI.getContentById(id)
+      const payload = response?.data?.data
+      const resolved =
+        payload?.movie ||
+        payload?.series ||
+        payload?.content ||
+        payload ||
+        response?.data
+      const normalized = resolved?.content ?? resolved
 
-      setContent(contentData)
+      if (!normalized) throw new Error('Content not found')
 
-      // Get season and episode from URL params
-      const seasonParam = searchParams.get('season')
-      const episodeParam = searchParams.get('episode')
+      const mergedContent = {
+        ...normalized,
+        isPurchased:
+          normalized.isPurchased ??
+          payload?.isPurchased ??
+          response?.data?.isPurchased ??
+          normalized.userAccess?.isPurchased ??
+          false,
+        userAccess: normalized.userAccess ?? payload?.userAccess ?? response?.data?.userAccess,
+      } as Content
 
-      // Auto-select episode from URL params or first episode if series
-      if (contentData.contentType === 'Series' && contentData.seasons?.length > 0) {
-        const targetSeasonNum = seasonParam ? parseInt(seasonParam) : 1
-        const targetSeason = contentData.seasons.find((s: any) => s.seasonNumber === targetSeasonNum) || contentData.seasons[0]
-        
-        if (targetSeason.episodes?.length > 0) {
-          const targetEpisodeNum = episodeParam ? parseInt(episodeParam) : 1
-          const targetEpisode = targetSeason.episodes.find((e: any) => e.episodeNumber === targetEpisodeNum) || targetSeason.episodes[0]
-          
-          setSelectedEpisode(targetEpisode)
-          setSelectedSeason(targetSeason.seasonNumber)
+      const fallbackId =
+        mergedContent._id || payload?._id || (resolved as { _id?: string })?._id || (resolved as { id?: string })?.id || id
+
+      const finalContent: Content = { ...mergedContent, _id: fallbackId }
+      setContent(finalContent)
+
+      if (finalContent.contentType === 'Series' && finalContent.seasons?.length) {
+        const seasonParam = Number(searchParams.get('season')) || undefined
+        const episodeParam = Number(searchParams.get('episode')) || undefined
+        const sorted = [...finalContent.seasons].sort((a, b) => a.seasonNumber - b.seasonNumber)
+        const defaultSeason =
+          sorted.find((season) => season.seasonNumber === seasonParam) || sorted[0]
+        const defaultEpisode =
+          defaultSeason.episodes?.find((episode) => episode.episodeNumber === episodeParam) ||
+          defaultSeason.episodes?.[0] ||
+          null
+
+        setActiveSeason(defaultSeason.seasonNumber)
+        setActiveEpisode(defaultEpisode ?? null)
+      } else {
+        setActiveEpisode(null)
+      }
+    } catch (error) {
+      console.error('Failed to load content', error)
+      toast.error('Failed to load content. Please try again.')
+      navigate('/browse')
+    } finally {
+      setLoadingContent(false)
+    }
+  }, [id, navigate, searchParams])
+
+  useEffect(() => {
+    loadContent()
+  }, [loadContent])
+
+  useEffect(() => {
+    loadWallet()
+  }, [loadWallet])
+
+  const fetchStreamSource = useCallback(async () => {
+    if (!content) return
+    if (isSeries && !activeEpisode) return
+    const identifier = resolveContentIdentifier(content)
+    if (!identifier) return
+
+    setStreamLoading(true)
+    setStreamError(null)
+
+    try {
+      const response = await contentAPI.getStreamUrl(
+        identifier,
+        isSeries
+          ? {
+              episodeId: activeEpisode?._id,
+              seasonNumber: activeSeason,
+              episodeNumber: activeEpisode?.episodeNumber,
+            }
+          : undefined
+      )
+      const payload = response?.data?.data || response?.data
+      const url = payload?.videoUrl || payload?.streamUrl
+
+      if (url) {
+        setStreamSource(url)
+      } else {
+        const fallback = isSeries ? activeEpisode?.videoUrl : content.movieFileUrl
+        if (fallback) {
+          setStreamSource(fallback)
+        } else {
+          throw new Error('Missing stream URL')
         }
       }
-    } catch (error: any) {
-      toast.error('Failed to load content')
-      navigate('/')
+    } catch (error) {
+      console.error('Unable to load stream', error)
+      const fallback = isSeries ? activeEpisode?.videoUrl : content?.movieFileUrl
+      if (fallback) {
+        setStreamSource(fallback)
+      } else {
+        setStreamSource('')
+        setStreamError('Unable to load video stream right now. Please try again later.')
+      }
     } finally {
-      setLoading(false)
+      setStreamLoading(false)
+    }
+  }, [content, activeEpisode, activeSeason, isSeries])
+
+  useEffect(() => {
+    if (!canPlayCurrent) return
+    fetchStreamSource()
+  }, [fetchStreamSource, canPlayCurrent])
+
+  const findNextEpisode = useCallback(() => {
+    if (!content || content.contentType !== 'Series' || !activeEpisode) return null
+    const seasons = [...(content.seasons || [])].sort((a, b) => a.seasonNumber - b.seasonNumber)
+    const seasonIndex = seasons.findIndex((season) => season.seasonNumber === activeSeason)
+    if (seasonIndex < 0) return null
+    const currentSeason = seasons[seasonIndex]
+    const currentEpisodes = currentSeason.episodes || []
+    const episodeIndex = currentEpisodes.findIndex((episode) => episode._id === activeEpisode._id)
+
+    if (episodeIndex > -1 && episodeIndex < currentEpisodes.length - 1) {
+      return { episode: currentEpisodes[episodeIndex + 1], seasonNumber: currentSeason.seasonNumber }
+    }
+
+    for (let index = seasonIndex + 1; index < seasons.length; index += 1) {
+      const nextSeason = seasons[index]
+      if (nextSeason.episodes?.length) {
+        return { episode: nextSeason.episodes[0], seasonNumber: nextSeason.seasonNumber }
+      }
+    }
+
+    return null
+  }, [content, activeEpisode, activeSeason])
+
+  const cancelAutoNext = useCallback(() => {
+    setAutoNextCountdown(null)
+    setPendingNextEpisode(null)
+  }, [])
+
+  const handleEpisodeSelect = useCallback(
+    (episode: Episode, seasonNumber: number, autoplay: boolean = false) => {
+      setActiveSeason(seasonNumber)
+      setActiveEpisode(episode)
+      setEpisodesOpen(true)
+      if (!autoplay) {
+        cancelAutoNext()
+      }
+    },
+    [cancelAutoNext]
+  )
+
+  const triggerAutoNext = useCallback(() => {
+    const next = findNextEpisode()
+    if (!next) return
+    if (!isEpisodeUnlocked(next.episode)) return
+    setPendingNextEpisode(next)
+    setAutoNextCountdown(10)
+  }, [findNextEpisode, isEpisodeUnlocked])
+
+  const playPendingEpisode = useCallback(() => {
+    if (!pendingNextEpisode) return
+    handleEpisodeSelect(pendingNextEpisode.episode, pendingNextEpisode.seasonNumber, true)
+    setPendingNextEpisode(null)
+    setAutoNextCountdown(null)
+  }, [pendingNextEpisode, handleEpisodeSelect])
+
+  useEffect(() => {
+    if (autoNextCountdown === null) return
+    if (autoNextCountdown <= 0) {
+      playPendingEpisode()
+      return
+    }
+    const timer = window.setTimeout(() => {
+      setAutoNextCountdown((prev) => (prev !== null ? prev - 1 : null))
+    }, 1000)
+    return () => window.clearTimeout(timer)
+  }, [autoNextCountdown, playPendingEpisode])
+
+  useEffect(() => {
+    if (!streamSource || !canPlayCurrent) return
+    const videoElement = videoNodeRef.current
+    if (!videoElement) return
+
+    const player = videojs(videoElement, {
+      autoplay: true,
+      controls: true,
+      preload: 'auto',
+      fluid: true,
+      responsive: true,
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+      controlBar: {
+        pictureInPictureToggle: true,
+      },
+    })
+
+    player.src({ src: streamSource, type: 'video/mp4' })
+    player.poster(content?.posterImageUrl || '')
+    playerRef.current = player
+
+    const handleEnded = () => {
+      triggerAutoNext()
+    }
+
+    player.on('ended', handleEnded)
+
+    return () => {
+      player.off('ended', handleEnded)
+      player.dispose()
+      playerRef.current = null
+    }
+  }, [streamSource, canPlayCurrent, triggerAutoNext, content])
+
+  const handleSeasonChange = (seasonNumber: number) => {
+    const season = orderedSeasons.find((entry) => entry.seasonNumber === seasonNumber)
+    if (!season) return
+    if (season.episodes?.length) {
+      handleEpisodeSelect(season.episodes[0], seasonNumber)
+    } else {
+      setActiveSeason(seasonNumber)
+      setActiveEpisode(null)
     }
   }
 
-  const handleEpisodeSelect = (episode: Episode, seasonNumber: number) => {
-    setSelectedEpisode(episode)
-    setSelectedSeason(seasonNumber)
-  }
-
   const handlePurchase = async () => {
-    if (!content || !wallet) return
-    
-    if (wallet.balance < content.priceInRwf) {
-      toast.error('Insufficient balance. Please top up your wallet.')
-      navigate('/profile?tab=wallet')
+    if (!content) return
+    const identifier = resolveContentIdentifier(content)
+    if (!identifier) return
+    if (!wallet) {
+      navigate('/wallet')
+      return
+    }
+
+    const totalPrice = content.priceInRwf || 0
+    if (wallet.balance < totalPrice) {
+      toast.error('Insufficient balance. Redirecting to wallet.')
+      navigate('/wallet')
       return
     }
 
     try {
       setPurchasing(true)
-      await purchaseContentWithWallet(content._id)
-      toast.success('Content purchased successfully!')
-      loadContent() // Reload to update access
-      loadWallet()
+      await purchaseContentWithWallet(identifier)
+      toast.success('Content unlocked!')
+      await Promise.all([loadContent(), loadWallet()])
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Purchase failed')
+      const message = error?.response?.data?.message || 'Purchase failed. Please try again.'
+      toast.error(message)
     } finally {
       setPurchasing(false)
     }
   }
 
-  if (loading) {
+  if (loadingContent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>
+      <div className={styles.loadingState}>
+        <Loader fullScreen={false} text="Loading stream..." />
       </div>
     )
   }
 
   if (!content) return null
 
-  const videoUrl = content.contentType === 'Movie' 
-    ? content.movieFileUrl 
-    : selectedEpisode?.videoUrl
+  const pageTitle =
+    isSeries && activeEpisode
+      ? `${content.title} • S${activeSeason}E${activeEpisode.episodeNumber} ${activeEpisode.title ? '– ' + activeEpisode.title : ''}`
+      : content.title
 
-  const isPurchased = content.isPurchased || content.userAccess?.isPurchased
-  const isFree = content.isFree || content.priceInRwf === 0
-  
-  // Check if specific episode is unlocked (for series)
-  const isEpisodeUnlocked = content.contentType === 'Series' && selectedEpisode
-    ? (selectedEpisode.isFree || selectedEpisode.isUnlocked || isPurchased)
-    : (isPurchased || isFree)
+  const description =
+    isSeries && activeEpisode ? activeEpisode.description : content.description
+
+  const durationLabel =
+    content.contentType === 'Movie'
+      ? `${content.duration ?? Math.round((content.watchProgress?.duration || 0) / 60)} min`
+      : activeEpisode
+      ? `${activeEpisode.duration} min`
+      : '—'
+
+  const insufficientFunds = wallet ? wallet.balance < (content.priceInRwf || 0) : false
+
+  const unlockButtonDisabled = !wallet || purchasing || insufficientFunds
+
+  const currentSeason = orderedSeasons.find((season) => season.seasonNumber === activeSeason)
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black to-transparent p-4 pointer-events-none">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-white hover:text-yellow-500 transition pointer-events-auto"
-        >
-          <FiArrowLeft size={24} />
-          <span className="text-lg font-semibold">Back</span>
+    <div className={styles.page}>
+      <div className={styles.backBar}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <FiArrowLeft size={20} />
+          <span>Back to Browse</span>
         </button>
       </div>
 
-      {/* Video Player Area */}
-      <div className="relative w-full bg-gray-900" style={{ paddingTop: '56.25%' }}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          {isEpisodeUnlocked && videoUrl ? (
-            <video
-              className="w-full h-full"
-              controls
-              autoPlay
-              controlsList="nodownload"
-              poster={content.posterImageUrl}
-              src={videoUrl}
-            >
-              <source src={videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+      <section className={styles.playerSection}>
+        <div className={styles.playerShell}>
+          {canPlayCurrent && streamSource ? (
+            <div className={styles.videoWrapper}>
+              <div data-vjs-player className={styles.videoContainer}>
+                <video
+                  ref={videoNodeRef}
+                  className="video-js vjs-big-play-centered vjs-default-skin"
+                  playsInline
+                  controls
+                  preload="auto"
+                />
+              </div>
+            </div>
           ) : (
-            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 text-center">
-              <img 
-                src={content.posterImageUrl} 
-                alt={content.title}
-                className="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm"
-              />
-              <div className="relative z-10 max-w-lg bg-black/80 p-8 rounded-xl border border-gray-800 backdrop-blur-md">
-                <FiLock className="mx-auto text-yellow-500 mb-4" size={48} />
-                <h2 className="text-2xl font-bold mb-2">
-                  {content.contentType === 'Series' ? 'Series Locked' : 'Movie Locked'}
-                </h2>
-                <p className="text-gray-300 mb-6">
-                  Purchase <strong>{content.title}</strong> to watch this content.
+            <div className={styles.playerOverlay}>
+              <div className={styles.lockedPanel}>
+                <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} />
+                <h2 className={styles.lockedTitle}>Unlock to watch this title</h2>
+                <p style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
+                  Purchase <strong>{content.title}</strong>{' '}
+                  {isSeries && activeEpisode ? `to watch S${activeSeason}E${activeEpisode.episodeNumber}` : 'to start streaming in full HD.'}
                 </p>
-                
-                <div className="flex flex-col gap-3">
-                  <div className="text-3xl font-bold text-yellow-500 mb-2">
-                    {content.priceInRwf} RWF
-                  </div>
-                  
-                  {wallet ? (
+                <div className={styles.lockedPrice}>{formatCurrency(content.priceInRwf || 0)}</div>
+                <div className={styles.lockedActions}>
+                  <button
+                    type="button"
+                    className={`${styles.ctaButton} ${styles.primaryCta}`}
+                    onClick={handlePurchase}
+                    disabled={unlockButtonDisabled}
+                  >
+                    {purchasing ? 'Processing...' : (
+                      <>
+                        <FiUnlock size={18} /> Unlock with Wallet
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.ctaButton} ${styles.secondaryCta}`}
+                    onClick={() => navigate(`/content/${resolveContentIdentifier(content)}`)}
+                  >
+                    <FiPlay size={16} /> View Details
+                  </button>
+                  {insufficientFunds && (
                     <button
-                      onClick={handlePurchase}
-                      disabled={purchasing || wallet.balance < content.priceInRwf}
-                      className="w-full py-3 px-6 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      type="button"
+                      className={`${styles.ctaButton} ${styles.secondaryCta}`}
+                      onClick={() => navigate('/wallet')}
                     >
-                      {purchasing ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
-                      ) : (
-                        <>
-                          <FiUnlock /> Unlock Now
-                        </>
-                      )}
+                      Top Up Wallet
                     </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/login')}
-                      className="w-full py-3 px-6 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition"
-                    >
-                      Login to Purchase
-                    </button>
-                  )}
-                  
-                  {wallet && wallet.balance < content.priceInRwf && (
-                    <p className="text-red-400 text-sm mt-2">
-                      Insufficient balance ({wallet.balance} RWF). <span className="underline cursor-pointer" onClick={() => navigate('/profile?tab=wallet')}>Top up</span>
-                    </p>
                   )}
                 </div>
+                {wallet && (
+                  <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
+                    Wallet balance: {formatCurrency(wallet.balance)}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {streamLoading && (
+            <div className={styles.playerOverlay}>
+              <Loader fullScreen={false} text="Fetching secure stream..." />
+            </div>
+          )}
+
+          {streamError && <div className={styles.streamError}>{streamError}</div>}
+
+          {autoNextCountdown !== null && pendingNextEpisode && (
+            <div className={styles.autoNextBanner}>
+              <p className={styles.autoNextTitle}>
+                Next episode in <strong>{autoNextCountdown}s</strong>
+              </p>
+              <p style={{ color: 'var(--text-gray)' }}>
+                S{pendingNextEpisode.seasonNumber}E{pendingNextEpisode.episode.episodeNumber}: {pendingNextEpisode.episode.title}
+              </p>
+              <div className={styles.autoNextActions}>
+                <button className={`${styles.ctaButton} ${styles.primaryCta}`} onClick={playPendingEpisode}>
+                  Play Now
+                </button>
+                <button className={`${styles.ctaButton} ${styles.secondaryCta}`} onClick={cancelAutoNext}>
+                  Cancel
+                </button>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* Content Info */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">
-            {content.contentType === 'Series' && selectedEpisode
-              ? `${content.title} - S${selectedSeason}E${selectedEpisode.episodeNumber}: ${selectedEpisode.title}`
-              : content.title}
-          </h1>
-          <p className="text-gray-400">
-            {content.contentType === 'Series' && selectedEpisode
-              ? selectedEpisode.description
-              : content.description}
-          </p>
+      <section className={styles.metaSection}>
+        <div className={styles.metaHeader}>
+          <h1 className={styles.metaTitle}>{pageTitle}</h1>
+          <p className={styles.metaDescription}>{description}</p>
         </div>
 
-        {/* Episodes List for Series */}
-        {content.contentType === 'Series' && content.seasons && content.seasons.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">Episodes</h2>
-              <button
-                onClick={() => setShowEpisodes(!showEpisodes)}
-                className="text-yellow-500 hover:text-yellow-400"
-              >
-                {showEpisodes ? 'Hide' : 'Show'}
+        <div className={styles.metaGrid}>
+          <div className={styles.metaCard}>
+            <p className={styles.metaLabel}>Release Year</p>
+            <p className={styles.metaValue}>{content.releaseYear || '—'}</p>
+          </div>
+          <div className={styles.metaCard}>
+            <p className={styles.metaLabel}>Rating</p>
+            <p className={styles.metaValue}>{content.averageRating?.toFixed(1) || content.ageRating || 'NR'}</p>
+          </div>
+          <div className={styles.metaCard}>
+            <p className={styles.metaLabel}>Duration</p>
+            <p className={styles.metaValue}>{durationLabel}</p>
+          </div>
+          <div className={styles.metaCard}>
+            <p className={styles.metaLabel}>Language</p>
+            <p className={styles.metaValue}>{content.language || content.countryOfOrigin || 'Kinyarwanda'}</p>
+          </div>
+        </div>
+      </section>
+
+      {isSeries && orderedSeasons.length > 0 && (
+        <section className={styles.episodesSection}>
+          <div className={styles.episodesHeader}>
+            <h2 className={styles.metaTitle} style={{ fontSize: 24 }}>Episodes</h2>
+            <div className={styles.episodesActions}>
+              <button className={styles.toggleButton} onClick={() => setEpisodesOpen((prev) => !prev)}>
+                {episodesOpen ? 'Hide List' : 'Show List'}
               </button>
             </div>
+          </div>
 
-            {showEpisodes && (
-              <>
-                {/* Season Selector */}
-                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                  {content.seasons.map((season) => (
+          {episodesOpen && (
+            <>
+              <div className={styles.seasonTabs}>
+                {orderedSeasons.map((season) => (
+                  <button
+                    key={season._id}
+                    type="button"
+                    onClick={() => handleSeasonChange(season.seasonNumber)}
+                    className={`${styles.seasonTab} ${season.seasonNumber === activeSeason ? styles.seasonTabActive : ''}`}
+                  >
+                    Season {season.seasonNumber}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.episodesList}>
+                {currentSeason?.episodes?.map((episode) => {
+                  const isActive = activeEpisode?._id === episode._id
+                  const unlocked = isEpisodeUnlocked(episode)
+                  return (
                     <button
-                      key={season._id}
-                      onClick={() => setSelectedSeason(season.seasonNumber)}
-                      className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${
-                        selectedSeason === season.seasonNumber
-                          ? 'bg-yellow-500 text-black'
-                          : 'bg-gray-800 text-white hover:bg-gray-700'
-                      }`}
+                      type="button"
+                      key={episode._id}
+                      className={`${styles.episodeCard} ${isActive ? styles.episodeCardActive : ''}`}
+                      onClick={() => handleEpisodeSelect(episode, currentSeason.seasonNumber)}
                     >
-                      Season {season.seasonNumber}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Episodes Grid */}
-                <div className="grid gap-4">
-                  {content.seasons
-                    .find((s) => s.seasonNumber === selectedSeason)
-                    ?.episodes.map((episode) => {
-                      const isPlaying = selectedEpisode?._id === episode._id
-                      const isUnlocked = episode.isFree || episode.isUnlocked || isPurchased
-
-                      return (
-                        <div
-                          key={episode._id}
-                          onClick={() => handleEpisodeSelect(episode, selectedSeason)}
-                          className={`flex gap-4 p-4 rounded-lg cursor-pointer transition ${
-                            isPlaying
-                              ? 'bg-yellow-500/20 border-2 border-yellow-500'
-                              : 'bg-gray-800 hover:bg-gray-700'
-                          }`}
-                        >
-                          <div className="flex-shrink-0 w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center text-xl font-bold relative overflow-hidden">
-                             {/* Lock Icon Overlay */}
-                             {!isUnlocked && (
-                               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                 <FiLock className="text-yellow-500" />
-                               </div>
-                             )}
-                            {episode.episodeNumber}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-lg font-semibold truncate">
-                                {episode.title}
-                              </h3>
-                              {isPlaying && (
-                                <span className="text-yellow-500 text-sm">Now Playing</span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-400 line-clamp-2">
-                              {episode.description}
-                            </p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                              <span>{episode.duration} min</span>
-                              {!isUnlocked && (
-                                <span className="text-yellow-500">• Locked</span>
-                              )}
-                            </div>
-                          </div>
-                          {isUnlocked && (
-                            <div className="flex items-center">
-                              <FiChevronRight className="text-gray-400" size={24} />
-                            </div>
+                      <div className={styles.episodeNumber}>{episode.episodeNumber}</div>
+                      <div className={styles.episodeInfo}>
+                        <div className={styles.episodeTitle}>{episode.title}</div>
+                        <p className={styles.episodeDescription}>{episode.description}</p>
+                        <div className={styles.episodeMeta}>
+                          <span>{episode.duration} min</span>
+                          {!unlocked && (
+                            <span className={styles.episodeLock}>
+                              <FiLock size={14} /> Locked
+                            </span>
                           )}
+                          {isActive && <span style={{ color: 'var(--primary-yellow)' }}>Now Playing</span>}
                         </div>
-                      )
-                    })}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Metadata */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <div className="text-gray-400">Release Year</div>
-            <div className="font-semibold">{content.releaseYear}</div>
-          </div>
-          <div>
-            <div className="text-gray-400">Rating</div>
-            <div className="font-semibold">{content.averageRating?.toFixed(1) || 'N/A'}</div>
-          </div>
-          <div>
-            <div className="text-gray-400">Type</div>
-            <div className="font-semibold">{content.contentType}</div>
-          </div>
-          <div>
-            <div className="text-gray-400">Duration</div>
-            <div className="font-semibold">
-              {content.contentType === 'Movie' 
-                ? `${content.duration} min`
-                : selectedEpisode 
-                ? `${selectedEpisode.duration} min`
-                : 'N/A'}
-            </div>
-          </div>
-        </div>
-
-        {/* Genres */}
-        {content.genres && content.genres.length > 0 && (
-          <div className="mt-6">
-            <div className="text-gray-400 text-sm mb-2">Genres</div>
-            <div className="flex flex-wrap gap-2">
-              {content.genres.map((genre) => (
-                <span
-                  key={genre._id}
-                  className="px-3 py-1 bg-gray-800 rounded-full text-sm"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+                      </div>
+                      <FiChevronRight size={20} color="var(--text-gray)" />
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </section>
+      )}
     </div>
   )
 }

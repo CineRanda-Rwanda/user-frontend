@@ -1,0 +1,254 @@
+.page {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, rgba(245, 197, 24, 0.08), transparent 45%), #020202;
+  color: #fff;
+  padding: 5.5rem clamp(1.5rem, 4vw, 5rem) 4rem;
+  font-family: 'Inter', 'Poppins', system-ui;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.balanceCard {
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(245, 197, 24, 0.12));
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.balanceLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.balanceAmount {
+  font-size: clamp(2.6rem, 5vw, 3.5rem);
+  margin: 1rem 0 0.5rem;
+  font-weight: 800;
+}
+
+.balanceSub {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
+}
+
+.glow {
+  position: absolute;
+  inset: auto -20% -30%;
+  height: 55%;
+  background: radial-gradient(circle, rgba(245, 197, 24, 0.35), transparent 65%);
+  filter: blur(35px);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.statLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.statValue {
+  margin-top: 0.75rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+
+.statHint {
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.3rem;
+}
+
+.topUpCard {
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 2rem;
+  margin-bottom: 3rem;
+}
+
+.topUpHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.topUpTitle {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.topUpSubtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.95rem;
+}
+
+.amountRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.amountInput {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.85rem 1.25rem;
+}
+
+.quickButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.quickButton {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #fff;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickButton:hover {
+  border-color: #f5c518;
+  color: #f5c518;
+}
+
+.topUpAction {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.primaryButton {
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #f5c518, #ffd451);
+  color: #000;
+  font-weight: 700;
+  padding: 0.95rem 2.4rem;
+  cursor: pointer;
+  box-shadow: 0 16px 35px rgba(245, 197, 24, 0.35);
+}
+
+.secondaryButton {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff;
+  padding: 0.9rem 2.2rem;
+  font-weight: 600;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.transactions {
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1.5rem;
+}
+
+.transactionList {
+  margin-top: 1rem;
+}
+
+.transactionItem {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.transactionItem:last-child {
+  border-bottom: none;
+}
+
+.transactionDescription {
+  font-weight: 600;
+}
+
+.transactionDate {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.9rem;
+}
+
+.amountPositive {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.amountNegative {
+  color: #f97316;
+  font-weight: 700;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.loading {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #020202;
+}
+
+@media (max-width: 640px) {
+  .transactionItem {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  .topUpAction {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .secondaryButton {
+    width: 100%;
+    text-align: center;
+  }
+}

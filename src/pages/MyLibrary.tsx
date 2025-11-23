@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../api/user';
-import { getContinueWatching } from '../api/watchHistory';
+import { getContinueWatching, WatchHistoryItem } from '../api/watchHistory';
 import { Content } from '../types/content';
-import { WatchHistoryItem } from '../api/watchHistory';
 import { toast } from 'react-toastify';
-import { FiStar, FiPlay, FiClock } from 'react-icons/fi';
+import { FiStar, FiPlay, FiClock, FiFilm, FiTv, FiLayers } from 'react-icons/fi';
+import Layout from '../components/layout/Layout';
+import Loader from '../components/common/Loader';
+import styles from './MyLibrary.module.css';
 
 const MyLibrary: React.FC = () => {
   const navigate = useNavigate();
@@ -45,75 +47,123 @@ const MyLibrary: React.FC = () => {
     }
   };
 
-  const filteredContent = filter === 'all' 
-    ? purchasedContent 
-    : purchasedContent.filter(c => c.contentType === filter);
+  const filteredContent =
+    filter === 'all'
+      ? purchasedContent
+      : purchasedContent.filter((c) => c.contentType === filter);
+
+  const movieCount = purchasedContent.filter((c) => c.contentType === 'Movie').length;
+  const seriesCount = purchasedContent.filter((c) => c.contentType === 'Series').length;
+  const progressHours = continueWatching.reduce((total, item) => total + (item.watchedDuration || 0), 0) / 3600;
+  const averageCompletion = continueWatching.length
+    ? Math.round(
+        continueWatching.reduce((acc, item) => acc + getProgressPercentage(item), 0) /
+          continueWatching.length
+      )
+    : 0;
 
   const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const safeSeconds = Math.max(seconds, 0);
+    const hours = Math.floor(safeSeconds / 3600);
+    const minutes = Math.floor((safeSeconds % 3600) / 60);
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
   const getProgressPercentage = (item: WatchHistoryItem) => {
-    return Math.round((item.watchedDuration / item.totalDuration) * 100);
+    if (!item.totalDuration) return 0;
+    return Math.min(100, Math.round((item.watchedDuration / item.totalDuration) * 100));
+  };
+
+  const handleQuickPlay = (event: React.MouseEvent, content: Content) => {
+    event.stopPropagation();
+    if (content.contentType === 'Series') {
+      navigate(`/content/${content._id}`);
+    } else {
+      navigate(`/watch/${content._id}`);
+    }
+  };
+
+  const handleOpenDetails = (event: React.MouseEvent, id: string) => {
+    event.stopPropagation();
+    navigate(`/content/${id}`);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+      <div className={styles.loading}>
+        <Loader fullScreen={false} text="Loading your library..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">My Library</h1>
-          <p className="text-gray-400">Your purchased movies and series</p>
-        </div>
+    <Layout>
+      <div className={styles.page}>
+        <section className={styles.hero}>
+          <div className={styles.heroText}>
+            <p className={styles.heroEyebrow}>Your Collection</p>
+            <h1 className={styles.heroTitle}>All of your stories in one cinematic shelf.</h1>
+            <p className={styles.heroSubtitle}>
+              Revisit what you love, resume where you left off, and explore every title you own with a
+              streamlined, premium experience.
+            </p>
+          </div>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <p className={styles.statLabel}>Total Titles</p>
+              <p className={styles.statValue}>{purchasedContent.length || '0'}</p>
+              <p className={styles.statHint}>
+                {movieCount} movies · {seriesCount} series
+              </p>
+            </div>
+            <div className={styles.statCard}>
+              <p className={styles.statLabel}>In Progress</p>
+              <p className={styles.statValue}>{continueWatching.length || '0'}</p>
+              <p className={styles.statHint}>Average completion {averageCompletion}%</p>
+            </div>
+            <div className={styles.statCard}>
+              <p className={styles.statLabel}>Hours Watched</p>
+              <p className={styles.statValue}>{progressHours >= 1 ? progressHours.toFixed(1) : progressHours.toFixed(2)}</p>
+              <p className={styles.statHint}>Tracked across your devices</p>
+            </div>
+          </div>
+        </section>
 
-        {/* Continue Watching Section */}
         {continueWatching.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <FiClock className="text-yellow-500" />
-              Continue Watching
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.sectionEyebrow}>Resume</p>
+                <h2 className={styles.sectionTitle}>Continue Watching</h2>
+              </div>
+              <p className={styles.sectionHint}>
+                {continueWatching.length} {continueWatching.length === 1 ? 'title' : 'titles'} waiting · Keep the momentum
+              </p>
+            </div>
+            <div className={styles.carousel}>
               {continueWatching.map((item) => (
                 <div
                   key={item._id}
+                  className={styles.progressCard}
                   onClick={() => navigate(`/watch/${item.movieId}`)}
-                  className="group relative bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-yellow-500 transition"
                 >
-                  <div className="relative aspect-video">
-                    <img
-                      src={item.content.posterImageUrl}
-                      alt={item.content.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-20 transition flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-yellow-500 flex items-center justify-center group-hover:scale-110 transition">
-                        <FiPlay className="w-8 h-8 text-black ml-1" />
+                  <div className={styles.progressThumb}>
+                    <img src={item.content.posterImageUrl} alt={item.content.title} />
+                    <div className={styles.progressOverlay}>
+                      <div className={styles.progressPlay}>
+                        <FiPlay size={20} />
                       </div>
                     </div>
-                    {/* Progress Bar */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                    <div className={styles.progressBar}>
                       <div
-                        className="h-full bg-yellow-500"
+                        className={styles.progressFill}
                         style={{ width: `${getProgressPercentage(item)}%` }}
                       />
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-white font-semibold text-lg mb-1 truncate">
-                      {item.content.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-sm text-gray-400">
+                  <div className={styles.progressMeta}>
+                    <h3>{item.content.title}</h3>
+                    <div className={styles.progressInfo}>
                       <span>{getProgressPercentage(item)}% watched</span>
                       <span>{formatDuration(item.totalDuration - item.watchedDuration)} left</span>
                     </div>
@@ -121,102 +171,101 @@ const MyLibrary: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Filter Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-gray-800">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-6 py-3 font-semibold transition ${
-              filter === 'all'
-                ? 'text-yellow-500 border-b-2 border-yellow-500'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            All ({purchasedContent.length})
-          </button>
-          <button
-            onClick={() => setFilter('Movie')}
-            className={`px-6 py-3 font-semibold transition ${
-              filter === 'Movie'
-                ? 'text-yellow-500 border-b-2 border-yellow-500'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Movies ({purchasedContent.filter(c => c.contentType === 'Movie').length})
-          </button>
-          <button
-            onClick={() => setFilter('Series')}
-            className={`px-6 py-3 font-semibold transition ${
-              filter === 'Series'
-                ? 'text-yellow-500 border-b-2 border-yellow-500'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Series ({purchasedContent.filter(c => c.contentType === 'Series').length})
-          </button>
+        <div className={styles.filterBar}>
+          {[
+            { key: 'all', label: `All (${purchasedContent.length})`, icon: <FiLayers /> },
+            { key: 'Movie', label: `Movies (${movieCount})`, icon: <FiFilm /> },
+            { key: 'Series', label: `Series (${seriesCount})`, icon: <FiTv /> },
+          ].map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => setFilter(option.key as 'all' | 'Movie' | 'Series')}
+              className={`${styles.filterChip} ${filter === option.key ? styles.filterChipActive : ''}`}
+            >
+              <span className={styles.filterLabel}>
+                {option.icon}
+                {option.label}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* Content Grid */}
-        {filteredContent.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-2xl font-semibold text-white mb-2">
-              {filter === 'all' ? 'No purchased content yet' : `No ${filter.toLowerCase()}s purchased`}
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Browse our catalog and start building your library!
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>Collection</p>
+              <h2 className={styles.sectionTitle}>
+                {filter === 'all' ? 'All Titles' : `${filter === 'Movie' ? 'Movies' : 'Series'}`}
+              </h2>
+            </div>
+            <p className={styles.sectionHint}>
+              {filteredContent.length} {filteredContent.length === 1 ? 'title' : 'titles'} curated just for you
             </p>
-            <button
-              onClick={() => navigate('/browse')}
-              className="px-6 py-3 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-600 transition"
-            >
-              Browse Content
-            </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredContent.map((content) => (
-              <div
-                key={content._id}
-                onClick={() => navigate(`/content/${content._id}`)}
-                className="group relative bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-yellow-500 transition"
-              >
-                <div className="relative aspect-[2/3]">
-                  <img
-                    src={content.posterImageUrl}
-                    alt={content.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <div className="flex items-center gap-2 text-white text-sm mb-2">
-                        <FiStar className="text-yellow-500" fill="currentColor" />
+
+          {filteredContent.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyEmoji}>📚</div>
+              <h3>Nothing here yet</h3>
+              <p>Browse our catalog and start building your premium collection.</p>
+              <button type="button" className={styles.emptyAction} onClick={() => navigate('/browse')}>
+                Go to Browse
+              </button>
+            </div>
+          ) : (
+            <div className={styles.grid}>
+              {filteredContent.map((content) => (
+                <div
+                  key={content._id}
+                  className={styles.card}
+                  onClick={() => navigate(`/content/${content._id}`)}
+                >
+                  <div className={styles.cardPoster}>
+                    <img src={content.posterImageUrl} alt={content.title} />
+                    <div className={styles.cardOverlay}>
+                      <span className={styles.ownedBadge}>OWNED</span>
+                      <div className={styles.overlayMeta}>
+                        <FiStar color="#f5c518" />
                         <span>{content.averageRating?.toFixed(1) || 'N/A'}</span>
                         <span>•</span>
                         <span>{content.releaseYear}</span>
                       </div>
-                      <button className="w-full bg-yellow-500 text-black py-2 rounded font-semibold hover:bg-yellow-600 transition flex items-center justify-center gap-2">
-                        <FiPlay /> Watch Now
-                      </button>
+                      <div className={styles.cardActions}>
+                        <button
+                          type="button"
+                          className={styles.primaryAction}
+                          onClick={(event) => handleQuickPlay(event, content)}
+                        >
+                          <FiPlay /> Watch
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.secondaryAction}
+                          onClick={(event) => handleOpenDetails(event, content._id)}
+                        >
+                          Details
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  {/* Purchased Badge */}
-                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                    Owned
+                  <div className={styles.cardBody}>
+                    <h3>{content.title}</h3>
+                    <div className={styles.cardMeta}>
+                      <span>{content.contentType}</span>
+                      {content.duration && content.contentType === 'Movie' && <span>• {content.duration}m</span>}
+                    </div>
                   </div>
                 </div>
-                <div className="p-3">
-                  <h3 className="text-white font-semibold truncate">{content.title}</h3>
-                  <p className="text-sm text-gray-400">{content.contentType}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </Layout>
   );
 };
 

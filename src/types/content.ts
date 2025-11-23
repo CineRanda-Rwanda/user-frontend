@@ -49,6 +49,17 @@ export interface Season {
   seasonTitle: string
   episodes: Episode[]
   _id: string
+  priceInRwf?: number
+  priceInCoins?: number
+  seasonPriceInRwf?: number
+  seasonPriceInCoins?: number
+  finalSeasonPrice?: {
+    price: number
+    discount?: number
+    originalPrice?: number
+    currency?: string
+  }
+  isFree?: boolean
   userAccess?: {
     isPurchased: boolean
     unlockedEpisodes: string[]

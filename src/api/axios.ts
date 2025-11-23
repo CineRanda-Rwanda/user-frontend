@@ -71,9 +71,10 @@ api.interceptors.response.use(
 
     // Handle other errors
     const message = (error.response?.data as any)?.message || error.message || 'An error occurred'
-    
+    const shouldSuppressToast = originalRequest?.suppressErrorToast
+
     // Don't show toast for 401 errors (handled above)
-    if (error.response?.status !== 401) {
+    if (!shouldSuppressToast && error.response?.status !== 401) {
       toast.error(message)
     }
 

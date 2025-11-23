@@ -1,10 +1,12 @@
-// Format currency
-export const formatCurrency = (amount: number, currency: string = 'RWF'): string => {
-  return new Intl.NumberFormat('en-RW', {
+// Format currency in Rwandan Francs while displaying "FRW"
+export const formatCurrency = (amount: number, displayCode: string = 'FRW'): string => {
+  const formatted = new Intl.NumberFormat('en-RW', {
     style: 'currency',
-    currency,
-    minimumFractionDigits: 0
+    currency: 'RWF',
+    minimumFractionDigits: 0,
   }).format(amount)
+
+  return formatted.replace(/RWF|RF/, displayCode)
 }
 
 // Format duration (seconds to HH:MM:SS or MM:SS)
