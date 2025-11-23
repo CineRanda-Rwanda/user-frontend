@@ -1,758 +1,276 @@
+paymentAPI.getTransactions()
 # 🎬 Cineranda User Frontend
 
-> A Netflix-style streaming platform for Rwanda - User-facing web application
+> Premium streaming experience for Cineranda subscribers. Built with React 18, TypeScript, and Vite, themed around the brand’s black, yellow (`#FFD700`), and red (`#E50914`) palette.
 
-Built with **React 18 + TypeScript + Vite** featuring a sleek black, yellow, and red theme.
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Status](https://img.shields.io/badge/Build-Ready-success)
 
----
-
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Development Status](#-development-status)
-- [Environment Variables](#-environment-variables)
-- [API Integration](#-api-integration)
-- [Components Guide](#-components-guide)
-- [Pages to Complete](#-pages-to-complete)
-- [Design System](#-design-system)
-- [Contributing](#-contributing)
+This repository contains the entire user-facing application: landing, catalog browsing, purchase flow, wallet, and video playback surfaces. It already includes production-grade authentication, an opinionated API layer, responsive UI components, and contextual documentation so any contributor can get productive quickly.
 
 ---
 
-## ✨ Features
+## 📚 Table of Contents
 
-- ✅ User authentication (Login/Register)
-- ✅ Protected routes with JWT token management
-- ✅ Responsive design (Mobile, Tablet, Desktop)
-- ✅ Dark theme with Yellow/Red accents
-- ⏳ Browse content (Movies & TV Series)
-- ⏳ Search with filters
-- ⏳ Content purchase (Flutterwave + Coins)
-- ⏳ Video player with progress tracking
-- ⏳ User library and watch history
-- ⏳ Profile management
-
----
-
-## 🚀 Tech Stack
-
-| Technology | Purpose |
-|------------|---------|
-| React 18 | UI Framework |
-| TypeScript | Type Safety |
-| Vite | Build Tool |
-| React Router v6 | Routing |
-| Axios | HTTP Client |
-| Video.js | Video Player |
-| React Icons | Icon Library |
-| React Toastify | Notifications |
-| CSS Modules | Styling |
+1. [Overview](#overview)
+2. [Tech Stack](#tech-stack)
+3. [Prerequisites](#prerequisites)
+4. [Quick Start](#quick-start)
+5. [NPM Scripts](#npm-scripts)
+6. [Project Structure](#project-structure)
+7. [Configuration & Environment](#configuration--environment)
+8. [Architecture & Data Flow](#architecture--data-flow)
+9. [Feature Highlights](#feature-highlights)
+10. [API Layer & Backend Integration](#api-layer--backend-integration)
+11. [Styling & Design System](#styling--design-system)
+12. [Testing & Quality](#testing--quality)
+13. [Deployment Checklist](#deployment-checklist)
+14. [Troubleshooting](#troubleshooting)
+15. [Additional References](#additional-references)
 
 ---
 
-## 🏁 Getting Started
+## Overview
 
-### Prerequisites
-
-- Node.js 18+ and npm/yarn
-- Backend API running (see backend documentation)
-
-### Installation
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Configure environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and set your values:
-   ```env
-   VITE_API_BASE_URL=http://localhost:5000
-   VITE_PAYMENT_PROVIDER=FLUTTERWAVE
-   VITE_FLUTTERWAVE_PUBLIC_KEY=your_public_key
-   VITE_CDN_URL=https://your-cdn.com
-   ```
-
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-   
-   App will open at `http://localhost:3000`
-
-4. **Build for production:**
-   ```bash
-   npm run build
-   ```
+- **Goal:** Deliver a Netflix-grade UX tailored to the Rwandan market with localized payment flows (Flutterwave + coin wallet) and a curated library of premium titles.
+- **Status:** Core layout, authentication, browsing, wallet, and media discovery features are live. Search, wallet screens, and the watch experience share a unified design language and are responsive down to 360px.
+- **Key Documents:**
+   - `USER_FRONTEND_REQUIREMENTS.md` – end-to-end product spec
+   - `PROJECT_SUMMARY.md`, `IMPLEMENTATION_PLAN.md` – phased roadmap context
+   - Postman collection `Cineranda API (Complete).postman_collection.json` – backend contract
 
 ---
 
-## 📁 Project Structure
+## Tech Stack
+
+| Layer | Tooling |
+| --- | --- |
+| Framework | React 18 (SPA) + React Router v6 |
+| Language | TypeScript (strict typing) |
+| Build Tooling | Vite 5 + SWC, pnpm/npm-compatible |
+| Styling | CSS Modules + global tokens in `src/styles` |
+| HTTP & Data | Axios instance with interceptors, React Context for auth/session |
+| Video | `video.js` + custom controls (Watch page) |
+| Notifications | `react-toastify` |
+| Testing | Vitest + Testing Library + jsdom |
+
+---
+
+## Prerequisites
+
+- **Node.js 18.17+** (LTS) and npm 9+ (or pnpm/yarn if preferred).
+- **Git** for version control.
+- **Backend API** reachable locally or remotely (default dev proxy assumes `http://localhost:5000/api/v1`).
+- Optional: **Flutterwave sandbox keys** for testing purchase flows.
+
+> Windows users can run `./setup.ps1`; macOS/Linux users can run `./setup.sh` to automate dependency installation and `.env` scaffolding.
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/CineRanda-Rwanda/user-frontend.git
+cd user-frontend
+npm install
+
+# Copy and customize environment variables
+cp .env.example .env
+
+# Start Vite dev server (http://localhost:5173 by default)
 
 ```
-src/
-├── api/                    # API integration layer
-│   ├── axios.ts           # ✅ Axios instance with interceptors
-│   ├── auth.ts            # ✅ Authentication API calls
-│   ├── content.ts         # ✅ Content API calls
-│   ├── user.ts            # ✅ User API calls
-│   └── payment.ts         # ✅ Payment API calls
-│
-├── components/
-│   ├── common/            # Reusable UI components
-│   │   ├── Button.tsx     # ✅ Button component
-│   │   ├── Input.tsx      # ✅ Input/Textarea/Select
-│   │   ├── Modal.tsx      # ✅ Modal component
-│   │   └── Loader.tsx     # ✅ Loading spinner
-│   │
-│   ├── layout/            # Layout components (TODO)
-│   │   ├── Navbar.tsx     # ⏳ Navigation bar
-│   │   ├── Footer.tsx     # ⏳ Footer
-│   │   └── Layout.tsx     # ⏳ Page wrapper
-│   │
-│   ├── content/           # Content-specific components (TODO)
-│   │   ├── ContentCard.tsx        # ⏳ Movie/series card
-│   │   ├── ContentRow.tsx         # ⏳ Horizontal scroll row
-│   │   ├── FeaturedHero.tsx       # ⏳ Hero banner
-│   │   └── RatingStars.tsx        # ⏳ Star rating
-│   │
-│   ├── player/            # Video player components (TODO)
-│   │   ├── VideoPlayer.tsx        # ⏳ Main player
-│   │   ├── PlayerControls.tsx     # ⏳ Custom controls
-│   │   └── EpisodeSelector.tsx    # ⏳ Episode list
-│   │
-│   └── payment/           # Payment components (TODO)
-│       ├── PaymentModal.tsx       # ⏳ Payment modal
-│       └── PricingCard.tsx        # ⏳ Pricing display
-│
-├── contexts/              # React Context
-│   └── AuthContext.tsx    # ✅ Authentication context
-│
-├── hooks/                 # Custom hooks (TODO)
-│   ├── useAuth.ts         # ✅ Auth hook (in AuthContext)
-│   ├── useContent.ts      # ⏳ Content fetching hook
-│   └── usePayment.ts      # ⏳ Payment hook
-│
-├── pages/                 # Page components
-│   ├── Auth/
-│   │   ├── Login.tsx      # ✅ Login page
-│   │   └── Register.tsx   # ✅ Register page
-│   ├── Browse.tsx         # ⏳ Main browse page
-│   ├── ContentDetails.tsx # ⏳ Content details
-│   ├── Watch.tsx          # ⏳ Video player page
-│   ├── Search.tsx         # ⏳ Search page
-│   ├── MyLibrary.tsx      # ⏳ User's library
-│   ├── Profile.tsx        # ⏳ User profile
-│   └── NotFound.tsx       # ✅ 404 page
-│
-├── types/                 # TypeScript types
-│   ├── auth.ts            # ✅ Auth types
-│   ├── user.ts            # ✅ User types
-│   ├── content.ts         # ✅ Content types
-│   └── payment.ts         # ✅ Payment types
-│
-├── utils/                 # Utility functions
-│   ├── formatters.ts      # ✅ Format currency, dates, etc.
-│   ├── validators.ts      # ✅ Form validation
-│   └── constants.ts       # ✅ App constants
-│
-├── styles/                # Global styles
-│   ├── global.css         # ✅ Global styles
-│   └── animations.css     # ✅ Animation keyframes
-│
-├── App.tsx                # ✅ Main app component
-└── main.tsx               # ✅ Entry point
-```
 
-**Legend:**
-- ✅ Completed
-- ⏳ To be implemented
-
----
-
-## 📊 Development Status
-
-### ✅ Completed (Core Foundation)
-
-- [x] Project setup (Vite + React + TypeScript)
-- [x] Design system (colors, typography, animations)
-- [x] API integration layer with interceptors
-- [x] Authentication system (Login/Register)
-- [x] Protected routes
-- [x] Common UI components (Button, Input, Modal, Loader)
-- [x] TypeScript type definitions
-- [x] Utility functions
-- [x] Token management
-
-### ⏳ To Be Implemented
-
-#### High Priority
-1. **Layout Components**
-   - Navbar with search, notifications, profile dropdown
-   - Footer with links
-   - Layout wrapper
-
-2. **Browse Page**
-   - Featured hero section (auto-rotating)
-   - Horizontal content rows (Trending, New, By Genre)
-   - Content cards with hover effects
-   - Integration with content API
-
-3. **Content Details Page**
-   - Hero banner with backdrop
-   - Content information (title, rating, description)
-   - Purchase button (triggers payment modal)
-   - Episode list for series
-   - Similar content section
-
-4. **Payment Modal**
-   - Flutterwave payment integration
-   - Coin payment option
-   - Payment status polling
-   - Success/failure handling
-
-5. **Video Player**
-   - Video.js integration
-   - Custom controls
-   - Progress tracking (save every 5s)
-   - Resume from last position
-   - Episode selector for series
-   - Keyboard shortcuts
-
-#### Medium Priority
-6. **Search Page**
-   - Search input with debounce
-   - Filters (type, genre, year, rating)
-   - Results grid
-   - Pagination
-
-7. **My Library Page**
-   - Purchased content grid
-   - Watch progress indicators
-   - Continue watching section
-
-8. **Profile Page**
-   - Account info editing
-   - Password change
-   - Wallet balance display
-   - Transaction history
-   - Settings
-
-#### Low Priority
-9. **Polish & Optimization**
-   - Loading skeletons
-   - Error boundaries
-   - Image lazy loading
-   - Code splitting optimization
-   - SEO metadata
-
----
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the root directory:
+### Environment template
 
 ```env
-# API Configuration
-VITE_API_BASE_URL=http://localhost:5000
-
-# Payment Provider
+VITE_API_BASE_URL=http://localhost:5000/api/v1
 VITE_PAYMENT_PROVIDER=FLUTTERWAVE
 VITE_FLUTTERWAVE_PUBLIC_KEY=FLWPUBK-xxxxxxxxxxxxx
-
-# CDN for media files
 VITE_CDN_URL=https://cdn.cineranda.com
 ```
 
----
-
-## 🔌 API Integration
-
-### Base URL
-All API calls go through the configured `VITE_API_BASE_URL`.
-
-### Authentication
-Tokens are stored in `localStorage`:
-- `accessToken`: JWT for API authentication
-- `refreshToken`: Token for refreshing access token
-
-The axios interceptor automatically:
-- Adds `Authorization: Bearer {token}` header
-- Refreshes token on 401 errors
-- Redirects to login if refresh fails
-
-### Example API Usage
-
-```typescript
-import { contentAPI } from '@/api/content'
-
-// Fetch all movies
-const movies = await contentAPI.getContentByType('Movie', 20)
-
-// Search content
-const results = await contentAPI.searchContent({ q: 'inception' })
-
-// Get content details
-const content = await contentAPI.getContentById('content-id-here')
-```
+> Update `VITE_API_BASE_URL` to point to staging/production backends when deploying; all HTTP modules use this single source of truth.
 
 ---
 
-## 🎨 Design System
+## NPM Scripts
 
-### Colors
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Launch Vite in development mode with hot module reload |
+| `npm run build` | Type-check (`tsc`) then generate optimized production bundle |
+| `npm run preview` | Serve the built assets locally to verify production output |
+| `npm run lint` | Run ESLint with TypeScript support; fails on warnings |
+| `npm run test` | Execute Vitest unit/integration tests in watch or CI mode |
 
-```css
-/* Primary */
---primary-yellow: #FFD700    /* Buttons, highlights */
---accent-red: #E50914        /* CTAs, important actions */
-
-/* Background */
---bg-black: #000000          /* Main background */
---bg-card: #141414           /* Card backgrounds */
-
-/* Text */
---text-white: #FFFFFF        /* Primary text */
---text-gray: #B3B3B3         /* Secondary text */
-```
-
-### Typography
-
-- **Font Family**: Inter, system fonts
-- **Headings**: Bold, line-height 1.2
-- **Body**: Regular, line-height 1.6
-
-### Spacing
-
-Use CSS variables for consistent spacing:
-```css
-var(--spacing-xs)   /* 4px */
-var(--spacing-sm)   /* 8px */
-var(--spacing-md)   /* 16px */
-var(--spacing-lg)   /* 24px */
-var(--spacing-xl)   /* 32px */
-var(--spacing-2xl)  /* 48px */
-var(--spacing-3xl)  /* 64px */
-```
-
-### Animations
-
-All animations use `var(--transition-base)` (0.3s ease) for consistency.
+> `vite.config.ts` enables module aliasing (e.g. `@/components`) and configures the dev proxy if you need to forward `/api` calls to a local backend.
 
 ---
 
-## 🧩 Components Guide
+## Project Structure
 
-### Button Component
-
-```tsx
-import Button from '@/components/common/Button'
-
-<Button variant="primary" size="large" fullWidth onClick={handleClick}>
-  Click Me
-</Button>
-
-// Variants: primary (yellow), secondary (red), ghost, outline
-// Sizes: small, medium, large
-// Props: loading, fullWidth, icon
+```
+user-frontend/
+├── src/
+│   ├── api/                # Axios instance + grouped REST clients (auth, content, wallet, etc.)
+│   ├── components/
+│   │   ├── common/         # Shared primitives (Loader, ScrollToTop, etc.)
+│   │   ├── content/        # Carousel, cards, hero rows, continue-watching rail
+│   │   ├── layout/         # Navbar, Footer, Layout wrapper
+│   │   ├── search/         # GlobalSearchBar, filter panel, sort dropdowns
+│   │   ├── ui/             # Button, Input, Modal, Skeleton, ProgressBar
+│   │   └── wallet/         # Wallet-specific widgets
+│   ├── contexts/           # `AuthContext` with login/register/verify flows
+│   ├── pages/              # Route-level screens (Browse, Movies, Series, Watch, Wallet, etc.)
+│   ├── styles/             # Global CSS, variables, animation helpers
+│   ├── types/              # Content, user, payment, auth interfaces
+│   └── utils/              # Formatters, validators, constants, storage keys
+├── public/                 # Static assets served as-is (favicons, logos)
+├── setup.ps1 / setup.sh    # One-command bootstrap scripts
+├── tsconfig*.json          # TS + path aliases shared by Vite and IDEs
+├── vite.config.ts          # Vite, React plugin, dev proxy, build options
+└── README.md               # You are here
 ```
 
-### Input Component
-
-```tsx
-import { Input } from '@/components/common/Input'
-
-<Input
-  type="email"
-  label="Email"
-  placeholder="Enter your email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  error={errors.email}
-  required
-/>
-```
-
-### Modal Component
-
-```tsx
-import Modal from '@/components/common/Modal'
-
-<Modal
-  isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
-  title="Modal Title"
-  size="large"
->
-  Modal content here
-</Modal>
-```
-
-### Loader Component
-
-```tsx
-import Loader from '@/components/common/Loader'
-
-<Loader size="large" text="Loading..." />
-<Loader fullScreen text="Please wait..." />
-```
+Each folder is self-sufficient; components import styles through CSS Modules (e.g., `ContentRow.module.css`) and keep business logic close to UI definitions for clarity.
 
 ---
 
-## 📄 Pages to Complete
+## Configuration & Environment
 
-### 1. Browse Page (`src/pages/Browse.tsx`)
+| Variable | Required | Description |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | ✅ | Base URL for all REST calls (e.g., `https://api.cineranda.com/api/v1`). Must include `/api/v1` if backend expects it. |
+| `VITE_PAYMENT_PROVIDER` | ✅ | Currently `FLUTTERWAVE`. Enables provider-specific UI copy. |
+| `VITE_FLUTTERWAVE_PUBLIC_KEY` | ✅ for live payments | Injected into payment modals for Flutterwave inline flows. |
+| `VITE_CDN_URL` | Optional | Overrides default CDN root for posters, banners, and streaming assets. |
 
-**Requirements:**
-- Featured hero section (auto-rotate every 7s)
-- Horizontal scrolling rows:
-  - Trending Now
-  - New Releases
-  - Popular Movies
-  - Top Series
-  - By Genre sections
-- Lazy load images
-- Skeleton loaders
-
-**API Calls:**
-```typescript
-contentAPI.getAllContent({ isPublished: true, limit: 50 })
-contentAPI.getTrendingContent(10)
-contentAPI.getNewReleases(10)
-contentAPI.getContentByType('Movie', 20)
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 320-430
+- Use `.env.local` for developer-specific overrides; never commit secrets.
+- For CI/CD, surface these variables via your hosting provider or container orchestrator.
+- `src/utils/constants.ts` exposes typed constants that read from `import.meta.env.*`, so updates propagate automatically.
 
 ---
 
-### 2. Content Details Page (`src/pages/ContentDetails.tsx`)
+## Architecture & Data Flow
 
-**Requirements:**
-- Hero banner with backdrop image
-- Content metadata (title, rating, genres, year, duration)
-- Description
-- Cast and director
-- Purchase button (triggers payment modal)
-- Watch Now button (if owned)
-- Episode list for series (locked if not purchased)
-- Similar content section
-- Trailer player (if available)
-
-**API Calls:**
-```typescript
-contentAPI.getContentById(id)
-userAPI.getLibrary() // Check if user owns content
-contentAPI.getSimilarContent(id, genres)
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 432-530
+- **Routing:** `App.tsx` lazy-loads every route behind `<Suspense>` to shrink the initial bundle. Protected routes wrap Watch/MyLibrary/Wallet/Profile while Browse, Movies, Series, Search are public for marketing discovery.
+- **State & Auth:** `AuthContext` stores the hydrated `User`, login/register/verify workflows, refresh logic, and exposes helpers to update profile data. Tokens persist in `localStorage` using `STORAGE_KEYS` constants.
+- **API Access:** `src/api/axios.ts` centralizes interceptors, adds bearer tokens, refreshes access tokens on 401s, and shows toast notifications on server errors. Feature-specific modules (content, wallet, payment, ratings, watchHistory) keep endpoint details isolated from UI components.
+- **UI Composition:** Layout -> Page -> Feature components pattern. Example: `Browse` uses `Layout`, fetches data through `contentAPI`, and renders `AnimatedCarousel`, `ContentRow`, and `ContinueWatching` rails.
+- **Modularity:** Most data-fetching functions return raw Axios responses to retain pagination metadata; pages normalize shapes before passing to components (see `Browse.tsx`).
+- **Testing Harness:** `src/setupTests.ts` configures Testing Library + vitest DOM matchers; co-located tests live under `src/pages/__tests__` and can be added alongside components for better coverage.
 
 ---
 
-### 3. Payment Modal Component (`src/components/payment/PaymentModal.tsx`)
+## Feature Highlights
 
-**Requirements:**
-- Two tabs: Flutterwave | Coins
-- Flutterwave tab:
-  - Email input
-  - Phone number input (+250 format)
-  - "Pay Now" button
-  - Opens Flutterwave payment URL in new window
-  - Polls payment status every 5 seconds
-- Coins tab:
-  - Display user's coin balance
-  - Show content price
-  - "Confirm Purchase" button
-  - Instant deduction
-- Success/failure toasts
-- Loading states
-
-**API Calls:**
-```typescript
-paymentAPI.initiatePayment({
-  contentId,
-  paymentMethod: 'FLUTTERWAVE',
-  email,
-  phoneNumber
-})
-paymentAPI.getPaymentStatus(transactionId)
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 1077-1250
+- **Authentication & Verification** (`src/pages/Auth/*`, `contexts/AuthContext.tsx`)
+   - Email/password login, registration with verification code step, token refresh, guarded navigation, toast-based feedback.
+- **Content Discovery** (`pages/Browse.tsx`, `components/content/*`)
+   - Animated hero carousel, trending/new release rails, movie/series segregation, continue-watching shelf when authenticated.
+- **Category Hubs** (`pages/Movies.tsx`, `pages/Series.tsx`)
+   - Dedicated views with filters/sorting hooks that reuse `ContentRow` and `ContentCard` patterns.
+- **Search Experience** (`components/search/*`, `pages/Search.tsx`)
+   - Unified search bar, advanced filter panel (type, genre, pricing, year), responsive dropdown clustering, debounced requests, improved mobile layout (see recent `GlobalSearchBar.module.css` update).
+- **Watch & Trailer Playback** (`pages/Watch.tsx`, `pages/TrailerPlayer.tsx`, `components/content/ContinueWatching.tsx`)
+   - `video.js` integration, watch-history sync (save every 5 seconds), resume states, and cinematic trailer overlay.
+- **Wallet & Payments** (`pages/Wallet.tsx`, `components/wallet/Wallet.tsx`, `api/payment.ts`, `api/wallet.ts`)
+   - Balance overview, coin purchase flow, Flutterwave initiation/polling, transaction history cards.
+- **Notifications & Feedback** (`react-toastify`, `components/common/Loader.tsx`, `components/ui/Skeleton.tsx`)
+   - Consistent user feedback for loading/error states, skeleton placeholders for cards, and toast-based success/error messaging.
+- **Responsive Design & Accessibility**
+   - CSS Modules follow a tokenized spacing/typography system (`src/styles/global.css`). Layouts collapse elegantly; buttons respect minimum touch targets; focus states are preserved for keyboard navigation.
 
 ---
 
-### 4. Video Player Component (`src/components/player/VideoPlayer.tsx`)
+## API Layer & Backend Integration
 
-**Requirements:**
-- Use video.js library
-- Custom controls:
-  - Play/Pause
-  - Progress bar with seek
-  - Volume control
-  - Playback speed (0.5x - 2x)
-  - Fullscreen toggle
-- Keyboard shortcuts:
-  - Space: Play/Pause
-  - Arrow Left/Right: Seek ±10s
-  - Arrow Up/Down: Volume
-  - F: Fullscreen
-  - M: Mute
-- Progress tracking (save every 5s)
-- Resume from last position
-- Auto-next episode countdown (10s)
-- Episode selector for series
+- **Axios Instance (`src/api/axios.ts`):**
+   - Adds `Authorization` headers when tokens exist.
+   - Retries the original request after automatic refresh using `/auth/refresh-token`.
+   - Centralizes timeout (30s) and toast-based error messaging.
+- **Modules:**
+   - `auth.ts` – login/register/verify/logout flows.
+   - `content.ts` – listing, search, details, recommendations.
+   - `user.ts` – profile, library, transactions, watch history.
+   - `wallet.ts` / `payment.ts` – balance, coin purchases, Flutterwave initiation.
+   - `watchHistory.ts` – progress syncing for “Continue Watching”.
+   - `ratings.ts` – submit/view community ratings.
+- **Contracts & Testing:**
+   - Use the Postman collection `Cineranda API (Complete).postman_collection.json` to validate endpoints or mock responses when the backend is unavailable.
+   - Update `API_ENDPOINTS_ANALYSIS.md` when backend contracts change; the README intentionally links there for deeper reference.
 
-**API Calls:**
-```typescript
-contentAPI.getStreamUrl(contentId)
-userAPI.getWatchProgress(contentId)
-userAPI.updateWatchProgress({ contentId, lastPosition, totalDuration })
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 1253-1440
+> During development, run the backend on `http://localhost:5000`; Vite’s dev server proxies API requests through `import.meta.env.VITE_API_BASE_URL` so there are no manual CORS tweaks.
 
 ---
 
-### 5. Search Page (`src/pages/Search.tsx`)
+## Styling & Design System
 
-**Requirements:**
-- Search input (debounced 300ms)
-- Filters:
-  - Content type (All, Movies, Series)
-  - Genre dropdown
-  - Year range
-  - Rating range
-- Sort options:
-  - Relevance
-  - Rating
-  - Release year
-  - Title (A-Z)
-- Results grid (responsive)
-- Pagination or infinite scroll
-- Empty state message
-
-**API Calls:**
-```typescript
-contentAPI.searchContent({
-  q: searchQuery,
-  contentType,
-  genre,
-  minRating,
-  page,
-  limit: 24
-})
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 620-680
+- **Tokens:** Defined in `src/styles/global.css` / `variables.css` (colors, typography, spacing, blur radii). Components consume them via CSS custom properties.
+- **Modules:** Every feature has a dedicated `*.module.css` file to avoid class collisions. Example: `ContentRow.module.css`, `GlobalSearchBar.module.css`.
+- **Themes:** Dark base with gradients, card blurs, and neon accent glows. Buttons use yellow for primary CTAs, red for destructive/purchase flows.
+- **Animations:** Keyframes defined in `styles/animations.css` for hero carousels, hover lifts, shimmer skeletons.
+- **Accessibility:** Font sizes scale with the viewport; interactive elements include focus outlines; toast notifications include ARIA roles via `react-toastify` defaults.
 
 ---
 
-### 6. My Library Page (`src/pages/MyLibrary.tsx`)
-
-**Requirements:**
-- "Continue Watching" section at top
-- Filter tabs: All | Movies | Series
-- Content grid with purchased items
-- Show watch progress bar on each card
-- "Completed" badge for finished content
-- Empty state if no purchases
-
-**API Calls:**
-```typescript
-userAPI.getLibrary()
-userAPI.getWatchHistory()
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 682-730
-
----
-
-### 7. Profile Page (`src/pages/Profile.tsx`)
-
-**Requirements:**
-- 4 tabs:
-  1. **Account**: Edit username, phone, change password
-  2. **Wallet**: Coin balance, buy coins button, transaction history
-  3. **History**: Watch history, purchase history
-  4. **Settings**: Preferences, delete account
-- Form validation
-- Success/error toasts
-- Confirmation modals for destructive actions
-
-**API Calls:**
-```typescript
-userAPI.getCurrentUser()
-userAPI.updateProfile({ username, phoneNumber })
-userAPI.changePassword({ oldPassword, newPassword })
-userAPI.getWallet()
-userAPI.getWatchHistory()
-paymentAPI.getTransactions()
-```
-
-**See:** `USER_FRONTEND_REQUIREMENTS.md` lines 732-820
-
----
-
-### 8. Navbar Component (`src/components/layout/Navbar.tsx`)
-
-**Requirements:**
-- Logo (🎬 emoji + "Cineranda" text)
-- Navigation links:
-  - Home
-  - Movies
-  - Series
-  - My Library
-- Search icon (opens search page)
-- Notifications icon with badge
-- Profile dropdown:
-  - Username
-  - Profile
-  - Settings
-  - Logout
-- Sticky positioning
-- Mobile: Hamburger menu
-
-**Style:**
-```css
-background: rgba(0, 0, 0, 0.9)
-backdrop-filter: blur(10px)
-position: sticky
-top: 0
-z-index: var(--z-sticky)
-```
-
----
-
-## 🎬 Development Workflow
-
-### Step-by-Step Guide
-
-1. **Start with Layout**
-   ```bash
-   # Create Navbar, Footer, Layout components
-   # These wrap all pages
-   ```
-
-2. **Build Browse Page**
-   ```bash
-   # Create ContentCard component
-   # Create ContentRow component
-   # Create FeaturedHero component
-   # Integrate with content API
-   ```
-
-3. **Add Content Details**
-   ```bash
-   # Create content details page
-   # Add rating component
-   # Integrate purchase button
-   ```
-
-4. **Implement Payment**
-   ```bash
-   # Create PaymentModal component
-   # Integrate Flutterwave
-   # Add payment status polling
-   ```
-
-5. **Build Video Player**
-   ```bash
-   # Install video.js: npm install video.js
-   # Create VideoPlayer component
-   # Add progress tracking
-   # Add keyboard shortcuts
-   ```
-
-6. **Complete Remaining Pages**
-   ```bash
-   # Search page
-   # My Library page
-   # Profile page
-   ```
-
-7. **Polish & Test**
-   ```bash
-   # Add loading states
-   # Test responsive design
-   # Fix bugs
-   # Optimize performance
-   ```
-
----
-
-## 🧪 Testing
+## Testing & Quality
 
 ```bash
-# Run tests (when added)
-npm run test
+# Unit / integration tests
+npm run test          # watch mode
+npm run test -- --run # single run for CI
 
-# Type checking
-npx tsc --noEmit
-
-# Lint
+# Static analysis
 npm run lint
+npx tsc --noEmit      # strict type checking without emitting JS
 ```
 
----
-
-## 📚 Additional Resources
-
-- **Full Requirements**: `USER_FRONTEND_REQUIREMENTS.md` (2,060 lines)
-- **API Documentation**: See backend repository
-- **Video.js Docs**: https://videojs.com/
-- **React Router v6**: https://reactrouter.com/
-- **Flutterwave Integration**: https://developer.flutterwave.com/
+- `src/setupTests.ts` wires up Testing Library matchers (e.g., `toBeInTheDocument`).
+- Store component-level tests next to their source (`ComponentName.test.tsx`) or under `pages/__tests__` for route-level flows.
+- For API mocking, rely on `vi.mock('@/api/...')` or bring in `msw` if you need network-level simulations.
 
 ---
 
-## 🤝 Contributing
+## Deployment Checklist
 
-1. Follow the design system strictly (black, yellow, red theme)
-2. Use TypeScript for all new code
-3. Add proper error handling
-4. Test on mobile, tablet, and desktop
-5. Keep components small and reusable
-6. Document complex logic
-
----
-
-## 📝 Notes
-
-- **Token Management**: Handled automatically by axios interceptor
-- **Error Handling**: All API calls are wrapped in try-catch
-- **Responsive Design**: Mobile-first approach
-- **Performance**: Code splitting via lazy loading
-- **Security**: All inputs are validated and sanitized
+1. **Environment:** Provide production `.env` (API base URL, payment keys, CDN root, analytics IDs if applicable).
+2. **Build:** `npm run build` – outputs to `dist/`.
+3. **Preview:** `npm run preview` – sanity-check bundle locally.
+4. **Hosting:** Upload `dist/` to Netlify, Vercel, CloudFront/S3, or any static host. Ensure SPA fallback rewrites `/* -> /index.html`.
+5. **Security:**
+    - Serve over HTTPS.
+    - Configure CSP headers (see `USER_FRONTEND_REQUIREMENTS.md` §16).
+    - Confirm Flutterwave redirect/callback URLs match production domain.
+6. **Monitoring:** Enable analytics/error reporting (Sentry, LogRocket) if required by stakeholders.
 
 ---
 
-## 🚀 Quick Start Commands
+## Troubleshooting
 
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
+| Symptom | Likely Cause | Fix |
+| --- | --- | --- |
+| `Network Error` on API calls | Wrong `VITE_API_BASE_URL` or backend offline | Verify `.env`, restart dev server after changes |
+| Stuck on loading spinner after login | Refresh token missing/expired | Clear `localStorage`, log in again; inspect `/auth/refresh-token` response |
+| Flutterwave modal never opens | Missing `VITE_FLUTTERWAVE_PUBLIC_KEY` | Populate key in `.env`, rebuild |
+| Styles look double-bordered search bar | Use updated `GlobalSearchBar.module.css`; ensure CSS modules compiled (restart dev server) |
+| Tests fail with DOM errors | Vitest not running in jsdom | Ensure `test` config uses jsdom (defaults applied via `setupTests.ts`) |
 
 ---
 
-**For detailed specifications, refer to `USER_FRONTEND_REQUIREMENTS.md`**
+## Additional References
 
-**Built with ❤️ for Cineranda**
+- `USER_FRONTEND_REQUIREMENTS.md` – authoritative feature-by-feature blueprint.
+- `API_AUDIT_REPORT.md`, `API_INTEGRATION_UPDATE.md` – backend alignment notes.
+- `FRONTEND_REFACTOR_SUMMARY.md`, `DEVELOPMENT_GUIDE.md` – historical decisions and coding conventions.
+- `CHECKLIST.md`, `PROJECT_SUMMARY.md` – release and QA checklists.
+
+For new contributors: skim the documents above, run through Quick Start, then pick up issues referencing the relevant sections in `USER_FRONTEND_REQUIREMENTS.md`. Consistent adherence to the design system and module boundaries keeps this codebase maintainable.
+
+---
+
+**Built with ❤️ for the Cineranda community.**
+## 🔌 API Integration
