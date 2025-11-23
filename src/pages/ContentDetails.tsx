@@ -220,7 +220,11 @@ const ContentDetails: React.FC = () => {
 
     try {
       setSeasonUnlockingId(season._id);
-      await purchaseSeasonWithWallet({ contentId, seasonId: season._id });
+      await purchaseSeasonWithWallet({
+        contentId,
+        seasonId: season._id,
+        seasonNumber: season.seasonNumber,
+      });
       toast.success(`Season ${season.seasonNumber} unlocked!`);
       setContent((prev) => {
         if (!prev) return prev;
@@ -279,18 +283,29 @@ const ContentDetails: React.FC = () => {
       return;
     }
 
+    const owningSeason =
+      parentSeason ||
+      content.seasons?.find((entry) => entry.episodes?.some((item) => item._id === episode._id));
+
+    if (!owningSeason) {
+      toast.error('Unable to determine season for this episode. Please refresh and try again.');
+      return;
+    }
+
     try {
       setEpisodeUnlockingId(episode._id);
-      await purchaseEpisodeWithWallet({ contentId, episodeId: episode._id });
+      await purchaseEpisodeWithWallet({
+        contentId,
+        episodeId: episode._id,
+        seasonNumber: owningSeason.seasonNumber,
+      });
       toast.success(`Episode ${episode.episodeNumber} unlocked!`);
       setContent((prev) => {
         if (!prev) return prev;
         const mergedUserAccess = new Set(prev.userAccess?.unlockedEpisodes || []);
         mergedUserAccess.add(episode._id);
 
-        const resolvedSeason =
-          parentSeason ||
-          prev.seasons?.find((entry) => entry.episodes?.some((item) => item._id === episode._id));
+        const resolvedSeason = owningSeason;
 
         const updatedSeasons = prev.seasons?.map((entry) => {
           if (!resolvedSeason || entry._id !== resolvedSeason._id) return entry;

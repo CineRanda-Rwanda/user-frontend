@@ -37,6 +37,13 @@ const Watch: React.FC = () => {
   const [autoNextCountdown, setAutoNextCountdown] = useState<number | null>(null)
   const [pendingNextEpisode, setPendingNextEpisode] = useState<{ episode: Episode; seasonNumber: number } | null>(null)
 
+  const [accessInfo, setAccessInfo] = useState<{
+    hasAccess: boolean
+    accessType?: string
+    unlockedEpisodeIds: Set<string>
+    totalEpisodes?: number
+  } | null>(null)
+
   const videoNodeRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<VideoJsPlayer | null>(null)
 
@@ -46,11 +53,19 @@ const Watch: React.FC = () => {
   }, [content?.seasons])
 
   const isSeries = content?.contentType === 'Series'
+  const hasServerFullAccess = Boolean(
+    accessInfo?.hasAccess &&
+      (accessInfo?.accessType === 'full' ||
+        accessInfo?.accessType === 'free' ||
+        !accessInfo?.accessType)
+  )
+
   const isContentUnlocked = Boolean(
     content?.isFree ||
       content?.priceInRwf === 0 ||
       content?.isPurchased ||
-      content?.userAccess?.isPurchased
+      content?.userAccess?.isPurchased ||
+      hasServerFullAccess
   )
 
   const isEpisodeUnlocked = useCallback(
@@ -59,6 +74,8 @@ const Watch: React.FC = () => {
       if (isContentUnlocked) return true
       if (!episode) return false
       if (episode.isFree || episode.isUnlocked) return true
+
+      if (accessInfo?.unlockedEpisodeIds && accessInfo.unlockedEpisodeIds.has(episode._id)) return true
 
       const unlockedEpisodes = content.userAccess?.unlockedEpisodes || []
       if (unlockedEpisodes.includes(episode._id)) return true
@@ -72,7 +89,7 @@ const Watch: React.FC = () => {
 
       return false
     },
-    [content, isContentUnlocked]
+    [content, isContentUnlocked, accessInfo]
   )
 
   const canPlayCurrent = Boolean(
@@ -146,9 +163,40 @@ const Watch: React.FC = () => {
     }
   }, [id, navigate, searchParams])
 
+  const loadAccessInfo = useCallback(async () => {
+    if (!id) return
+    try {
+      const response = await contentAPI.checkAccess(id)
+      const payload = response?.data?.data || response?.data
+      const unlockedIdsSource = Array.isArray(payload?.purchasedEpisodeIds)
+        ? payload.purchasedEpisodeIds
+        : Array.isArray(payload?.unlockedEpisodeIds)
+        ? payload.unlockedEpisodeIds
+        : []
+
+      const unlockedEpisodeIds = new Set<string>(
+        unlockedIdsSource.filter((value: unknown): value is string => typeof value === 'string')
+      )
+
+      setAccessInfo({
+        hasAccess: Boolean(payload?.hasAccess ?? payload?.accessGranted ?? false),
+        accessType: payload?.accessType,
+        unlockedEpisodeIds,
+        totalEpisodes: payload?.totalEpisodes,
+      })
+    } catch (error) {
+      console.warn('Failed to load access info', error)
+      setAccessInfo(null)
+    }
+  }, [id])
+
   useEffect(() => {
     loadContent()
   }, [loadContent])
+
+  useEffect(() => {
+    loadAccessInfo()
+  }, [loadAccessInfo])
 
   useEffect(() => {
     loadWallet()
@@ -189,12 +237,18 @@ const Watch: React.FC = () => {
       }
     } catch (error) {
       console.error('Unable to load stream', error)
-      const fallback = isSeries ? activeEpisode?.videoUrl : content?.movieFileUrl
-      if (fallback) {
-        setStreamSource(fallback)
-      } else {
+      const status = (error as any)?.response?.status
+      if (status === 401 || status === 403) {
         setStreamSource('')
-        setStreamError('Unable to load video stream right now. Please try again later.')
+        setStreamError('This episode is still locked. Unlock it to keep watching.')
+      } else {
+        const fallback = isSeries ? activeEpisode?.videoUrl : content?.movieFileUrl
+        if (fallback) {
+          setStreamSource(fallback)
+        } else {
+          setStreamSource('')
+          setStreamError('Unable to load video stream right now. Please try again later.')
+        }
       }
     } finally {
       setStreamLoading(false)
@@ -338,7 +392,7 @@ const Watch: React.FC = () => {
       setPurchasing(true)
       await purchaseContentWithWallet(identifier)
       toast.success('Content unlocked!')
-      await Promise.all([loadContent(), loadWallet()])
+      await Promise.all([loadContent(), loadWallet(), loadAccessInfo()])
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Purchase failed. Please try again.'
       toast.error(message)

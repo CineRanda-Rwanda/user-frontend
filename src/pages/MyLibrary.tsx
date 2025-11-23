@@ -1,13 +1,85 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FiStar, FiPlay, FiFilm, FiTv, FiLayers } from 'react-icons/fi';
+
+import { contentAPI } from '../api/content';
 import { userAPI } from '../api/user';
 import { getContinueWatching, WatchHistoryItem } from '../api/watchHistory';
 import { Content } from '../types/content';
-import { toast } from 'react-toastify';
-import { FiStar, FiPlay, FiClock, FiFilm, FiTv, FiLayers } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/common/Loader';
 import styles from './MyLibrary.module.css';
+
+interface EpisodeAccessItem {
+  episodeId: string;
+  title: string;
+  seasonNumber?: number;
+  episodeNumber?: number;
+  duration?: number;
+  thumbnailUrl?: string;
+  description?: string;
+}
+
+interface EpisodeAccessGroup {
+  contentId: string;
+  content: Content | null;
+  episodes: EpisodeAccessItem[];
+}
+
+const normalizeContentEntity = (raw: any): Content | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const entity = raw.content ?? raw;
+  const fallbackId =
+    entity._id ||
+    entity.id ||
+    entity.contentId ||
+    entity.seriesId;
+
+  if (!fallbackId) return null;
+  return { ...entity, _id: fallbackId } as Content;
+};
+
+const extractContentFromResponse = (response: any): Content | null => {
+  if (!response) return null;
+  const payload = response?.data?.data ?? response?.data ?? response;
+  const resolved =
+    payload?.movie ||
+    payload?.series ||
+    payload?.content ||
+    payload;
+  return normalizeContentEntity(resolved);
+};
+
+const normalizeEpisodeAccess = (entry: any): EpisodeAccessItem | null => {
+  if (!entry) return null;
+  const rawEpisode = entry.episode || entry.episodeDetails || entry;
+  const episodeId = entry.episodeId || rawEpisode?._id || entry._id;
+  if (!episodeId) return null;
+
+  const seasonNumber =
+    entry.seasonNumber ??
+    rawEpisode?.seasonNumber ??
+    rawEpisode?.season?.seasonNumber;
+
+  return {
+    episodeId,
+    title:
+      rawEpisode?.title ||
+      entry.title ||
+      `Episode ${rawEpisode?.episodeNumber ?? entry.episodeNumber ?? ''}`,
+    seasonNumber,
+    episodeNumber: rawEpisode?.episodeNumber ?? entry.episodeNumber,
+    duration: rawEpisode?.duration ?? entry.duration,
+    thumbnailUrl:
+      rawEpisode?.thumbnailUrl ||
+      rawEpisode?.posterImageUrl ||
+      rawEpisode?.thumbnailImageUrl ||
+      entry.thumbnailUrl ||
+      entry.posterImageUrl,
+    description: rawEpisode?.description || entry.description,
+  };
+};
 
 const MyLibrary: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +87,8 @@ const MyLibrary: React.FC = () => {
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'Movie' | 'Series'>('all');
+  const [episodeGroups, setEpisodeGroups] = useState<EpisodeAccessGroup[]>([]);
+  const [episodeAccessLookup, setEpisodeAccessLookup] = useState<Record<string, EpisodeAccessGroup>>({});
 
   useEffect(() => {
     loadLibraryData();
@@ -33,12 +107,112 @@ const MyLibrary: React.FC = () => {
           return [];
         }),
       ]);
-      
+
       // Handle different response structures with safe navigation
-      const libraryData = libraryResponse?.data?.data?.content || 
-                         libraryResponse?.data?.content || 
-                         [];
-      setPurchasedContent(Array.isArray(libraryData) ? libraryData : []);
+      const libraryPayload = libraryResponse?.data?.data || libraryResponse?.data || {};
+
+      const toContentArray = (value: unknown): Content[] =>
+        (Array.isArray(value) ? value : [])
+          .map((item) => normalizeContentEntity(item))
+          .filter((item): item is Content => Boolean(item));
+
+      const aggregatedContentMap = new Map<string, Content>();
+      const registerContent = (entry?: Content | null) => {
+        if (!entry?._id) return;
+        aggregatedContentMap.set(entry._id, entry);
+      };
+
+      [...toContentArray(libraryPayload?.content),
+        ...toContentArray(libraryPayload?.movies),
+        ...toContentArray(libraryPayload?.series),
+      ].forEach(registerContent);
+
+      const purchasedEpisodesRaw = Array.isArray(libraryPayload?.purchasedEpisodes)
+        ? libraryPayload.purchasedEpisodes
+        : [];
+
+      const episodeMap = new Map<string, EpisodeAccessGroup>();
+      const missingSeriesIds = new Set<string>();
+
+      purchasedEpisodesRaw.forEach((entry: any) => {
+        const contentId =
+          entry?.contentId ||
+          entry?.content?._id ||
+          entry?.seriesId;
+        if (!contentId) return;
+
+        if (!episodeMap.has(contentId)) {
+          episodeMap.set(contentId, {
+            contentId,
+            content: aggregatedContentMap.get(contentId) || normalizeContentEntity(entry?.content),
+            episodes: [],
+          });
+        }
+
+        const group = episodeMap.get(contentId);
+        if (!group) return;
+
+        if (!group.content) {
+          const normalized = normalizeContentEntity(entry?.content);
+          if (normalized) {
+            registerContent(normalized);
+            group.content = normalized;
+          } else {
+            missingSeriesIds.add(contentId);
+          }
+        }
+
+        const normalizedEpisode = normalizeEpisodeAccess(entry);
+        if (normalizedEpisode) {
+          group.episodes.push(normalizedEpisode);
+        }
+      });
+
+      if (missingSeriesIds.size > 0) {
+        const fetchedSeries = await Promise.all(
+          Array.from(missingSeriesIds).map(async (seriesId) => {
+            try {
+              const response = await contentAPI.getContentById(seriesId);
+              return extractContentFromResponse(response);
+            } catch (error) {
+              console.warn('Unable to fetch series for library entry:', seriesId, error);
+              return null;
+            }
+          })
+        );
+
+        fetchedSeries
+          .filter((item): item is Content => Boolean(item))
+          .forEach((item) => {
+            registerContent(item);
+            const group = episodeMap.get(item._id);
+            if (group) {
+              group.content = item;
+            }
+          });
+      }
+
+      const resolvedContent = Array.from(aggregatedContentMap.values());
+      setPurchasedContent(resolvedContent);
+
+      const resolvedEpisodeGroups = Array.from(episodeMap.values())
+        .map((group) => ({
+          ...group,
+          episodes: group.episodes.sort((a, b) => {
+            const seasonDelta = (a.seasonNumber || 0) - (b.seasonNumber || 0);
+            if (seasonDelta !== 0) return seasonDelta;
+            return (a.episodeNumber || 0) - (b.episodeNumber || 0);
+          }),
+        }))
+        .filter((group) => group.episodes.length > 0 && group.content);
+
+      setEpisodeGroups(resolvedEpisodeGroups);
+      setEpisodeAccessLookup(
+        resolvedEpisodeGroups.reduce<Record<string, EpisodeAccessGroup>>((acc, group) => {
+          acc[group.contentId] = group;
+          return acc;
+        }, {})
+      );
       setContinueWatching(Array.isArray(continueWatchingData) ? continueWatchingData : []);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to load library');
@@ -218,7 +392,18 @@ const MyLibrary: React.FC = () => {
             </div>
           ) : (
             <div className={styles.grid}>
-              {filteredContent.map((content) => (
+              {filteredContent.map((content) => {
+                const partialSeriesAccess = episodeAccessLookup[content._id];
+                const showPartialBadge =
+                  content.contentType === 'Series' &&
+                  partialSeriesAccess &&
+                  !(content.isPurchased || content.userAccess?.isPurchased);
+
+                const badgeLabel = showPartialBadge
+                  ? `${partialSeriesAccess.episodes.length} unlocked`
+                  : 'OWNED';
+
+                return (
                 <div
                   key={content._id}
                   className={styles.card}
@@ -227,7 +412,9 @@ const MyLibrary: React.FC = () => {
                   <div className={styles.cardPoster}>
                     <img src={content.posterImageUrl} alt={content.title} />
                     <div className={styles.cardOverlay}>
-                      <span className={styles.ownedBadge}>OWNED</span>
+                      <span className={`${styles.ownedBadge} ${showPartialBadge ? styles.partialBadge : ''}`}>
+                        {badgeLabel}
+                      </span>
                       <div className={styles.overlayMeta}>
                         <FiStar color="#f5c518" />
                         <span>{content.averageRating?.toFixed(1) || 'N/A'}</span>
@@ -260,10 +447,75 @@ const MyLibrary: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </section>
+
+        {episodeGroups.length > 0 && (
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.sectionEyebrow}>Episodes</p>
+                <h2 className={styles.sectionTitle}>Unlocked Episodes</h2>
+              </div>
+              <p className={styles.sectionHint}>
+                {episodeGroups.reduce((count, group) => count + group.episodes.length, 0)} total episodes unlocked
+              </p>
+            </div>
+
+            <div className={styles.partialGrid}>
+              {episodeGroups.map((group) => (
+                <div key={group.contentId} className={styles.partialCard}>
+                  <div className={styles.partialHeader}>
+                    <div className={styles.partialPoster}>
+                      <img src={group.content?.posterImageUrl} alt={group.content?.title || 'Series'} />
+                    </div>
+                    <div>
+                      <p className={styles.sectionEyebrow}>Series</p>
+                      <h3 className={styles.partialTitle}>{group.content?.title || 'Series'}</h3>
+                      <p className={styles.partialHint}>{group.episodes.length} unlocked episode{group.episodes.length > 1 ? 's' : ''}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.partialDetails}
+                      onClick={() => navigate(`/content/${group.contentId}`)}
+                    >
+                      View Series
+                    </button>
+                  </div>
+
+                  <div className={styles.partialEpisodes}>
+                    {group.episodes.map((episode) => (
+                      <div key={`${group.contentId}-${episode.episodeId}`} className={styles.partialEpisode}>
+                        <div>
+                          <p className={styles.partialEpisodeMeta}>
+                            S{episode.seasonNumber ?? '?'} · E{episode.episodeNumber ?? '?'}
+                          </p>
+                          <h4>{episode.title}</h4>
+                          <p className={styles.partialEpisodeDesc}>{episode.description}</p>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.partialWatch}
+                          onClick={() =>
+                            navigate(
+                              `/watch/${group.contentId}?season=${episode.seasonNumber || 1}&episode=${episode.episodeNumber || 1}`
+                            )
+                          }
+                        >
+                          <FiPlay size={16} />
+                          Watch
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </Layout>
   );

@@ -7,23 +7,36 @@ export interface PurchaseContentRequest {
 export interface PurchaseEpisodeRequest {
   contentId: string;
   episodeId: string;
+  seasonNumber: number;
 }
 
 export interface PurchaseSeasonRequest {
   contentId: string;
   seasonId: string;
+  seasonNumber?: number;
 }
 
 export interface PurchaseResponse {
+  status?: string;
   message: string;
-  data: {
-    remainingBalance: number;
+  data?: {
     purchase?: {
-      contentId: string;
-      paidAmount: number;
-      paymentMethod: 'rwf' | 'coins';
-      purchaseDate: string;
+      _id?: string;
+      contentId?: string;
+      episodeId?: string;
+      contentType?: string;
+      amountPaid?: number;
+      currency?: string;
+      purchasedAt?: string;
+      seasonNumber?: number;
+      episodeNumber?: number;
     };
+    remainingBalance?: {
+      balance: number;
+      bonusBalance: number;
+      totalBalance: number;
+    };
+    unlockedEpisodes?: string[];
   };
 }
 
@@ -33,9 +46,11 @@ export interface PurchaseResponse {
 export const purchaseContentWithWallet = async (
   contentId: string
 ): Promise<PurchaseResponse> => {
-  const response = await api.post('/payments/content/purchase/wallet', { contentId });
+  const response = await api.post('/payments/content/purchase/wallet', {
+    contentId,
+  });
   return response.data;
-};
+}
 
 /**
  * Purchase single episode with wallet balance
@@ -45,7 +60,7 @@ export const purchaseEpisodeWithWallet = async (
 ): Promise<PurchaseResponse> => {
   const response = await api.post('/payments/episode/purchase/wallet', data);
   return response.data;
-};
+}
 
 /**
  * Purchase entire season with wallet balance
@@ -55,7 +70,7 @@ export const purchaseSeasonWithWallet = async (
 ): Promise<PurchaseResponse> => {
   const response = await api.post('/payments/season/purchase/wallet', data);
   return response.data;
-};
+}
 
 export const paymentAPI = {
   purchaseContent: purchaseContentWithWallet,
