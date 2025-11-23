@@ -2,18 +2,29 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Layout from '@/components/layout/Layout'
-import SearchBar from '@/components/search/SearchBar'
 import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
 import ContentCard from '@/components/content/ContentCard'
 import EmptyState from '@/components/common/EmptyState'
-import Skeleton from '@/components/ui/Skeleton'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { contentAPI } from '@/api/content'
 import { Content } from '@/types/content'
+import { extractCollection } from '@/utils/collection'
 import styles from './Search.module.css'
 
+const parseCommaParam = (value: string | null) =>
+  value
+    ? value
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    : []
+
+const arraysEqual = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((item, index) => item === b[index])
+
 const Search: React.FC = () => {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [results, setResults] = useState<Content[]>([])
   const [loading, setLoading] = useState(false)
@@ -22,12 +33,10 @@ const Search: React.FC = () => {
   const [hasMore, setHasMore] = useState(true)
   const [totalResults, setTotalResults] = useState(0)
   
-  const [filters, setFilters] = useState<SearchFilters>({
-    contentType: 'all',
-    genres: [],
-    categories: [],
-    priceRange: 'all'
-  })
+  const [filters, setFilters] = useState<SearchFilters>(() => ({
+    genres: parseCommaParam(searchParams.get('genres')),
+    categories: parseCommaParam(searchParams.get('categories'))
+  }))
   
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -45,11 +54,11 @@ const Search: React.FC = () => {
         ])
         
         // Extract genres and categories from response
-        const genresData = genresRes.data?.data || genresRes.data || []
-        const categoriesData = categoriesRes.data?.data || categoriesRes.data || []
+        const genresData = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
+        const categoriesData = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
         
-        setGenres(Array.isArray(genresData) ? genresData : [])
-        setCategories(Array.isArray(categoriesData) ? categoriesData : [])
+        setGenres(genresData)
+        setCategories(categoriesData)
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
         // Set empty arrays on error
@@ -61,6 +70,29 @@ const Search: React.FC = () => {
     loadFilters()
   }, [])
 
+  useEffect(() => {
+    const nextQuery = searchParams.get('q') || ''
+    if (nextQuery !== searchQuery) {
+      setSearchQuery(nextQuery)
+    }
+
+    const nextGenres = parseCommaParam(searchParams.get('genres'))
+    const nextCategories = parseCommaParam(searchParams.get('categories'))
+
+    setFilters((prev) => {
+      const sameGenres = arraysEqual(prev.genres, nextGenres)
+      const sameCategories = arraysEqual(prev.categories, nextCategories)
+      if (sameGenres && sameCategories) {
+        return prev
+      }
+      return {
+        ...prev,
+        genres: nextGenres,
+        categories: nextCategories
+      }
+    })
+  }, [searchParams])
+
   // Search function
   const performSearch = useCallback(async (
     query: string,
@@ -68,8 +100,7 @@ const Search: React.FC = () => {
     currentSort: SortOption,
     currentPage: number = 1
   ) => {
-    if (!query.trim() && currentFilters.contentType === 'all' && 
-        currentFilters.genres.length === 0 && currentFilters.categories.length === 0) {
+    if (!query.trim() && currentFilters.genres.length === 0 && currentFilters.categories.length === 0) {
       setResults([])
       setTotalResults(0)
       return
@@ -89,20 +120,8 @@ const Search: React.FC = () => {
         // Handle search response structure: { status, results, data: { content: [] } }
         data = response.data?.data?.results || response.data?.data?.content || []
         pagination = response.data?.data?.pagination || response.data?.pagination || {}
-      } 
-      // Otherwise, use filtering endpoints
-      else if (currentFilters.contentType === 'Movie') {
-        response = await contentAPI.getContentByType('Movie', currentPage, 20)
-        // API returns: { status, results, data: { content: [] } }
-        data = response.data?.data?.content || []
-        pagination = response.data?.data?.pagination || response.data?.pagination || {}
-      } else if (currentFilters.contentType === 'Series') {
-        response = await contentAPI.getContentByType('Series', currentPage, 20)
-        // API returns: { status, results, data: { content: [] } }
-        data = response.data?.data?.content || []
-        pagination = response.data?.data?.pagination || response.data?.pagination || {}
       } else {
-        // Get both movies and series
+        // No search term: pull latest movies and series so filters still work
         const [moviesRes, seriesRes] = await Promise.all([
           contentAPI.getContentByType('Movie', currentPage, 10),
           contentAPI.getContentByType('Series', currentPage, 10)
@@ -110,7 +129,6 @@ const Search: React.FC = () => {
         const movies = moviesRes.data?.data?.content || []
         const series = seriesRes.data?.data?.content || []
         data = [...movies, ...series]
-        // Approximate pagination for combined results
         const moviesPagination = moviesRes.data?.data?.pagination || moviesRes.data?.pagination || {}
         const seriesPagination = seriesRes.data?.data?.pagination || seriesRes.data?.pagination || {}
         pagination = {
@@ -134,29 +152,6 @@ const Search: React.FC = () => {
       if (currentFilters.categories.length > 0) {
         filteredData = filteredData.filter((item: Content) => 
           item.categories?.some(c => currentFilters.categories.includes(c._id))
-        )
-      }
-
-      // Filter by price
-      if (currentFilters.priceRange === 'free') {
-        filteredData = filteredData.filter((item: Content) => 
-          item.priceInRwf === 0
-        )
-      } else if (currentFilters.priceRange === 'paid') {
-        filteredData = filteredData.filter((item: Content) => 
-          (item.priceInRwf || 0) > 0
-        )
-      }
-
-      // Filter by release year
-      if (currentFilters.releaseYearFrom) {
-        filteredData = filteredData.filter((item: Content) => 
-          item.releaseYear >= currentFilters.releaseYearFrom!
-        )
-      }
-      if (currentFilters.releaseYearTo) {
-        filteredData = filteredData.filter((item: Content) => 
-          item.releaseYear <= currentFilters.releaseYearTo!
         )
       }
 
@@ -207,16 +202,29 @@ const Search: React.FC = () => {
     performSearch(searchQuery, filters, sortBy, 1)
   }, [searchQuery, filters, sortBy])
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-  }
-
   const handleFiltersChange = (newFilters: SearchFilters) => {
     setFilters(newFilters)
+    const params = new URLSearchParams(searchParams)
+    if (newFilters.genres.length) {
+      params.set('genres', newFilters.genres.join(','))
+    } else {
+      params.delete('genres')
+    }
+
+    if (newFilters.categories.length) {
+      params.set('categories', newFilters.categories.join(','))
+    } else {
+      params.delete('categories')
+    }
+
+    setSearchParams(params)
   }
 
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort)
+    const params = new URLSearchParams(searchParams)
+    params.set('sort', newSort)
+    setSearchParams(params)
   }
 
   const handleLoadMore = () => {
@@ -228,34 +236,37 @@ const Search: React.FC = () => {
   const handleResetSearch = () => {
     setSearchQuery('')
     setFilters({
-      contentType: 'all',
       genres: [],
-      categories: [],
-      priceRange: 'all'
+      categories: []
     })
     setSortBy('newest')
     setResults([])
     setTotalResults(0)
+    setSearchParams(new URLSearchParams())
   }
 
   const showEmptyState = !loading && results.length === 0 && (searchQuery || 
-    filters.contentType !== 'all' || filters.genres.length > 0 || 
-    filters.categories.length > 0 || filters.priceRange !== 'all')
+    filters.genres.length > 0 || filters.categories.length > 0)
 
   return (
     <Layout>
     <div className={styles.searchPage}>
       <div className={styles.header}>
         <div className={styles.searchSection}>
-          <SearchBar value={searchQuery} onSearch={handleSearch} />
+          <h1 className={styles.searchTitle}>Search</h1>
+          <p className={styles.searchHint}>
+            {searchQuery
+              ? `Showing results for "${searchQuery}"`
+              : 'Use the global search in the navigation bar to discover something new.'}
+          </p>
         </div>
 
         <div className={styles.controls}>
-          <FilterPanel
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            genres={genres}
-            categories={categories}
+                <p className={styles.searchHint}>
+                  {searchQuery
+                    ? `Showing results for "${searchQuery}"`
+                    : 'Use the global search in the navigation bar to discover something new.'}
+                </p>
             isOpen={isFilterOpen}
             onToggle={() => setIsFilterOpen(!isFilterOpen)}
           />

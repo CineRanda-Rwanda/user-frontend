@@ -13,6 +13,18 @@
   margin-bottom: 1.5rem;
 }
 
+.searchTitle {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  margin: 0 0 0.35rem 0;
+}
+
+.searchHint {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 .controls {
   display: flex;
   gap: 1rem;

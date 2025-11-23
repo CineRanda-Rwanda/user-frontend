@@ -9,6 +9,7 @@ import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
+import { extractCollection } from '@/utils/collection'
 import styles from './Series.module.css'
 
 const Series: React.FC = () => {
@@ -23,10 +24,8 @@ const Series: React.FC = () => {
   const [genres, setGenres] = useState<Array<{ _id: string; name: string }>>([])
   const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([])
   const [filters, setFilters] = useState<SearchFilters>({
-    contentType: 'Series',
     genres: [],
-    categories: [],
-    priceRange: 'all'
+    categories: []
   })
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
 
@@ -75,12 +74,12 @@ const Series: React.FC = () => {
           contentAPI.getGenres(),
           contentAPI.getCategories()
         ])
-        
-        const genresData = genresRes.data?.data || genresRes.data || []
-        const categoriesData = categoriesRes.data?.data || categoriesRes.data || []
-        
-        setGenres(Array.isArray(genresData) ? genresData : [])
-        setCategories(Array.isArray(categoriesData) ? categoriesData : [])
+
+        const extractedGenres = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
+        const extractedCategories = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
+
+        setGenres(extractedGenres)
+        setCategories(extractedCategories)
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
       }
@@ -110,13 +109,6 @@ const Series: React.FC = () => {
         filteredSeries = filteredSeries.filter((item: Content) =>
           item.categories?.some(c => filters.categories.includes(c._id))
         )
-      }
-
-      // Apply price filter
-      if (filters.priceRange === 'free') {
-        filteredSeries = filteredSeries.filter((item: Content) => (item.priceInRwf || 0) === 0)
-      } else if (filters.priceRange === 'paid') {
-        filteredSeries = filteredSeries.filter((item: Content) => (item.priceInRwf || 0) > 0)
       }
 
       // Apply sorting

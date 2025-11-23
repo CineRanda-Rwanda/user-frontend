@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { FiSearch, FiBell, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiDollarSign } from 'react-icons/fi'
+import { FiBell, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiDollarSign } from 'react-icons/fi'
 import { getInitials, formatCurrency } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
+import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
@@ -68,20 +69,12 @@ const Navbar: React.FC = () => {
 
       {/* Search Bar */}
       <div className={styles.searchContainer}>
-        <div className={styles.searchBox}>
-          <FiSearch className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search movies and series..."
-            className={styles.searchInput}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                navigate(`/search?q=${encodeURIComponent(e.currentTarget.value)}`);
-                e.currentTarget.value = '';
-              }
-            }}
-          />
-        </div>
+        <GlobalSearchBar
+          variant="compact"
+          className={styles.navbarSearch}
+          showHeading={false}
+          showFilters={false}
+        />
       </div>
 
       {/* Actions */}

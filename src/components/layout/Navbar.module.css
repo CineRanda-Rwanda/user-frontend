@@ -80,45 +80,13 @@
 
 .searchContainer {
   flex: 1;
-  max-width: 500px;
+  max-width: 560px;
   margin: 0 var(--spacing-xl);
-}
-
-.searchBox {
-  position: relative;
   display: flex;
-  align-items: center;
+}
+
+.navbarSearch {
   width: 100%;
-}
-
-.searchIcon {
-  position: absolute;
-  left: var(--spacing-md);
-  font-size: var(--fs-lg);
-  color: var(--text-gray);
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) * 3);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-full);
-  color: var(--text-white);
-  font-size: var(--fs-base);
-  transition: all var(--transition-base);
-}
-
-.searchInput::placeholder {
-  color: var(--text-gray);
-}
-
-.searchInput:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: var(--primary-yellow);
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
 }
 
 .actions {

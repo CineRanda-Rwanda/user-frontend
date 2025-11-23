@@ -9,6 +9,7 @@ import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
+import { extractCollection } from '@/utils/collection'
 import styles from './Movies.module.css'
 
 const Movies: React.FC = () => {
@@ -23,10 +24,8 @@ const Movies: React.FC = () => {
   const [genres, setGenres] = useState<Array<{ _id: string; name: string }>>([])
   const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([])
   const [filters, setFilters] = useState<SearchFilters>({
-    contentType: 'Movie',
     genres: [],
-    categories: [],
-    priceRange: 'all'
+    categories: []
   })
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
 
@@ -75,12 +74,12 @@ const Movies: React.FC = () => {
           contentAPI.getGenres(),
           contentAPI.getCategories()
         ])
-        
-        const genresData = genresRes.data?.data || genresRes.data || []
-        const categoriesData = categoriesRes.data?.data || categoriesRes.data || []
-        
-        setGenres(Array.isArray(genresData) ? genresData : [])
-        setCategories(Array.isArray(categoriesData) ? categoriesData : [])
+
+        const extractedGenres = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
+        const extractedCategories = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
+
+        setGenres(extractedGenres)
+        setCategories(extractedCategories)
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
       }
@@ -122,13 +121,6 @@ const Movies: React.FC = () => {
         filteredMovies = filteredMovies.filter((movie: Content) =>
           movie.categories?.some(c => filters.categories.includes(c._id))
         )
-      }
-
-      // Apply price filter
-      if (filters.priceRange === 'free') {
-        filteredMovies = filteredMovies.filter((movie: Content) => (movie.priceInRwf || 0) === 0)
-      } else if (filters.priceRange === 'paid') {
-        filteredMovies = filteredMovies.filter((movie: Content) => (movie.priceInRwf || 0) > 0)
       }
 
       // Apply sorting

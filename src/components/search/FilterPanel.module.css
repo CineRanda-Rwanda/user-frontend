@@ -131,34 +131,6 @@
   color: var(--text-primary);
 }
 
-.buttonGroup {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.buttonGroup button {
-  padding: 0.625rem 1.25rem;
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--fs-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.buttonGroup button:hover {
-  border-color: var(--primary);
-  color: var(--text-primary);
-}
-
-.buttonGroup button.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
 .checkboxGroup {
   display: flex;
   flex-direction: column;
@@ -194,37 +166,6 @@
 .checkbox input:checked + span {
   color: var(--text-primary);
   font-weight: 500;
-}
-
-.yearRange {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.yearRange span {
-  color: var(--text-gray);
-  font-size: var(--fs-sm);
-}
-
-.yearInput {
-  flex: 1;
-  padding: 0.625rem;
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--fs-base);
-  transition: border-color 0.2s ease;
-}
-
-.yearInput:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-.yearInput::placeholder {
-  color: var(--text-gray);
 }
 
 @media (max-width: 768px) {
