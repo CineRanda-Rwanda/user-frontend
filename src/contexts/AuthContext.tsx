@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         try {
           const { data } = await userAPI.getCurrentUser()
-          const userData = data.data?.user || data.user || data
+          const userData = (data as any).data?.user || (data as any).user || data
           setUser(userData as any)
         } catch (error) {
           console.error('Failed to load user:', error)
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data } = await authAPI.login(credentials)
       
       // Handle both response formats from API
-      const user = data.user || data.data?.user
+      const user = (data as any).user || (data as any).data?.user
       const token = data.token
       const refreshToken = data.refreshToken
       
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data } = await authAPI.verifyRegistration(payload)
       
       // Handle the response format from API
-      const user = data.data?.user
+      const user = (data as any).data?.user
       const token = data.token
       const refreshToken = data.refreshToken
       
@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshUser = async () => {
     try {
       const { data } = await userAPI.getCurrentUser()
-      const userData = data.data?.user || data.user || data
+      const userData = (data as any).data?.user || (data as any).user || data
       setUser(userData as any)
     } catch (error) {
       console.error('Failed to refresh user:', error)
@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateProfile = async (profileData: Partial<User>) => {
     try {
       const { data } = await userAPI.updateProfile(profileData)
-      const userData = data.data?.user || data.user || data
+      const userData = (data as any).data?.user || (data as any).user || data
       setUser(userData as any)
     } catch (error) {
       console.error('Failed to update profile:', error)

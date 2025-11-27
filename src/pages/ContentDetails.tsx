@@ -75,7 +75,7 @@ const ContentDetails: React.FC = () => {
 
       setContent(mergedContent);
 
-      if (mergedContent.contentType === 'Series' && mergedContent.seasons?.length > 0) {
+      if (mergedContent.contentType === 'Series' && mergedContent.seasons && mergedContent.seasons.length > 0) {
         const firstSeason = mergedContent.seasons[0];
         setActiveSeason(firstSeason.seasonNumber);
         if (firstSeason.episodes?.length > 0) {

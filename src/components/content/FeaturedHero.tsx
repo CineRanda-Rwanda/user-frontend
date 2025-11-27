@@ -18,7 +18,7 @@ interface FeaturedHeroProps {
 
 const ROTATION_INTERVAL_MS = 8000
 
-const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null, hidePrice = false }) => {
+const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null }) => {
   const [autoIndex, setAutoIndex] = useState(0)
   const [showWatchMenu, setShowWatchMenu] = useState(false)
   const [loadingTrailer, setLoadingTrailer] = useState(false)

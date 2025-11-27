@@ -262,11 +262,11 @@ const Search: React.FC = () => {
         </div>
 
         <div className={styles.controls}>
-                <p className={styles.searchHint}>
-                  {searchQuery
-                    ? `Showing results for "${searchQuery}"`
-                    : 'Use the global search in the navigation bar to discover something new.'}
-                </p>
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            genres={genres}
+            categories={categories}
             isOpen={isFilterOpen}
             onToggle={() => setIsFilterOpen(!isFilterOpen)}
           />
