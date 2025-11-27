@@ -18,7 +18,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   debounceMs = 300 
 }) => {
   const [query, setQuery] = useState(externalValue || '')
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (externalValue !== undefined) {
