@@ -16,6 +16,17 @@ import styles from './Watch.module.css'
 const resolveContentIdentifier = (item?: Partial<Content> | null) =>
   item?._id || (item as { id?: string })?.id || ''
 
+const detectMimeType = (url?: string) => {
+  if (!url) return 'video/mp4'
+  const normalized = url.split('?')[0].toLowerCase()
+  if (normalized.endsWith('.m3u8')) return 'application/x-mpegURL'
+  if (normalized.endsWith('.mpd')) return 'application/dash+xml'
+  if (normalized.endsWith('.webm')) return 'video/webm'
+  if (normalized.endsWith('.ogg') || normalized.endsWith('.ogv')) return 'video/ogg'
+  if (normalized.endsWith('.mov')) return 'video/quicktime'
+  return 'video/mp4'
+}
+
 const Watch: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -344,7 +355,7 @@ const Watch: React.FC = () => {
       },
     })
 
-    player.src({ src: streamSource, type: 'video/mp4' })
+    player.src({ src: streamSource, type: detectMimeType(streamSource) })
     player.poster(content?.posterImageUrl || '')
     playerRef.current = player
 

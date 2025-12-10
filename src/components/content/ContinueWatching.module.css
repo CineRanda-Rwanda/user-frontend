@@ -1,5 +1,5 @@
 .continueWatching {
-  padding: 0 var(--spacing-2xl);
+  padding: 0 var(--page-padding);
   margin-bottom: var(--spacing-3xl);
 }
 
@@ -42,12 +42,18 @@
 
 .card {
   cursor: pointer;
-  transition: transform var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
   animation: fadeInUp 0.5s ease;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.75);
 }
 
 .thumbnail {
@@ -109,7 +115,7 @@
 }
 
 .info {
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .contentTitle {

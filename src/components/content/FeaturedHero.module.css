@@ -1,9 +1,12 @@
 .hero {
   position: relative;
-  height: 80vh;
-  min-height: 500px;
+  min-height: clamp(420px, 70vh, 720px);
+  margin: 0 auto var(--spacing-3xl);
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  margin-bottom: var(--spacing-2xl);
+  background: var(--bg-dark);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+  max-width: var(--container-max);
 }
 
 .background {
@@ -17,23 +20,15 @@
   height: 100%;
   object-fit: cover;
   animation: fadeIn 0.5s ease;
+  filter: saturate(105%) contrast(105%);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
-    rgba(0, 0, 0, 0.95) 100%
-  ),
-  linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0.8) 100%
-  );
+  background:
+    linear-gradient(120deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.35) 60%, rgba(0, 0, 0, 0.85) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.4));
   z-index: 1;
 }
 
@@ -44,16 +39,16 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 var(--spacing-3xl);
-  max-width: 800px;
+  padding: 0 clamp(1.5rem, 8vw, 6rem);
+  max-width: 720px;
 }
 
 .badge {
   display: inline-block;
   background: var(--accent-red);
   color: white;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  border-radius: 999px;
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
   text-transform: uppercase;
@@ -77,6 +72,7 @@
   font-size: var(--fs-lg);
   color: var(--text-gray);
   margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
 }
 
 .rating {
@@ -89,10 +85,10 @@
 
 .description {
   font-size: var(--fs-lg);
-  color: var(--text-gray);
-  line-height: 1.6;
+  color: var(--text-secondary);
+  line-height: 1.7;
   margin-bottom: var(--spacing-2xl);
-  max-width: 600px;
+  max-width: 580px;
 }
 
 .actions {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
@@ -7,6 +7,7 @@ import styles from './Auth.module.css'
 
 const Login: React.FC = () => {
   const { login } = useAuth()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     identifier: '', // Can be username or phone number
     pin: ''
@@ -96,6 +97,14 @@ const Login: React.FC = () => {
           >
             Sign In
           </Button>
+
+          <button
+            type="button"
+            className={styles['ghost-button']}
+            onClick={() => navigate('/')}
+          >
+            ← Back to Home
+          </button>
         </form>
 
         <p className={styles['link-text']}>

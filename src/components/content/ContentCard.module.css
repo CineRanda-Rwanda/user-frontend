@@ -3,13 +3,16 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: transform var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
   background: var(--bg-card);
   aspect-ratio: 2/3;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
   z-index: 2;
 }
 
@@ -24,7 +27,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.2) 100%);
   padding: var(--spacing-md);
   opacity: 0;
   transition: opacity var(--transition-base);
@@ -64,22 +67,23 @@
   position: absolute;
   top: var(--spacing-sm);
   right: var(--spacing-sm);
-  background: var(--accent-red);
-  color: white;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--primary-yellow);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
+  border: 1px solid rgba(255, 215, 0, 0.5);
 }
 
 .badge {
   position: absolute;
   top: var(--spacing-sm);
   left: var(--spacing-sm);
-  background: var(--primary-yellow);
-  color: var(--bg-black);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
+  background: var(--accent-red);
+  color: var(--text-white);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: var(--fs-xs);
   font-weight: var(--fw-bold);
   text-transform: uppercase;

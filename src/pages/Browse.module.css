@@ -1,1 +1,69 @@
-/* Styles removed: Browse page no longer renders a local search section. */
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-3xl);
+	padding-bottom: var(--spacing-3xl);
+}
+
+.section {
+	padding: 0 var(--page-padding);
+}
+
+.sectionHeading {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-bottom: var(--spacing-lg);
+}
+
+.kicker {
+	font-size: var(--fs-sm);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-gray);
+	margin-bottom: var(--spacing-xs);
+}
+
+.sectionHeading h2 {
+	font-size: var(--fs-3xl);
+	font-weight: var(--fw-bold);
+	color: var(--text-white);
+}
+
+.sectionStack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-3xl);
+}
+
+.emptyState {
+	margin: 0 auto;
+	padding: var(--spacing-3xl);
+	border-radius: var(--radius-2xl);
+	background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.85));
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	max-width: 640px;
+	text-align: center;
+	box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+}
+
+.emptyState h3 {
+	font-size: var(--fs-2xl);
+	margin-bottom: var(--spacing-sm);
+	color: var(--text-white);
+}
+
+.emptyState p {
+	color: var(--text-gray);
+	margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+	.sectionHeading h2 {
+		font-size: var(--fs-2xl);
+	}
+
+	.emptyState {
+		padding: var(--spacing-2xl);
+	}
+}

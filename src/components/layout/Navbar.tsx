@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { FiBell, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiDollarSign } from 'react-icons/fi'
+import {
+  FiBell,
+  FiUser,
+  FiSettings,
+  FiLogOut,
+  FiMenu,
+  FiX,
+  FiDollarSign,
+  FiBookOpen,
+  FiChevronRight
+} from 'react-icons/fi'
 import { getInitials, formatCurrency } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
@@ -46,6 +56,14 @@ const Navbar: React.FC = () => {
     setIsProfileOpen(false)
   }
 
+  const handleProfileNavigation = (path: string) => {
+    navigate(path)
+    setIsProfileOpen(false)
+    setIsMobileMenuOpen(false)
+  }
+
+  const purchasedCount = user?.purchasedContent?.length || 0
+
   return (
     <nav className={styles.navbar}>
       {/* Logo */}
@@ -56,14 +74,30 @@ const Navbar: React.FC = () => {
 
       {/* Desktop Navigation */}
       <div className={styles.nav}>
-        <NavLink to="/" className={({ isActive }) => isActive ? styles.active : ''}>Home</NavLink>
-        <NavLink to="/movies" className={({ isActive }) => isActive ? styles.active : ''}>Movies</NavLink>
-        <NavLink to="/series" className={({ isActive }) => isActive ? styles.active : ''}>Series</NavLink>
-        {isAuthenticated && (
-          <>
-            <NavLink to="/my-library" className={({ isActive }) => isActive ? styles.active : ''}>My Library</NavLink>
-          </>
-        )}
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+          }
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/movies"
+          className={({ isActive }) =>
+            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+          }
+        >
+          Movies
+        </NavLink>
+        <NavLink
+          to="/series"
+          className={({ isActive }) =>
+            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+          }
+        >
+          Series
+        </NavLink>
       </div>
 
       {/* Search Bar */}
@@ -78,13 +112,11 @@ const Navbar: React.FC = () => {
 
       {/* Actions */}
       <div className={styles.actions}>
-        
         {isAuthenticated ? (
           <>
-            {/* Wallet Balance */}
             {walletBalance && (
-              <button 
-                className={styles.walletButton} 
+              <button
+                className={styles.walletButton}
                 onClick={() => navigate('/wallet')}
                 title="Wallet"
               >
@@ -95,53 +127,101 @@ const Navbar: React.FC = () => {
               </button>
             )}
 
-            {/* Notifications */}
             <button className={styles.actionButton}>
               <FiBell />
               <span className={styles.badge}>3</span>
             </button>
 
-            {/* Profile Dropdown */}
             <div style={{ position: 'relative' }} ref={dropdownRef}>
               <button
                 className={styles.profileButton}
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
-                <div className={styles.avatar}>
-                  {getInitials(user?.username)}
-                </div>
+                <div className={styles.avatar}>{getInitials(user?.username)}</div>
               </button>
 
               {isProfileOpen && (
                 <div className={styles.dropdown}>
                   <div className={styles.dropdownHeader}>
-                    <div className={styles.dropdownName}>{user?.username}</div>
-                    <div className={styles.dropdownEmail}>{user?.email}</div>
+                    <div>
+                      <div className={styles.dropdownName}>{user?.username}</div>
+                      <div className={styles.dropdownEmail}>{user?.email || 'No email added'}</div>
+                    </div>
+                    <div className={styles.dropdownMeta}>
+                      <span>{user?.location === 'international' ? 'International' : 'Rwanda'} member</span>
+                      {user?.createdAt && (
+                        <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                      )}
+                    </div>
                   </div>
-                  <div className={styles.dropdownMenu}>
+                  <div className={styles.dropdownStats}>
+                    <div className={styles.dropdownStat}>
+                      <p>Library</p>
+                      <strong>{purchasedCount}</strong>
+                    </div>
+                    <div className={styles.dropdownStat}>
+                      <p>Wallet</p>
+                      <strong>{walletBalance ? formatCurrency(walletBalance.balance) : '—'}</strong>
+                    </div>
+                  </div>
+                  <div className={styles.dropdownSection}>
+                    <p className={styles.dropdownLabel}>Library & Profile</p>
                     <button
                       className={styles.dropdownItem}
-                      onClick={() => {
-                        navigate('/profile')
-                        setIsProfileOpen(false)
-                      }}
+                      onClick={() => handleProfileNavigation('/my-library')}
+                    >
+                      <FiBookOpen />
+                      <div className={styles.dropdownItemText}>
+                        <span>My Library</span>
+                        <small>Continue watching & purchases</small>
+                      </div>
+                      <FiChevronRight className={styles.dropdownCaret} />
+                    </button>
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => handleProfileNavigation('/profile')}
                     >
                       <FiUser />
-                      <span>Profile</span>
+                      <div className={styles.dropdownItemText}>
+                        <span>Profile Overview</span>
+                        <small>Identity & account info</small>
+                      </div>
+                      <FiChevronRight className={styles.dropdownCaret} />
                     </button>
                     <button
                       className={styles.dropdownItem}
-                      onClick={() => {
-                        navigate('/profile')
-                        setIsProfileOpen(false)
-                      }}
+                      onClick={() => handleProfileNavigation('/profile#settings')}
                     >
                       <FiSettings />
-                      <span>Settings</span>
+                      <div className={styles.dropdownItemText}>
+                        <span>Account Settings</span>
+                        <small>Preferences & security</small>
+                      </div>
+                      <FiChevronRight className={styles.dropdownCaret} />
                     </button>
-                    <button className={styles.dropdownItem} onClick={handleLogout}>
+                  </div>
+                  <div className={styles.dropdownSection}>
+                    <p className={styles.dropdownLabel}>Billing & Session</p>
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => handleProfileNavigation('/wallet')}
+                    >
+                      <FiDollarSign />
+                      <div className={styles.dropdownItemText}>
+                        <span>Wallet Dashboard</span>
+                        <small>Top up & transactions</small>
+                      </div>
+                      <FiChevronRight className={styles.dropdownCaret} />
+                    </button>
+                    <button
+                      className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                      onClick={handleLogout}
+                    >
                       <FiLogOut />
-                      <span>Logout</span>
+                      <div className={styles.dropdownItemText}>
+                        <span>Logout</span>
+                        <small>Return to guest view</small>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -195,9 +275,6 @@ const Navbar: React.FC = () => {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link to="/my-library" onClick={() => setIsMobileMenuOpen(false)}>
-                  My Library
-                </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                   Profile
                 </Link>

@@ -14,12 +14,8 @@ const ContinueWatching: React.FC<ContinueWatchingProps> = ({ items }) => {
   if (items.length === 0) return null;
 
   const handleWatch = (item: WatchHistoryItem) => {
-    // Navigate to watch page for the content
-    if (item.contentType === 'Movie') {
-      navigate(`/watch/movie/${item.movieId}`);
-    } else {
-      navigate(`/watch/series/${item.movieId}`);
-    }
+    // Watch route is unified: /watch/:id handles both movies & series
+    navigate(`/watch/${item.movieId}`);
   };
 
   const formatDuration = (seconds: number): string => {

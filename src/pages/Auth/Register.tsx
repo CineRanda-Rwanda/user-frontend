@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
@@ -7,6 +7,7 @@ import styles from './Auth.module.css'
 
 const Register: React.FC = () => {
   const { register, verifyRegistration } = useAuth()
+  const navigate = useNavigate()
   const [step, setStep] = useState<'register' | 'verify'>('register')
   const [formData, setFormData] = useState({
     username: '',
@@ -203,6 +204,14 @@ const Register: React.FC = () => {
             </Button>
           </form>
         )}
+
+        <button
+          type="button"
+          className={styles['ghost-button']}
+          onClick={() => navigate('/')}
+        >
+          ← Back to Home
+        </button>
 
         <p className={styles['link-text']}>
           Already have an account?{' '}

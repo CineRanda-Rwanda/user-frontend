@@ -1,3 +1,4 @@
+
 .row {
   margin-bottom: var(--spacing-3xl);
 }
@@ -7,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-lg);
-  padding: 0 var(--spacing-xl);
+  padding: 0 var(--page-padding);
 }
 
 .title {
@@ -29,7 +30,7 @@
 
 .scrollContainer {
   position: relative;
-  padding: 0 var(--spacing-xl);
+  padding: 0 var(--page-padding);
 }
 
 .grid {

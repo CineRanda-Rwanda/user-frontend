@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
     setUser(null)
     toast.info('Logged out successfully')
-    navigate('/login')
+    navigate('/', { replace: true })
   }
 
   const refreshUser = async () => {

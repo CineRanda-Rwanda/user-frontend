@@ -83,6 +83,24 @@
   font-size: var(--fs-sm);
 }
 
+.ghost-button {
+  margin-top: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-gray);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.ghost-button:hover {
+  color: var(--primary-yellow);
+  border-color: var(--primary-yellow);
+}
+
 @media (max-width: 640px) {
   .login-box {
     padding: var(--spacing-xl);

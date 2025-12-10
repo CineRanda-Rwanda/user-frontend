@@ -8,8 +8,11 @@ import Layout from '@/components/layout/Layout'
 import ContentRow from '@/components/content/ContentRow'
 import ContinueWatching from '@/components/content/ContinueWatching'
 import AnimatedCarousel from '@/components/content/AnimatedCarousel'
+import FeaturedHero from '@/components/content/FeaturedHero'
 import Loader from '@/components/common/Loader'
+import Button from '@/components/common/Button'
 import { toast } from 'react-toastify'
+import styles from './Browse.module.css'
 
 const Browse: React.FC = () => {
   const { isAuthenticated } = useAuth()
@@ -27,9 +30,6 @@ const Browse: React.FC = () => {
   const loadContent = async () => {
     try {
       setLoading(true)
-      console.log('Starting to load content...')
-      console.log('Is Authenticated:', isAuthenticated)
-
       // Load all content in parallel using the new API structure
       const [moviesRes, seriesRes] = await Promise.all([
         contentAPI.getContentByType('Movie', 1, 20),
@@ -46,24 +46,14 @@ const Browse: React.FC = () => {
         }
       }
 
-      // Debug: Log the responses
-      console.log('Movies Response:', moviesRes)
-      console.log('Series Response:', seriesRes)
-
       // Extract data from responses
       // API Response format: { status, results, pagination, data: { content: [] } }
       const moviesData = moviesRes.data?.data?.content || moviesRes.data?.content || []
       const seriesData = seriesRes.data?.data?.content || seriesRes.data?.content || []
 
-      console.log('Extracted Movies:', moviesData)
-      console.log('Extracted Series:', seriesData)
-
       // Ensure arrays
       const safeMovies = Array.isArray(moviesData) ? moviesData : []
       const safeSeries = Array.isArray(seriesData) ? seriesData : []
-
-      console.log('Final Movies Count:', safeMovies.length)
-      console.log('Final Series Count:', safeSeries.length)
 
       // Build a simple "featured" set from newest content
       const allContent = [...safeMovies, ...safeSeries]
@@ -81,8 +71,6 @@ const Browse: React.FC = () => {
       setMovies(safeMovies)
       setSeries(safeSeries)
       
-      console.log('State updated - Featured:', sortedContent.slice(0, 10).length, 'Movies:', safeMovies.length, 'Series:', safeSeries.length)
-      
       // Set continue watching if authenticated
       setContinueWatching(isAuthenticated ? continueWatchingRes : [])
     } catch (error) {
@@ -98,27 +86,56 @@ const Browse: React.FC = () => {
     return <Loader fullScreen text="Loading content..." />
   }
 
-  console.log('Rendering Browse - Movies:', movies.length, 'Series:', series.length, 'Trending:', trending.length)
+  const heroPool = trending.length > 0
+    ? trending
+    : newReleases.length > 0
+      ? newReleases
+      : [...movies, ...series]
+
+  const heroItems = heroPool.slice(0, 5)
+  const hasAnyRows = trending.length > 0 || movies.length > 0 || series.length > 0
+  const showEmptyState = !loading && !hasAnyRows
 
   return (
     <Layout>
-      {/* Animated Carousel for New Releases */}
-      {newReleases.length > 0 && (
-        <AnimatedCarousel 
-          items={newReleases}
-          title="New Releases"
-        />
+      {heroItems.length > 0 && (
+        <FeaturedHero content={heroItems} hidePrice />
       )}
 
-      {/* Continue Watching - Only for authenticated users */}
-      {isAuthenticated && continueWatching.length > 0 && (
-        <ContinueWatching items={continueWatching} />
-      )}
+      <div className={styles.page}>
+        {/* Continue Watching - Only for authenticated users */}
+        {isAuthenticated && continueWatching.length > 0 && (
+          <ContinueWatching items={continueWatching} />
+        )}
 
-      {/* Content Rows */}
-      <ContentRow title="Trending Now" content={trending} hidePrice />
-      <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
-      <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
+        {newReleases.length > 0 && (
+          <section className={styles.section} aria-labelledby="new-releases-heading">
+            <div className={styles.sectionHeading}>
+              <div>
+                <p className={styles.kicker}>Latest drop</p>
+                <h2 id="new-releases-heading">New Releases</h2>
+              </div>
+            </div>
+            <AnimatedCarousel items={newReleases} title="" />
+          </section>
+        )}
+
+        <div className={styles.sectionStack}>
+          <ContentRow title="Trending Now" content={trending} hidePrice />
+          <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
+          <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
+        </div>
+
+        {showEmptyState && (
+          <div className={styles.emptyState}>
+            <h3>Catalog is warming up</h3>
+            <p>We are curating fresh premieres. Check back soon or refresh to pull the latest titles.</p>
+            <Button variant="primary" onClick={() => loadContent()}>
+              Reload content
+            </Button>
+          </div>
+        )}
+      </div>
     </Layout>
   )
 }
