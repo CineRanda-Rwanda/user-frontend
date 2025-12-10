@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data } = await authAPI.verifyRegistration(payload)
       
       // Handle the response format from API
-      const user = (data as any).data?.user
+      const user = (data as any).user || (data as any).data?.user
       const token = data.token
       const refreshToken = data.refreshToken
       

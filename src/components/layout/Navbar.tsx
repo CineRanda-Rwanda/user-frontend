@@ -62,7 +62,6 @@ const Navbar: React.FC = () => {
         {isAuthenticated && (
           <>
             <NavLink to="/my-library" className={({ isActive }) => isActive ? styles.active : ''}>My Library</NavLink>
-            <NavLink to="/wallet" className={({ isActive }) => isActive ? styles.active : ''}>Wallet</NavLink>
           </>
         )}
       </div>
@@ -198,9 +197,6 @@ const Navbar: React.FC = () => {
               <>
                 <Link to="/my-library" onClick={() => setIsMobileMenuOpen(false)}>
                   My Library
-                </Link>
-                <Link to="/wallet" onClick={() => setIsMobileMenuOpen(false)}>
-                  Wallet
                 </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                   Profile
