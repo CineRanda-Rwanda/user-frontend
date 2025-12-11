@@ -27,9 +27,10 @@
   padding: var(--spacing-md);
   font-size: var(--fs-base);
   color: var(--text-white);
-  background: var(--bg-card);
-  border: 2px solid transparent;
-  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, rgba(28, 28, 28, 0.95), rgba(12, 12, 12, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all var(--transition-base);
   min-height: 48px;
 }
@@ -40,8 +41,8 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--primary-yellow);
-  background: var(--bg-card-hover);
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
 }
 
 .input:disabled {
