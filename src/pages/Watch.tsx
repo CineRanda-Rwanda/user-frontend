@@ -1,9 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
-import videojs from 'video.js'
-
-type VideoJsPlayer = ReturnType<typeof videojs>
 import { toast } from 'react-toastify'
 import { contentAPI } from '../api/content'
 import { purchaseContentWithWallet } from '../api/payment'
@@ -55,8 +52,7 @@ const Watch: React.FC = () => {
     totalEpisodes?: number
   } | null>(null)
 
-  const videoNodeRef = useRef<HTMLVideoElement | null>(null)
-  const playerRef = useRef<VideoJsPlayer | null>(null)
+  const [videoRefreshKey, setVideoRefreshKey] = useState(0)
 
   const orderedSeasons = useMemo(() => {
     if (!content?.seasons) return []
@@ -223,16 +219,12 @@ const Watch: React.FC = () => {
     setStreamError(null)
 
     try {
-      const response = await contentAPI.getStreamUrl(
-        identifier,
-        isSeries
-          ? {
-              episodeId: activeEpisode?._id,
-              seasonNumber: activeSeason,
-              episodeNumber: activeEpisode?.episodeNumber,
-            }
-          : undefined
-      )
+      const response = isSeries && activeEpisode
+        ? await contentAPI.getEpisodeStreamUrl(identifier, activeEpisode._id, {
+            seasonNumber: activeSeason,
+            episodeNumber: activeEpisode.episodeNumber,
+          })
+        : await contentAPI.getStreamUrl(identifier)
       const payload = response?.data?.data || response?.data
       const url = payload?.videoUrl || payload?.streamUrl
 
@@ -338,39 +330,20 @@ const Watch: React.FC = () => {
     return () => window.clearTimeout(timer)
   }, [autoNextCountdown, playPendingEpisode])
 
+  const videoPoster = content?.posterImageUrl || undefined
+  const resolvedStreamSource = canPlayCurrent ? streamSource : ''
+
   useEffect(() => {
-    if (!streamSource || !canPlayCurrent) return
-    const videoElement = videoNodeRef.current
-    if (!videoElement) return
+    setVideoRefreshKey((prev) => prev + 1)
+  }, [resolvedStreamSource])
 
-    const player = videojs(videoElement, {
-      autoplay: true,
-      controls: true,
-      preload: 'auto',
-      fluid: true,
-      responsive: true,
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
-      controlBar: {
-        pictureInPictureToggle: true,
-      },
-    })
+  const handleVideoEnded = useCallback(() => {
+    triggerAutoNext()
+  }, [triggerAutoNext])
 
-    player.src({ src: streamSource, type: detectMimeType(streamSource) })
-    player.poster(content?.posterImageUrl || '')
-    playerRef.current = player
-
-    const handleEnded = () => {
-      triggerAutoNext()
-    }
-
-    player.on('ended', handleEnded)
-
-    return () => {
-      player.off('ended', handleEnded)
-      player.dispose()
-      playerRef.current = null
-    }
-  }, [streamSource, canPlayCurrent, triggerAutoNext, content])
+  const handleVideoError = useCallback(() => {
+    setStreamError('Unable to load video stream right now. Please try again later.')
+  }, [])
 
   const handleSeasonChange = (seasonNumber: number) => {
     const season = orderedSeasons.find((entry) => entry.seasonNumber === seasonNumber)
@@ -454,66 +427,73 @@ const Watch: React.FC = () => {
 
       <section className={styles.playerSection}>
         <div className={styles.playerShell}>
-          {canPlayCurrent && streamSource ? (
-            <div className={styles.videoWrapper}>
-              <div data-vjs-player className={styles.videoContainer}>
-                <video
-                  ref={videoNodeRef}
-                  className="video-js vjs-big-play-centered vjs-default-skin"
-                  playsInline
-                  controls
-                  preload="auto"
-                />
-              </div>
+          <div className={styles.videoWrapper}>
+            <div data-vjs-player className={styles.videoContainer}>
+              <video
+                key={videoRefreshKey}
+                className={styles.videoElement}
+                playsInline
+                controls
+                preload="metadata"
+                poster={videoPoster}
+                onEnded={handleVideoEnded}
+                onError={handleVideoError}
+              >
+                {resolvedStreamSource && (
+                  <source src={resolvedStreamSource} type={detectMimeType(resolvedStreamSource)} />
+                )}
+              </video>
             </div>
-          ) : (
-            <div className={styles.playerOverlay}>
-              <div className={styles.lockedPanel}>
-                <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} />
-                <h2 className={styles.lockedTitle}>Unlock to watch this title</h2>
-                <p style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
-                  Purchase <strong>{content.title}</strong>{' '}
-                  {isSeries && activeEpisode ? `to watch S${activeSeason}E${activeEpisode.episodeNumber}` : 'to start streaming in full HD.'}
-                </p>
-                <div className={styles.lockedPrice}>{formatCurrency(content.priceInRwf || 0)}</div>
-                <div className={styles.lockedActions}>
-                  <button
-                    type="button"
-                    className={`${styles.ctaButton} ${styles.primaryCta}`}
-                    onClick={handlePurchase}
-                    disabled={unlockButtonDisabled}
-                  >
-                    {purchasing ? 'Processing...' : (
-                      <>
-                        <FiUnlock size={18} /> Unlock with Wallet
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.ctaButton} ${styles.secondaryCta}`}
-                    onClick={() => navigate(`/content/${resolveContentIdentifier(content)}`)}
-                  >
-                    <FiPlay size={16} /> View Details
-                  </button>
-                  {insufficientFunds && (
+
+            {(!canPlayCurrent || !streamSource) && (
+              <div className={styles.playerOverlay}>
+                <div className={styles.lockedPanel}>
+                  <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} />
+                  <h2 className={styles.lockedTitle}>Unlock to watch this title</h2>
+                  <p style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
+                    Purchase <strong>{content.title}</strong>{' '}
+                    {isSeries && activeEpisode ? `to watch S${activeSeason}E${activeEpisode.episodeNumber}` : 'to start streaming in full HD.'}
+                  </p>
+                  <div className={styles.lockedPrice}>{formatCurrency(content.priceInRwf || 0)}</div>
+                  <div className={styles.lockedActions}>
+                    <button
+                      type="button"
+                      className={`${styles.ctaButton} ${styles.primaryCta}`}
+                      onClick={handlePurchase}
+                      disabled={unlockButtonDisabled}
+                    >
+                      {purchasing ? 'Processing...' : (
+                        <>
+                          <FiUnlock size={18} /> Unlock with Wallet
+                        </>
+                      )}
+                    </button>
                     <button
                       type="button"
                       className={`${styles.ctaButton} ${styles.secondaryCta}`}
-                      onClick={() => navigate('/wallet')}
+                      onClick={() => navigate(`/content/${resolveContentIdentifier(content)}`)}
                     >
-                      Top Up Wallet
+                      <FiPlay size={16} /> View Details
                     </button>
+                    {insufficientFunds && (
+                      <button
+                        type="button"
+                        className={`${styles.ctaButton} ${styles.secondaryCta}`}
+                        onClick={() => navigate('/wallet')}
+                      >
+                        Top Up Wallet
+                      </button>
+                    )}
+                  </div>
+                  {wallet && (
+                    <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
+                      Wallet balance: {formatCurrency(wallet.balance)}
+                    </p>
                   )}
                 </div>
-                {wallet && (
-                  <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
-                    Wallet balance: {formatCurrency(wallet.balance)}
-                  </p>
-                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {streamLoading && (
             <div className={styles.playerOverlay}>

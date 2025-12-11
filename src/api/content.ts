@@ -52,6 +52,13 @@ export const contentAPI = {
   getStreamUrl: (contentId: string, params?: { episodeId?: string; seasonNumber?: number; episodeNumber?: number }) =>
     api.get(`/content/${contentId}/watch`, params ? { params } : undefined),
 
+  // Get secure playback URL for a specific episode inside a series
+  getEpisodeStreamUrl: (
+    seriesId: string,
+    episodeId: string,
+    params?: { seasonNumber?: number; episodeNumber?: number }
+  ) => api.get(`/content/series/${seriesId}/episodes/${episodeId}/watch`, params ? { params } : undefined),
+
   // Search content (public)
   searchContent: (query: string, page: number = 1, limit: number = 10) =>
     api.get('/content/search', { params: { q: query, page, limit } }),
