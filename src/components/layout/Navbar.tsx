@@ -9,8 +9,7 @@ import {
   FiMenu,
   FiX,
   FiDollarSign,
-  FiBookOpen,
-  FiChevronRight
+  FiBookOpen
 } from 'react-icons/fi'
 import { getInitials, formatCurrency } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
@@ -127,6 +126,15 @@ const Navbar: React.FC = () => {
               </button>
             )}
 
+            <button
+              className={styles.libraryBadge}
+              onClick={() => navigate('/my-library')}
+              title="My Library"
+            >
+              <FiBookOpen />
+              <span className={styles.libraryCount}>{purchasedCount}</span>
+            </button>
+
             <button className={styles.actionButton}>
               <FiBell />
               <span className={styles.badge}>3</span>
@@ -141,89 +149,35 @@ const Navbar: React.FC = () => {
               </button>
 
               {isProfileOpen && (
-                <div className={styles.dropdown}>
-                  <div className={styles.dropdownHeader}>
-                    <div>
-                      <div className={styles.dropdownName}>{user?.username}</div>
-                      <div className={styles.dropdownEmail}>{user?.email || 'No email added'}</div>
-                    </div>
-                    <div className={styles.dropdownMeta}>
-                      <span>{user?.location === 'international' ? 'International' : 'Rwanda'} member</span>
-                      {user?.createdAt && (
-                        <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className={styles.dropdownStats}>
-                    <div className={styles.dropdownStat}>
-                      <p>Library</p>
-                      <strong>{purchasedCount}</strong>
-                    </div>
-                    <div className={styles.dropdownStat}>
-                      <p>Wallet</p>
-                      <strong>{walletBalance ? formatCurrency(walletBalance.balance) : '—'}</strong>
-                    </div>
-                  </div>
-                  <div className={styles.dropdownSection}>
-                    <p className={styles.dropdownLabel}>Library & Profile</p>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => handleProfileNavigation('/my-library')}
-                    >
-                      <FiBookOpen />
-                      <div className={styles.dropdownItemText}>
-                        <span>My Library</span>
-                        <small>Continue watching & purchases</small>
-                      </div>
-                      <FiChevronRight className={styles.dropdownCaret} />
-                    </button>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => handleProfileNavigation('/profile')}
-                    >
-                      <FiUser />
-                      <div className={styles.dropdownItemText}>
-                        <span>Profile Overview</span>
-                        <small>Identity & account info</small>
-                      </div>
-                      <FiChevronRight className={styles.dropdownCaret} />
-                    </button>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => handleProfileNavigation('/profile#settings')}
-                    >
-                      <FiSettings />
-                      <div className={styles.dropdownItemText}>
-                        <span>Account Settings</span>
-                        <small>Preferences & security</small>
-                      </div>
-                      <FiChevronRight className={styles.dropdownCaret} />
-                    </button>
-                  </div>
-                  <div className={styles.dropdownSection}>
-                    <p className={styles.dropdownLabel}>Billing & Session</p>
-                    <button
-                      className={styles.dropdownItem}
-                      onClick={() => handleProfileNavigation('/wallet')}
-                    >
-                      <FiDollarSign />
-                      <div className={styles.dropdownItemText}>
-                        <span>Wallet Dashboard</span>
-                        <small>Top up & transactions</small>
-                      </div>
-                      <FiChevronRight className={styles.dropdownCaret} />
-                    </button>
-                    <button
-                      className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
-                      onClick={handleLogout}
-                    >
-                      <FiLogOut />
-                      <div className={styles.dropdownItemText}>
-                        <span>Logout</span>
-                        <small>Return to guest view</small>
-                      </div>
-                    </button>
-                  </div>
+                <div className={`${styles.dropdown} ${styles.simpleDropdown}`}>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => handleProfileNavigation('/profile')}
+                  >
+                    <FiUser />
+                    <span>My Profile</span>
+                  </button>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => handleProfileNavigation('/my-library')}
+                  >
+                    <FiBookOpen />
+                    <span>My Library</span>
+                  </button>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => handleProfileNavigation('/profile#settings')}
+                  >
+                    <FiSettings />
+                    <span>Settings</span>
+                  </button>
+                  <button
+                    className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                    onClick={handleLogout}
+                  >
+                    <FiLogOut />
+                    <span>Logout</span>
+                  </button>
                 </div>
               )}
             </div>

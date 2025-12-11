@@ -7,19 +7,20 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.5rem;
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: var(--text-white);
   font-size: var(--fs-base);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .trigger:hover {
-  border-color: var(--primary);
-  background: var(--hover-bg);
+  border-color: rgba(255, 215, 0, 0.6);
+  background: rgba(8, 8, 8, 0.95);
 }
 
 .icon {
@@ -35,14 +36,15 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  min-width: 200px;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  min-width: 220px;
+  background: rgba(5, 5, 5, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
   z-index: 100;
   animation: slideDown 0.2s ease;
   overflow: hidden;
+  backdrop-filter: blur(12px);
 }
 
 @keyframes slideDown {
@@ -56,12 +58,13 @@
   }
 }
 
+
 .option {
   width: 100%;
   padding: 0.875rem 1.25rem;
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-gray, #b3b3b3);
   font-size: var(--fs-base);
   text-align: left;
   cursor: pointer;
@@ -69,8 +72,8 @@
 }
 
 .option:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-white);
 }
 
 .option.active {
