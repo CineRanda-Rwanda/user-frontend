@@ -1,12 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, useRef } from 'react'
 import { toast } from 'react-toastify'
 import { notificationsAPI } from '@/api/notifications'
 import { NotificationsEnvelope, NotificationsQuery, UserNotification } from '@/types/notification'
 import { DEFAULT_LIMIT } from '@/utils/constants'
 import { isNotificationUnread } from '@/utils/notifications'
 import { useAuth } from './AuthContext'
-
-const POLLING_INTERVAL_MS = 30000
 
 interface NotificationsContextValue {
   notifications: UserNotification[]
@@ -29,13 +27,26 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const inFlightRef = useRef(false)
+  const lastFetchAtRef = useRef(0)
 
-  const fetchNotifications = useCallback(async (params?: NotificationsQuery, options?: { silent?: boolean }) => {
+  const fetchNotifications = useCallback(async (params?: NotificationsQuery, options?: { silent?: boolean; force?: boolean }) => {
     if (!isAuthenticated) {
       setNotifications([])
       setUnreadCount(0)
       return
     }
+
+    const now = Date.now()
+    // Throttle bursts: skip if last fetch < 2s and not forced
+    if (!options?.force && now - lastFetchAtRef.current < 2000) {
+      return
+    }
+    if (inFlightRef.current) {
+      return
+    }
+    inFlightRef.current = true
+    lastFetchAtRef.current = now
 
     const shouldToggleLoading = !options?.silent
     if (shouldToggleLoading) {
@@ -60,6 +71,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       console.error('Failed to load notifications:', err)
       setError('Unable to load notifications right now.')
     } finally {
+      inFlightRef.current = false
       if (shouldToggleLoading) {
         setLoading(false)
       }
@@ -75,34 +87,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   }, [isAuthenticated, fetchNotifications])
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return
-    }
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        fetchNotifications(undefined, { silent: true })
-      }
-    }
-
-    const handleWindowFocus = () => {
-      fetchNotifications(undefined, { silent: true })
-    }
-
-    const intervalId = window.setInterval(() => {
-      fetchNotifications(undefined, { silent: true })
-    }, POLLING_INTERVAL_MS)
-
-    window.addEventListener('focus', handleWindowFocus)
-    document.addEventListener('visibilitychange', handleVisibility)
-
-    return () => {
-      window.clearInterval(intervalId)
-      window.removeEventListener('focus', handleWindowFocus)
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
-  }, [isAuthenticated, fetchNotifications])
+  // No polling or focus listeners per request; rely on explicit refresh/useEffect above
 
   const markAsRead = useCallback(async (notificationId: string) => {
     if (!notificationId) return

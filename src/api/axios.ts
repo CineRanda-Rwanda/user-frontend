@@ -24,6 +24,7 @@ api.interceptors.request.use(
 )
 
 // Response interceptor - Handle errors and token refresh
+let refreshing: Promise<{ token: string; refreshToken?: string }> | null = null
 api.interceptors.response.use(
   (response) => {
     // Debug successful responses
@@ -40,27 +41,41 @@ api.interceptors.response.use(
       originalRequest._retry = true
 
       try {
+        const existing = refreshing
+        if (existing) {
+          const res = await existing
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${res.token}`
+          }
+          return api(originalRequest)
+        }
+
         const refreshToken = localStorage.getItem('refreshToken')
-        if (refreshToken) {
+        if (!refreshToken) throw new Error('Missing refresh token')
+
+        refreshing = (async () => {
           const { data } = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}/auth/refresh-token`,
             { refreshToken }
           )
-          
-          const newToken = data.data?.token || data.token
-          const newRefreshToken = data.data?.refreshToken || data.refreshToken
-          
+          const newToken: string = (data as any).data?.token || (data as any).token
+          const newRefreshToken: string | undefined = (data as any).data?.refreshToken || (data as any).refreshToken
           localStorage.setItem('accessToken', newToken)
           if (newRefreshToken) {
             localStorage.setItem('refreshToken', newRefreshToken)
           }
+          return { token: newToken, refreshToken: newRefreshToken }
+        })()
 
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`
-          }
-          return api(originalRequest)
+        const res = await refreshing
+        refreshing = null
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${res.token}`
         }
+        return api(originalRequest)
       } catch (refreshError) {
+        refreshing = null
         // Refresh failed - clear tokens and redirect to login
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')

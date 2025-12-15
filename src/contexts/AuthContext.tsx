@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authAPI } from '@/api/auth'
 import { userAPI } from '@/api/user'
@@ -32,13 +32,16 @@ type NormalizedAuthPayload = {
 
 const normalizeAuthPayload = (raw: AuthResponse): NormalizedAuthPayload => {
   const normalizedUser = ((raw as any).user || raw?.data?.user) as User | undefined
+  const token = (raw as any)?.token || (raw as any)?.data?.token
+  const refreshToken = (raw as any)?.refreshToken || (raw as any)?.data?.refreshToken
+  const message = (raw as any)?.message || (raw as any)?.data?.message
 
   return {
     user: normalizedUser,
-    token: raw?.token,
-    refreshToken: raw?.refreshToken,
+    token,
+    refreshToken,
     welcomeBonus: raw?.data?.welcomeBonus,
-    message: raw?.message
+    message
   }
 }
 
@@ -47,21 +50,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  const persistSession = (payload: NormalizedAuthPayload) => {
-    const sessionUser = payload.user
-    const token = payload.token
+  const logout = useCallback(
+    (options?: { silent?: boolean }) => {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+    setUser(null)
+      if (!options?.silent) {
+        toast.info('Logged out successfully')
+      }
+      navigate('/', { replace: true })
+    },
+    [navigate]
+  )
 
-    if (!sessionUser || !token) {
-      throw new Error('Invalid response from server')
-    }
-
+  const persistTokens = useCallback((token?: string, refreshToken?: string) => {
+    if (!token) return
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
-    if (payload.refreshToken) {
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, payload.refreshToken)
+    if (refreshToken) {
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
     }
+  }, [])
 
-    setUser(sessionUser as any)
-  }
+  const persistSession = useCallback(
+    (payload: NormalizedAuthPayload) => {
+      const sessionUser = payload.user
+      const token = payload.token
+
+      if (!sessionUser || !token) {
+        throw new Error('Invalid response from server')
+      }
+
+      persistTokens(token, payload.refreshToken)
+      setUser(sessionUser as any)
+    },
+    [persistTokens]
+  )
+
 
   // Load user on mount
   useEffect(() => {
@@ -130,14 +154,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast.error(message)
       throw error
     }
-  }
-
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
-    setUser(null)
-    toast.info('Logged out successfully')
-    navigate('/', { replace: true })
   }
 
   const refreshUser = async () => {
