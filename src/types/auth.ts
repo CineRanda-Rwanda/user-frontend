@@ -62,14 +62,17 @@ export interface AuthUser {
   updatedAt: string
 }
 
+export interface AuthResponseData {
+  user: AuthUser
+  welcomeBonus?: number
+}
+
 export interface AuthResponse {
   status: string
   token: string
   refreshToken?: string
   user?: AuthUser
-  data?: {
-    user: AuthUser
-  }
+  data?: AuthResponseData
   message?: string
 }
 
