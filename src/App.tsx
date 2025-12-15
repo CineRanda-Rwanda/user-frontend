@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { NotificationsProvider } from './contexts/NotificationsContext'
 import Loader from './components/common/Loader'
 import ScrollToTop from './components/common/ScrollToTop'
 
@@ -17,6 +18,7 @@ const Search = lazy(() => import('./pages/Search'))
 const MyLibrary = lazy(() => import('./pages/MyLibrary'))
 const Wallet = lazy(() => import('./pages/Wallet'))
 const Profile = lazy(() => import('./pages/Profile'))
+const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const TrailerPlayer = lazy(() => import('./pages/TrailerPlayer'))
 
@@ -164,6 +166,14 @@ const AppRoutes = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
@@ -190,7 +200,9 @@ const AppRoutes = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <NotificationsProvider>
+        <AppRoutes />
+      </NotificationsProvider>
     </AuthProvider>
   )
 }

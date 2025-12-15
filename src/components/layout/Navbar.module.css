@@ -95,6 +95,12 @@
   gap: var(--spacing-md);
 }
 
+.notificationWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .actionButton {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -131,6 +137,7 @@
   text-align: center;
 }
 
+
 .walletButton {
   display: flex;
   align-items: center;
@@ -146,38 +153,35 @@
   font-weight: var(--fw-semibold);
 }
 
-.libraryBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-white);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-}
-
-.libraryBadge:hover {
-  border-color: var(--primary-yellow);
+.libraryButton {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(255, 255, 255, 0.05));
+  border-color: rgba(255, 215, 0, 0.45);
   color: var(--primary-yellow);
 }
 
-.libraryCount {
-  min-width: 26px;
-  text-align: center;
+.libraryButton:hover {
+  border-color: rgba(255, 215, 0, 0.8);
+  color: var(--primary-yellow-light);
+  box-shadow: 0 12px 30px rgba(255, 215, 0, 0.2);
 }
 
 .walletButton:hover {
   background: linear-gradient(115deg, rgba(255, 215, 0, 0.2), rgba(255, 255, 255, 0.08));
 }
 
-.walletBalance {
+.walletPrefix {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary-yellow-light);
+}
+
+.walletAmount {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
   white-space: nowrap;
 }
+
 
 .authButtons {
   display: flex;

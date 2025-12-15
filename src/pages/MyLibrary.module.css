@@ -6,6 +6,34 @@
   font-family: 'Inter', 'Poppins', system-ui;
 }
 
+.pageToolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  border-color: rgba(245, 197, 24, 0.8);
+  color: #f5c518;
+  transform: translateX(-2px);
+}
+
 .hero {
   display: flex;
   flex-wrap: wrap;
@@ -243,23 +271,35 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, min(100%, 280px)));
+  gap: 1.75rem;
+  justify-content: center;
+}
+
+.gridSingle {
+  grid-template-columns: minmax(280px, 360px);
+}
+
+.gridSingle .card {
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 .card {
   border-radius: 28px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(6, 6, 6, 0.9));
   position: relative;
   cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
 }
 
 .card:hover {
   transform: translateY(-8px);
   border-color: rgba(245, 197, 24, 0.7);
+  box-shadow: 0 30px 60px rgba(245, 197, 24, 0.15);
 }
 
 .cardPoster {

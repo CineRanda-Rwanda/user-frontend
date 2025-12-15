@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiStar, FiPlay, FiFilm, FiTv, FiLayers } from 'react-icons/fi';
+import { FiStar, FiPlay, FiFilm, FiTv, FiLayers, FiArrowLeft } from 'react-icons/fi';
 
 import { contentAPI } from '../api/content';
 import { userAPI } from '../api/user';
@@ -226,6 +226,11 @@ const MyLibrary: React.FC = () => {
       ? purchasedContent
       : purchasedContent.filter((c) => c.contentType === filter);
 
+  const gridClassNames = [styles.grid];
+  if (filteredContent.length === 1) {
+    gridClassNames.push(styles.gridSingle);
+  }
+
   const movieCount = purchasedContent.filter((c) => c.contentType === 'Movie').length;
   const seriesCount = purchasedContent.filter((c) => c.contentType === 'Series').length;
   const progressHours = continueWatching.reduce((total, item) => total + (item.watchedDuration || 0), 0) / 3600;
@@ -246,6 +251,14 @@ const MyLibrary: React.FC = () => {
   const getProgressPercentage = (item: WatchHistoryItem) => {
     if (!item.totalDuration) return 0;
     return Math.min(100, Math.round((item.watchedDuration / item.totalDuration) * 100));
+  };
+
+  const handleGoBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+      return;
+    }
+    navigate('/browse');
   };
 
   const handleQuickPlay = (event: React.MouseEvent, content: Content) => {
@@ -273,6 +286,12 @@ const MyLibrary: React.FC = () => {
   return (
     <Layout>
       <div className={styles.page}>
+        <div className={styles.pageToolbar}>
+          <button type="button" className={styles.backButton} onClick={handleGoBack}>
+            <FiArrowLeft />
+            <span>Back</span>
+          </button>
+        </div>
         <section className={styles.hero}>
           <div className={styles.heroText}>
             <p className={styles.heroEyebrow}>Your Collection</p>
@@ -391,7 +410,7 @@ const MyLibrary: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className={styles.grid}>
+            <div className={gridClassNames.join(' ')}>
               {filteredContent.map((content) => {
                 const partialSeriesAccess = episodeAccessLookup[content._id];
                 const showPartialBadge =

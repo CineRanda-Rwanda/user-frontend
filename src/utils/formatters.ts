@@ -6,7 +6,8 @@ export const formatCurrency = (amount: number, displayCode: string = 'FRW'): str
     minimumFractionDigits: 0,
   }).format(amount)
 
-  return formatted.replace(/RWF|RF/, displayCode)
+  const sanitized = formatted.replace(/[$]/g, '')
+  return sanitized.replace(/RWF|RF/, displayCode).trim()
 }
 
 // Format duration (seconds to HH:MM:SS or MM:SS)

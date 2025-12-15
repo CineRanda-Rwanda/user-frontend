@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/common/Loader';
+import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import {
   getWalletBalance,
   getWalletTransactions,
@@ -20,6 +22,15 @@ const Wallet = () => {
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
   const [isTopUpLoading, setIsTopUpLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+      return;
+    }
+    navigate('/browse');
+  };
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -88,6 +99,12 @@ const Wallet = () => {
   return (
     <Layout>
       <section className={styles.page}>
+        <div className={styles.pageToolbar}>
+          <button type="button" className={styles.backButton} onClick={handleGoBack}>
+            <FiArrowLeft />
+            <span>Back</span>
+          </button>
+        </div>
         <div className={styles.hero}>
           <div className={styles.balanceCard}>
             <p className={styles.balanceLabel}>Available Balance</p>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNotifications } from '@/contexts/NotificationsContext'
 import {
   FiBell,
   FiUser,
@@ -14,15 +15,19 @@ import {
 import { getInitials, formatCurrency } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
+import NotificationOverlay from '@/components/notifications/NotificationOverlay'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth()
+  const { unreadCount } = useNotifications()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [walletBalance, setWalletBalance] = useState<{ balance: number; bonusBalance?: number } | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const notificationRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -33,6 +38,27 @@ const Navbar: React.FC = () => {
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsNotificationsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   useEffect(() => {
@@ -119,26 +145,47 @@ const Navbar: React.FC = () => {
                 onClick={() => navigate('/wallet')}
                 title="Wallet"
               >
-                <FiDollarSign />
-                <span className={styles.walletBalance}>
-                  {formatCurrency(walletBalance.balance)}
-                </span>
+                <span className={styles.walletPrefix}>FRW</span>
+                  <span className={styles.walletAmount}>
+                    {new Intl.NumberFormat('en-RW', {
+                      minimumFractionDigits: 0
+                    }).format(walletBalance.balance)}
+                  </span>
               </button>
             )}
 
             <button
-              className={styles.libraryBadge}
+              className={`${styles.actionButton} ${styles.libraryButton}`}
               onClick={() => navigate('/my-library')}
-              title="My Library"
+              title={`My Library${purchasedCount ? ` (${purchasedCount})` : ''}`}
             >
               <FiBookOpen />
-              <span className={styles.libraryCount}>{purchasedCount}</span>
             </button>
 
-            <button className={styles.actionButton}>
-              <FiBell />
-              <span className={styles.badge}>3</span>
-            </button>
+            <div className={styles.notificationWrapper} ref={notificationRef}>
+              <button
+                className={styles.actionButton}
+                onClick={() => {
+                  setIsNotificationsOpen((prev) => !prev)
+                  setIsProfileOpen(false)
+                }}
+                title="Notifications"
+              >
+                <FiBell />
+                {unreadCount > 0 && (
+                  <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
+                )}
+              </button>
+              {isNotificationsOpen && (
+                <NotificationOverlay
+                  onViewAll={() => {
+                    setIsNotificationsOpen(false)
+                    navigate('/notifications')
+                  }}
+                  onClose={() => setIsNotificationsOpen(false)}
+                />
+              )}
+            </div>
 
             <div style={{ position: 'relative' }} ref={dropdownRef}>
               <button
@@ -229,6 +276,9 @@ const Navbar: React.FC = () => {
             </Link>
             {isAuthenticated ? (
               <>
+                <Link to="/notifications" onClick={() => setIsMobileMenuOpen(false)}>
+                  Notifications
+                </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                   Profile
                 </Link>
