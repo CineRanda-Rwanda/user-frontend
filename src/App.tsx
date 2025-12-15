@@ -21,6 +21,10 @@ const Profile = lazy(() => import('./pages/Profile'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const TrailerPlayer = lazy(() => import('./pages/TrailerPlayer'))
+const HelpCenter = lazy(() => import('./pages/HelpCenter'))
+const ContactPage = lazy(() => import('./pages/Contact'))
+const FAQPage = lazy(() => import('./pages/FAQ'))
+const TermsPage = lazy(() => import('./pages/Terms'))
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -172,6 +176,38 @@ const AppRoutes = () => {
                 <ProtectedRoute>
                   <NotificationsPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help"
+              element={
+                <PublicRoute>
+                  <HelpCenter />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <PublicRoute>
+                  <ContactPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/faq"
+              element={
+                <PublicRoute>
+                  <FAQPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/terms"
+              element={
+                <PublicRoute>
+                  <TermsPage />
+                </PublicRoute>
               }
             />
 

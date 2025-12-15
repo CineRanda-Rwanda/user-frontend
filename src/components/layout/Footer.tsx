@@ -3,6 +3,36 @@ import { Link } from 'react-router-dom'
 import { FiFacebook, FiTwitter, FiInstagram, FiYoutube } from 'react-icons/fi'
 import styles from './Footer.module.css'
 
+const socialLinks = [
+  {
+    label: 'Facebook',
+    icon: <FiFacebook />,
+    href: import.meta.env.VITE_SOCIAL_FACEBOOK_URL || 'https://facebook.com'
+  },
+  {
+    label: 'Twitter',
+    icon: <FiTwitter />,
+    href: import.meta.env.VITE_SOCIAL_TWITTER_URL || 'https://twitter.com'
+  },
+  {
+    label: 'Instagram',
+    icon: <FiInstagram />,
+    href: import.meta.env.VITE_SOCIAL_INSTAGRAM_URL || 'https://instagram.com'
+  },
+  {
+    label: 'YouTube',
+    icon: <FiYoutube />,
+    href: import.meta.env.VITE_SOCIAL_YOUTUBE_URL || 'https://youtube.com'
+  }
+].filter((link) => !!link.href)
+
+const supportLinks = [
+  { label: 'Help Center', to: '/help' },
+  { label: 'FAQ', to: '/faq' },
+  { label: 'Contact Us', to: '/contact' },
+  { label: 'Terms of Service', to: '/terms' }
+]
+
 const Footer: React.FC = () => {
   return (
     <footer className={styles.footer}>
@@ -13,18 +43,18 @@ const Footer: React.FC = () => {
             Your premier destination for streaming movies and TV series in Rwanda.
           </p>
           <div className={styles.socialLinks}>
-            <a href="https://facebook.com" className={styles.socialLink} target="_blank" rel="noopener noreferrer">
-              <FiFacebook />
-            </a>
-            <a href="https://twitter.com" className={styles.socialLink} target="_blank" rel="noopener noreferrer">
-              <FiTwitter />
-            </a>
-            <a href="https://instagram.com" className={styles.socialLink} target="_blank" rel="noopener noreferrer">
-              <FiInstagram />
-            </a>
-            <a href="https://youtube.com" className={styles.socialLink} target="_blank" rel="noopener noreferrer">
-              <FiYoutube />
-            </a>
+            {socialLinks.map((social) => (
+              <a
+                key={social.label}
+                href={social.href}
+                className={styles.socialLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+              >
+                {social.icon}
+              </a>
+            ))}
           </div>
         </div>
 
@@ -41,10 +71,11 @@ const Footer: React.FC = () => {
         <div className={styles.footerSection}>
           <h3>Support</h3>
           <div className={styles.footerLinks}>
-            <Link to="/help">Help Center</Link>
-            <Link to="/contact">Contact Us</Link>
-            <Link to="/faq">FAQ</Link>
-            <Link to="/terms">Terms of Service</Link>
+            {supportLinks.map((link) => (
+              <Link key={link.to} to={link.to}>
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
 

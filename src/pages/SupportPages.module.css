@@ -1,0 +1,215 @@
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--spacing-4xl) var(--spacing-xl) var(--spacing-5xl);
+}
+
+.hero {
+  margin-bottom: var(--spacing-3xl);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  background: #0f0f14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+.sectionLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: var(--fs-xs);
+  color: var(--text-gray);
+  margin-bottom: var(--spacing-sm);
+  display: inline-block;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  margin-bottom: var(--spacing-sm);
+}
+
+.hero p {
+  color: var(--text-gray);
+  font-size: var(--fs-lg);
+  max-width: 720px;
+}
+
+.section {
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0c0c12;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xl);
+}
+
+.sectionHeader span {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: var(--fs-xs);
+  color: var(--text-gray);
+}
+
+.sectionHeader h2 {
+  font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+  margin: 0;
+}
+
+.sectionHeader p {
+  color: var(--text-gray);
+  max-width: 640px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.card {
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.card h3 {
+  font-size: var(--fs-xl);
+  margin: 0;
+}
+
+.card p {
+  color: var(--text-gray);
+  flex: 1;
+}
+
+.card a {
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  color: var(--primary-yellow);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.listItem h4 {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--spacing-xxs);
+}
+
+.listItem p {
+  color: var(--text-gray);
+}
+
+
+.tutorialWrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.videoFrame {
+  position: relative;
+  padding-top: 56.25%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.videoFrame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.stepList {
+  list-style: decimal;
+  padding-left: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  color: var(--text-gray);
+}
+
+.contactCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.contactLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: var(--fs-xs);
+  color: var(--text-gray);
+}
+
+.contactValue {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  color: var(--text-white);
+  text-decoration: none;
+}
+
+.contactValue:hover {
+  color: var(--primary-yellow);
+}
+
+.policyList {
+  list-style: decimal;
+  padding-left: var(--spacing-2xl);
+  color: var(--text-gray);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: transparent;
+  color: var(--text-gray);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-bottom: var(--spacing-lg);
+}
+
+.backButton:hover {
+  color: var(--primary-yellow);
+  border-color: var(--primary-yellow);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: var(--spacing-3xl) var(--spacing-md);
+  }
+  .section {
+    padding: var(--spacing-xl);
+  }
+
+  .hero {
+    padding: var(--spacing-xl);
+  }
+}
