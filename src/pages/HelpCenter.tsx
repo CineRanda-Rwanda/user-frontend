@@ -64,14 +64,14 @@ const HelpCenter: React.FC = () => {
       <section id="tutorial" className={styles.section}>
         <div className={styles.sectionHeader}>
           <span>Walkthrough</span>
-          <h2>How to use Cineranda</h2>
+          <h2>How to use CinéRanda</h2>
           <p>Follow the step-by-step text guide or play the video tutorial—whichever fits your pace.</p>
         </div>
         <div className={styles.tutorialWrap}>
           <div className={styles.videoFrame}>
             <iframe
               src={tutorialVideoUrl}
-              title="Cineranda onboarding tutorial"
+              title="CinéRanda onboarding tutorial"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />

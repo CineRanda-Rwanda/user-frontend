@@ -36,7 +36,7 @@ const Terms: React.FC = () => {
         </button>
         <p className={styles.sectionLabel}>Legal</p>
         <h1>Terms of Service</h1>
-        <p>Clear, professional terms that spell out what you can expect from Cineranda.</p>
+        <p>Clear, professional terms that spell out what you can expect from CinéRanda.</p>
       </header>
 
       <section className={styles.section}>
@@ -56,7 +56,7 @@ const Terms: React.FC = () => {
 
       <section className={styles.section}>
         <p>
-          By continuing to use Cineranda you confirm that you agree to these terms. For legal questions please reach out via the{' '}
+          By continuing to use CinéRanda you confirm that you agree to these terms. For legal questions please reach out via the{' '}
           <a href="/contact">Contact page</a>.
         </p>
       </section>

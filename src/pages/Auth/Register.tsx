@@ -99,7 +99,7 @@ const Register: React.FC = () => {
       <div className={styles['login-box']}>
         <div className={styles.logo}>
           <span className={styles['logo-icon']}>🎬</span>
-          <h1 className={styles['logo-text']}>Cineranda</h1>
+          <h1 className={styles['logo-text']}>CinéRanda</h1>
         </div>
 
         <h2 className={styles.title}>Create Account</h2>

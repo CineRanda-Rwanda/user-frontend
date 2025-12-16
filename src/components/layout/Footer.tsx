@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
         <div className={styles.footerSection}>
-          <h3>Cineranda</h3>
+          <h3>CinéRanda</h3>
           <p style={{ color: 'var(--text-gray)', marginTop: 'var(--spacing-sm)' }}>
             Your premier destination for streaming movies and TV series in Rwanda.
           </p>
@@ -90,7 +90,7 @@ const Footer: React.FC = () => {
       </div>
 
       <div className={styles.footerBottom}>
-        <p>&copy; {new Date().getFullYear()} Cineranda. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} CinéRanda. All rights reserved.</p>
       </div>
     </footer>
   )

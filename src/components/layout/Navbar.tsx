@@ -9,10 +9,9 @@ import {
   FiLogOut,
   FiMenu,
   FiX,
-  FiDollarSign,
   FiBookOpen
 } from 'react-icons/fi'
-import { getInitials, formatCurrency } from '@/utils/formatters'
+import { getInitials } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
@@ -87,17 +86,22 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }
 
-  const purchasedCount = user?.purchasedContent?.length || 0
-
   return (
     <nav className={styles.navbar}>
-      {/* Logo */}
+      <button
+        className={styles.mobileMenuButton}
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle navigation menu"
+        aria-expanded={isMobileMenuOpen}
+      >
+        {isMobileMenuOpen ? <FiX /> : <FiMenu />}
+      </button>
+
       <Link to="/" className={styles.logo}>
         <span className={styles.logoIcon}>🎬</span>
-        <span className={styles.logoText}>Cineranda</span>
+        <span className={styles.logoText}>CinéRanda</span>
       </Link>
 
-      {/* Desktop Navigation */}
       <div className={styles.nav}>
         <NavLink
           to="/"
@@ -125,17 +129,16 @@ const Navbar: React.FC = () => {
         </NavLink>
       </div>
 
-      {/* Search Bar */}
       <div className={styles.searchContainer}>
         <GlobalSearchBar
           variant="compact"
           className={styles.navbarSearch}
           showHeading={false}
           showFilters={false}
+          placeholder="Search catalog"
         />
       </div>
 
-      {/* Actions */}
       <div className={styles.actions}>
         {isAuthenticated ? (
           <>
@@ -153,14 +156,6 @@ const Navbar: React.FC = () => {
                   </span>
               </button>
             )}
-
-            <button
-              className={`${styles.actionButton} ${styles.libraryButton}`}
-              onClick={() => navigate('/my-library')}
-              title={`My Library${purchasedCount ? ` (${purchasedCount})` : ''}`}
-            >
-              <FiBookOpen />
-            </button>
 
             <div className={styles.notificationWrapper} ref={notificationRef}>
               <button
@@ -240,13 +235,6 @@ const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Mobile Menu Button */}
-        <button
-          className={styles.mobileMenuButton}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <FiX /> : <FiMenu />}
-        </button>
       </div>
 
       {/* Mobile Navigation */}
@@ -255,7 +243,7 @@ const Navbar: React.FC = () => {
           <div className={styles.mobileNavHeader}>
             <Link to="/" className={styles.logo} onClick={() => setIsMobileMenuOpen(false)}>
               <span className={styles.logoIcon}>🎬</span>
-              <span className={styles.logoText}>Cineranda</span>
+              <span className={styles.logoText}>CinéRanda</span>
             </Link>
             <button
               className={styles.mobileMenuButton}
