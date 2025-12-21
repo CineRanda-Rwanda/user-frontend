@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { authAPI } from '@/api/auth'
 import { userAPI } from '@/api/user'
 import { User } from '@/types/user'
-import { LoginRequest, RegisterRequest, VerifyRegistrationRequest, AuthResponse } from '@/types/auth'
+import { LoginRequest, RegisterRequest, VerifyRegistrationRequest, VerifyEmailRequest, AuthResponse } from '@/types/auth'
 import { STORAGE_KEYS } from '@/utils/constants'
 import { toast } from 'react-toastify'
 import { formatCurrency } from '@/utils/formatters'
@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<any>
   verifyRegistration: (payload: VerifyRegistrationRequest) => Promise<void>
+  verifyEmail: (payload: VerifyEmailRequest) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
   updateProfile: (data: Partial<User>) => Promise<void>
@@ -125,11 +126,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (credentials: RegisterRequest) => {
     try {
-      const { data } = await authAPI.register(credentials)
-      
-      // Registration returns verification required message
-      toast.success(data.message || 'Verification code sent!')
-      return data // Return data for next step
+      if (credentials.method === 'phone') {
+        const { data } = await authAPI.registerPhone(credentials)
+        toast.success(data.message || 'We sent you a verification code via SMS.')
+        return data
+      }
+
+      const { data } = await authAPI.registerEmail(credentials)
+      const normalized = normalizeAuthPayload(data)
+      if (normalized.user && normalized.token) {
+        persistSession(normalized)
+        toast.success(normalized.message || 'Account ready! Welcome to Randa Plus.')
+        navigate('/browse')
+      } else {
+        toast.success(data.message || 'Check your email to verify your account.')
+      }
+      return data
     } catch (error: any) {
       const message = error.response?.data?.message || 'Registration failed'
       toast.error(message)
@@ -148,6 +160,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         : undefined
 
       toast.success(normalized.message || bonusMessage || 'Registration completed successfully!')
+      navigate('/browse')
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Verification failed'
+      toast.error(message)
+      throw error
+    }
+  }
+
+  const verifyEmail = async (payload: VerifyEmailRequest) => {
+    try {
+      const { data } = await authAPI.verifyEmail(payload)
+      const normalized = normalizeAuthPayload(data)
+      persistSession(normalized)
+
+      toast.success(normalized.message || 'Email verified! Welcome to Randa Plus.')
       navigate('/browse')
     } catch (error: any) {
       const message = error.response?.data?.message || 'Verification failed'
@@ -184,6 +211,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     register,
     verifyRegistration,
+    verifyEmail,
     logout,
     refreshUser,
     updateProfile

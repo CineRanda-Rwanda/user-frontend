@@ -1,0 +1,23 @@
+<svg width="147" height="38" viewBox="0 0 147 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cineRandaGradient" x1="32" y1="4" x2="147" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="50%" stop-color="#FFAE00" />
+      <stop offset="100%" stop-color="#E50914" />
+    </linearGradient>
+    <linearGradient id="clapperGradient" x1="0" y1="0" x2="0" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3D3D3D" />
+      <stop offset="100%" stop-color="#0F0F0F" />
+    </linearGradient>
+  </defs>
+  <g>
+    <rect x="2" y="6" width="28" height="24" rx="3" fill="#111" stroke="#F5F5F5" stroke-width="2" />
+    <rect x="2" y="2" width="28" height="10" rx="2" fill="url(#clapperGradient)" stroke="#F5F5F5" stroke-width="2" />
+    <path d="M6 4 L10 10" stroke="#F5F5F5" stroke-width="2" />
+    <path d="M14 4 L18 10" stroke="#F5F5F5" stroke-width="2" />
+    <path d="M22 4 L26 10" stroke="#F5F5F5" stroke-width="2" />
+    <circle cx="11" cy="22" r="2" fill="#FFD700" />
+    <circle cx="21" cy="22" r="2" fill="#FFD700" />
+  </g>
+  <text x="38" y="26" font-family="'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="url(#cineRandaGradient)">CinéRanda</text>
+</svg>

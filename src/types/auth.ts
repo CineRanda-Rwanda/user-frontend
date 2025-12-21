@@ -1,13 +1,43 @@
 // Auth types
-export interface LoginRequest {
-  identifier: string // Can be username or phone number
+export type LoginMethod = 'phone' | 'email'
+
+export interface PhoneLoginRequest {
+  method: 'phone'
+  phoneNumber: string
   pin: string
 }
 
-export interface RegisterRequest {
+export interface EmailLoginRequest {
+  method: 'email'
+  email: string
+  password: string
+}
+
+export type LoginRequest = PhoneLoginRequest | EmailLoginRequest
+
+export interface PhoneRegisterRequest {
+  method: 'phone'
   username: string
   phoneNumber: string
   pin: string
+  preferredChannel?: 'sms' | 'whatsapp'
+}
+
+export interface EmailRegisterRequest {
+  method: 'email'
+  username: string
+  email: string
+  password: string
+}
+
+export type RegisterRequest = PhoneRegisterRequest | EmailRegisterRequest
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ResetPasswordRequest {
+  token: string
+  newPassword: string
 }
 
 export interface VerifyRegistrationRequest {
@@ -15,6 +45,12 @@ export interface VerifyRegistrationRequest {
   phoneNumber: string
   pin: string
   verificationCode: string
+}
+
+export interface VerifyEmailRequest {
+  email: string
+  verificationCode: string
+  password: string
 }
 
 export interface WalletTransaction {

@@ -35,6 +35,10 @@
   min-height: 48px;
 }
 
+.input-with-suffix {
+  padding-right: calc(var(--spacing-xl) + 16px);
+}
+
 .input::placeholder {
   color: var(--text-gray-dark);
 }
@@ -60,6 +64,26 @@
   color: var(--text-gray);
   font-size: var(--fs-lg);
   pointer-events: none;
+}
+
+.visibility-toggle {
+  position: absolute;
+  right: var(--spacing-sm);
+  background: none;
+  border: none;
+  color: var(--text-gray);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-base);
+}
+
+.visibility-toggle:hover,
+.visibility-toggle:focus-visible {
+  color: var(--text-white);
 }
 
 .input-icon-clickable {

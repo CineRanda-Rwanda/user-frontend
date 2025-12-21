@@ -15,6 +15,7 @@ import { getInitials } from '@/utils/formatters'
 import { getWalletBalance } from '@/api/wallet'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
+import randaPlusLogo from '@/assets/randa-plus-logo.svg'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
@@ -97,9 +98,8 @@ const Navbar: React.FC = () => {
         {isMobileMenuOpen ? <FiX /> : <FiMenu />}
       </button>
 
-      <Link to="/" className={styles.logo}>
-        <span className={styles.logoIcon}>🎬</span>
-        <span className={styles.logoText}>CinéRanda</span>
+      <Link to="/" className={styles.logo} aria-label="Randa Plus home">
+        <img src={randaPlusLogo} alt="Randa Plus" className={styles.logoImage} />
       </Link>
 
       <div className={styles.nav}>
@@ -241,9 +241,13 @@ const Navbar: React.FC = () => {
       {isMobileMenuOpen && (
         <div className={styles.mobileNav}>
           <div className={styles.mobileNavHeader}>
-            <Link to="/" className={styles.logo} onClick={() => setIsMobileMenuOpen(false)}>
-              <span className={styles.logoIcon}>🎬</span>
-              <span className={styles.logoText}>CinéRanda</span>
+            <Link
+              to="/"
+              className={styles.logo}
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Randa Plus home"
+            >
+              <img src={randaPlusLogo} alt="Randa Plus" className={styles.logoImage} />
             </Link>
             <button
               className={styles.mobileMenuButton}

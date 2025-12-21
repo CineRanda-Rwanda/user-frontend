@@ -9,6 +9,7 @@ import ScrollToTop from './components/common/ScrollToTop'
 // Lazy load pages
 const Login = lazy(() => import('./pages/Auth/Login'))
 const Register = lazy(() => import('./pages/Auth/Register'))
+const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'))
 const Browse = lazy(() => import('./pages/Browse'))
 const Movies = lazy(() => import('./pages/Movies'))
 const Series = lazy(() => import('./pages/Series'))
@@ -67,6 +68,14 @@ const AppRoutes = () => {
               element={
                 <PublicRoute>
                   <Register />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicRoute>
+                  <ResetPassword />
                 </PublicRoute>
               }
             />

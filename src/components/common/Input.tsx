@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes } from 'react'
+import React, { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, useMemo, useState } from 'react'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import styles from './Input.module.css'
 
 interface BaseInputProps {
@@ -8,6 +9,7 @@ interface BaseInputProps {
   required?: boolean
   icon?: React.ReactNode
   onIconClick?: () => void
+  togglePasswordVisibility?: boolean
 }
 
 type InputProps = BaseInputProps & InputHTMLAttributes<HTMLInputElement>
@@ -21,9 +23,22 @@ export const Input: React.FC<InputProps> = ({
   required,
   icon,
   onIconClick,
+  togglePasswordVisibility = false,
   className = '',
+  type = 'text',
   ...props
 }) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const canTogglePassword = togglePasswordVisibility && type === 'password'
+  const inputType = canTogglePassword ? (isPasswordVisible ? 'text' : 'password') : type
+
+  const inputClasses = useMemo(() => {
+    const classes = [styles.input, className]
+    if (error) classes.push(styles['input-error'])
+    if (icon || canTogglePassword) classes.push(styles['input-with-suffix'])
+    return classes.join(' ').trim()
+  }, [className, error, icon, canTogglePassword])
+
   return (
     <div className={styles['input-group']}>
       {label && (
@@ -33,10 +48,7 @@ export const Input: React.FC<InputProps> = ({
         </label>
       )}
       <div className={styles['input-wrapper']}>
-        <input
-          className={`${styles.input} ${error ? styles['input-error'] : ''} ${className}`}
-          {...props}
-        />
+        <input className={inputClasses} type={inputType} {...props} />
         {icon && (
           <span
             className={`${styles['input-icon']} ${onIconClick ? styles['input-icon-clickable'] : ''}`}
@@ -44,6 +56,16 @@ export const Input: React.FC<InputProps> = ({
           >
             {icon}
           </span>
+        )}
+        {canTogglePassword && (
+          <button
+            type="button"
+            className={styles['visibility-toggle']}
+            onClick={() => setIsPasswordVisible((prev) => !prev)}
+            aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+          >
+            {isPasswordVisible ? <FiEyeOff /> : <FiEye />}
+          </button>
         )}
       </div>
       {error && <span className={styles['error-message']}>{error}</span>}
