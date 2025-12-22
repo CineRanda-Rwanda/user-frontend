@@ -7,7 +7,6 @@ import {
   FiUser,
   FiSettings,
   FiLogOut,
-  FiMenu,
   FiX,
   FiBookOpen
 } from 'react-icons/fi'
@@ -72,16 +71,41 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }
 
+  const primaryLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/movies', label: 'Movies' },
+    { path: '/series', label: 'Series' },
+    { path: '/my-library', label: 'My Library' }
+  ]
+
   return (
     <>
+      {isMobileMenuOpen && (
+        <div
+          className={styles.menuBackdrop}
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <nav className={styles.navbar}>
       <button
-        className={styles.mobileMenuButton}
+        className={`${styles.mobileMenuButton} ${
+          isMobileMenuOpen ? styles.menuButtonActive : ''
+        }`}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label="Toggle navigation menu"
         aria-expanded={isMobileMenuOpen}
+        aria-pressed={isMobileMenuOpen}
       >
-        {isMobileMenuOpen ? <FiX /> : <FiMenu />}
+        {isMobileMenuOpen ? (
+          <FiX />
+        ) : (
+          <span className={styles.menuIcon} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        )}
       </button>
 
       <Link to="/" className={styles.logo} aria-label="Randa Plus home">
@@ -89,30 +113,17 @@ const Navbar: React.FC = () => {
       </Link>
 
       <div className={styles.nav}>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
-          }
-        >
-          Home
-        </NavLink>
-        <NavLink
-          to="/movies"
-          className={({ isActive }) =>
-            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
-          }
-        >
-          Movies
-        </NavLink>
-        <NavLink
-          to="/series"
-          className={({ isActive }) =>
-            isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
-          }
-        >
-          Series
-        </NavLink>
+        {primaryLinks.map((link) => (
+          <NavLink
+            key={link.path}
+            to={link.path}
+            className={({ isActive }) =>
+              isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+            }
+          >
+            {link.label}
+          </NavLink>
+        ))}
       </div>
 
       <div className={styles.searchContainer}>
@@ -221,27 +232,20 @@ const Navbar: React.FC = () => {
               <img src={randaPlusLogo} alt="Randa Plus" className={styles.logoImage} />
             </Link>
             <button
-              className={styles.mobileMenuButton}
+              className={`${styles.mobileMenuButton} ${styles.menuButtonActive}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <FiX />
             </button>
           </div>
           <div className={styles.mobileNavLinks}>
-            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
-              Home
-            </Link>
-            <Link to="/movies" onClick={() => setIsMobileMenuOpen(false)}>
-              Movies
-            </Link>
-            <Link to="/series" onClick={() => setIsMobileMenuOpen(false)}>
-              Series
-            </Link>
+            {primaryLinks.map((link) => (
+              <Link key={link.path} to={link.path} onClick={() => setIsMobileMenuOpen(false)}>
+                {link.label}
+              </Link>
+            ))}
             {isAuthenticated ? (
               <>
-                <Link to="/notifications" onClick={() => setIsMobileMenuOpen(false)}>
-                  Notifications
-                </Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                   Profile
                 </Link>
