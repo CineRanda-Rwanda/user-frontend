@@ -30,15 +30,7 @@
   gap: 1rem;
   margin-bottom: 1rem;
   align-items: center;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.controls::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
 }
 
 .clearAllButton {
@@ -117,6 +109,15 @@
 
   .header {
     margin-bottom: 2rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls > * {
+    width: 100%;
   }
 
   .grid {

@@ -38,15 +38,7 @@
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-2xl);
   align-items: center;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.controls::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
 }
 
 .clearAllButton {
@@ -140,6 +132,11 @@
 
   .searchSection {
     margin-bottom: var(--spacing-xl);
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: var(--spacing-md);
   }
 
   .grid {
