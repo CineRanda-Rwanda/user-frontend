@@ -7,8 +7,6 @@ export type SortOption =
   | 'oldest' 
   | 'title-asc' 
   | 'title-desc' 
-  | 'rating-high' 
-  | 'rating-low'
   | 'price-low'
   | 'price-high'
 
@@ -22,8 +20,6 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'oldest', label: 'Oldest First' },
   { value: 'title-asc', label: 'Title: A-Z' },
   { value: 'title-desc', label: 'Title: Z-A' },
-  { value: 'rating-high', label: 'Highest Rated' },
-  { value: 'rating-low', label: 'Lowest Rated' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
 ]
@@ -57,7 +53,10 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ value, onChange }) => {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
-        <span>Sort: {selectedOption?.label}</span>
+        <div className={styles.inlineLabel}>
+          <span className={styles.labelText}>Sort:</span>
+          <span className={styles.valueText}>{selectedOption?.label}</span>
+        </div>
         <FiChevronDown className={`${styles.icon} ${isOpen ? styles.open : ''}`} />
       </button>
 

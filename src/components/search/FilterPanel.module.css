@@ -1,30 +1,59 @@
+
 .toggleButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--fs-base);
+  gap: 0.85rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
+  color: var(--text-white, #fff);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .toggleButton:hover {
-  border-color: var(--primary);
-  background: var(--hover-bg);
+  transform: translateY(-1px);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+}
+
+.toggleIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 215, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-yellow, #f5c518);
+}
+
+.toggleCopy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.toggleLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.toggleTitle {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .badge {
-  background: var(--primary);
-  color: white;
+  background: linear-gradient(120deg, #f5c518, #ff9f0a);
+  color: #000;
   font-size: var(--fs-xs);
-  padding: 0.125rem 0.5rem;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 .panel {
@@ -38,6 +67,7 @@
   z-index: 1000;
   transition: right 0.3s ease;
   overflow-y: auto;
+  background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.06), transparent 45%), #050505;
 }
 
 .panel.open {
@@ -85,18 +115,22 @@
 }
 
 .resetButton {
-  padding: 0.5rem 1rem;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--primary);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary-yellow, #f5c518);
   font-size: var(--fs-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .resetButton:hover {
-  background: var(--hover-bg);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 215, 0, 0.4);
 }
 
 .closeButton {
@@ -124,48 +158,89 @@
   margin-bottom: 2rem;
 }
 
-.filterSection h4 {
-  font-size: var(--fs-base);
+.summaryBox {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.summaryTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
 }
 
-.checkboxGroup {
+.summaryHint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.summaryChips {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.checkbox {
+.summaryChip {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 215, 0, 0.15);
+  color: #fef3c7;
+  font-size: 0.85rem;
+}
+
+.sectionHeading {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.filterEyebrow {
+  margin: 0 0 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sectionHeading h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.sectionCount {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pillGrid {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.checkbox:hover {
-  background: var(--hover-bg);
+.pillActive {
+  background: linear-gradient(120deg, #f5c518, #ffde7b);
+  color: #000;
+  border-color: transparent;
+  box-shadow: 0 12px 26px rgba(245, 197, 24, 0.4);
 }
 
-.checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--primary);
-}
-
-.checkbox span {
-  font-size: var(--fs-base);
-  color: var(--text-secondary);
-}
-
-.checkbox input:checked + span {
-  color: var(--text-primary);
-  font-weight: 500;
+.pill:hover:not(.pillActive) {
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 @media (max-width: 768px) {

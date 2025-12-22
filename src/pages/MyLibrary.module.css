@@ -82,6 +82,53 @@
   flex: 1;
 }
 
+.heroSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.summaryChip {
+  flex: 1 1 220px;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  border-radius: 24px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+}
+
+.summaryChip svg {
+  font-size: 1.4rem;
+  color: #f5c518;
+  flex-shrink: 0;
+}
+
+.summaryLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.summaryValue {
+  margin: 0.35rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.summaryMeta {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
 .statCard {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;

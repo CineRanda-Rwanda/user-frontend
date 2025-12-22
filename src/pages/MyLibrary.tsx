@@ -301,24 +301,37 @@ const MyLibrary: React.FC = () => {
               streamlined, premium experience.
             </p>
           </div>
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <p className={styles.statLabel}>Total Titles</p>
-              <p className={styles.statValue}>{purchasedContent.length || '0'}</p>
-              <p className={styles.statHint}>
-                {movieCount} movies · {seriesCount} series
-              </p>
+          <div className={styles.heroSummary}>
+            <div className={styles.summaryChip}>
+              <FiLayers />
+              <div>
+                <p className={styles.summaryLabel}>Library Size</p>
+                <p className={styles.summaryValue}>{purchasedContent.length} owned titles</p>
+                <p className={styles.summaryMeta}>{movieCount} movies · {seriesCount} series</p>
+              </div>
             </div>
-            <div className={styles.statCard}>
-              <p className={styles.statLabel}>In Progress</p>
-              <p className={styles.statValue}>{continueWatching.length || '0'}</p>
-              <p className={styles.statHint}>Average completion {averageCompletion}%</p>
-            </div>
-            <div className={styles.statCard}>
-              <p className={styles.statLabel}>Hours Watched</p>
-              <p className={styles.statValue}>{progressHours >= 1 ? progressHours.toFixed(1) : progressHours.toFixed(2)}</p>
-              <p className={styles.statHint}>Tracked across your devices</p>
-            </div>
+            {continueWatching.length > 0 && (
+              <div className={styles.summaryChip}>
+                <FiPlay />
+                <div>
+                  <p className={styles.summaryLabel}>In Progress</p>
+                  <p className={styles.summaryValue}>{continueWatching.length} waiting</p>
+                  <p className={styles.summaryMeta}>Avg completion {averageCompletion}%</p>
+                </div>
+              </div>
+            )}
+            {progressHours > 0 && (
+              <div className={styles.summaryChip}>
+                <FiStar />
+                <div>
+                  <p className={styles.summaryLabel}>Hours Watched</p>
+                  <p className={styles.summaryValue}>
+                    {progressHours >= 10 ? progressHours.toFixed(1) : progressHours.toFixed(2)} hrs
+                  </p>
+                  <p className={styles.summaryMeta}>Since syncing across devices</p>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

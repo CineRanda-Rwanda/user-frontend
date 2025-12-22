@@ -38,6 +38,31 @@
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-2xl);
   align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.controls::-webkit-scrollbar {
+  display: none;
+}
+
+.clearAllButton {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: var(--text-gray);
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.clearAllButton:hover {
+  color: var(--primary-yellow);
+  border-color: rgba(255, 215, 0, 0.5);
 }
 
 .searchContainer {
@@ -115,11 +140,6 @@
 
   .searchSection {
     margin-bottom: var(--spacing-xl);
-  }
-
-  .controls {
-    flex-direction: column;
-    gap: var(--spacing-md);
   }
 
   .grid {

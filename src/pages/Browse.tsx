@@ -7,7 +7,6 @@ import { WatchHistoryItem } from '@/api/watchHistory'
 import Layout from '@/components/layout/Layout'
 import ContentRow from '@/components/content/ContentRow'
 import ContinueWatching from '@/components/content/ContinueWatching'
-import AnimatedCarousel from '@/components/content/AnimatedCarousel'
 import FeaturedHero from '@/components/content/FeaturedHero'
 import Loader from '@/components/common/Loader'
 import Button from '@/components/common/Button'
@@ -17,7 +16,6 @@ import styles from './Browse.module.css'
 const Browse: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [newReleases, setNewReleases] = useState<Content[]>([])
   const [trending, setTrending] = useState<Content[]>([])
   const [movies, setMovies] = useState<Content[]>([])
   const [series, setSeries] = useState<Content[]>([])
@@ -61,11 +59,8 @@ const Browse: React.FC = () => {
         new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       )
 
-      // First few items become trending/new releases
+      // First few items become trending selections
       setTrending(sortedContent.slice(0, 10))
-
-      // Set new releases from combined and sorted content
-      setNewReleases(sortedContent.slice(0, 15))
 
       // Set movies and series
       setMovies(safeMovies)
@@ -88,9 +83,9 @@ const Browse: React.FC = () => {
 
   const heroPool = trending.length > 0
     ? trending
-    : newReleases.length > 0
-      ? newReleases
-      : [...movies, ...series]
+    : movies.length > 0
+      ? movies
+      : series
 
   const heroItems = heroPool.slice(0, 5)
   const hasAnyRows = trending.length > 0 || movies.length > 0 || series.length > 0
@@ -106,18 +101,6 @@ const Browse: React.FC = () => {
         {/* Continue Watching - Only for authenticated users */}
         {isAuthenticated && continueWatching.length > 0 && (
           <ContinueWatching items={continueWatching} />
-        )}
-
-        {newReleases.length > 0 && (
-          <section className={styles.section} aria-labelledby="new-releases-heading">
-            <div className={styles.sectionHeading}>
-              <div>
-                <p className={styles.kicker}>Latest drop</p>
-                <h2 id="new-releases-heading">New Releases</h2>
-              </div>
-            </div>
-            <AnimatedCarousel items={newReleases} title="" />
-          </section>
         )}
 
         <div className={styles.sectionStack}>

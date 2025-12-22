@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Layout from '@/components/layout/Layout'
-import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
+import { SearchFilters } from '@/types/filters'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
+import FilterDropdown from '@/components/search/FilterDropdown'
 import ContentCard from '@/components/content/ContentCard'
 import EmptyState from '@/components/common/EmptyState'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -39,7 +40,6 @@ const Search: React.FC = () => {
   }))
   
   const [sortBy, setSortBy] = useState<SortOption>('newest')
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
   
   const [genres, setGenres] = useState<Array<{ _id: string; name: string }>>([])
   const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([])
@@ -166,10 +166,6 @@ const Search: React.FC = () => {
             return (a.title || '').localeCompare(b.title || '')
           case 'title-desc':
             return (b.title || '').localeCompare(a.title || '')
-          case 'rating-high':
-            return (b.averageRating || 0) - (a.averageRating || 0)
-          case 'rating-low':
-            return (a.averageRating || 0) - (b.averageRating || 0)
           case 'price-low':
             return (a.priceInRwf || 0) - (b.priceInRwf || 0)
           case 'price-high':
@@ -220,6 +216,16 @@ const Search: React.FC = () => {
     setSearchParams(params)
   }
 
+  const handleFilterSelect = (key: 'genres' | 'categories', value: string | null) => {
+    const nextFilters = {
+      ...filters,
+      [key]: value ? [value] : []
+    }
+    handleFiltersChange(nextFilters)
+  }
+
+  const clearAllFilters = () => handleFiltersChange({ genres: [], categories: [] })
+
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort)
     const params = new URLSearchParams(searchParams)
@@ -262,15 +268,26 @@ const Search: React.FC = () => {
         </div>
 
         <div className={styles.controls}>
-          <FilterPanel
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            genres={genres}
-            categories={categories}
-            isOpen={isFilterOpen}
-            onToggle={() => setIsFilterOpen(!isFilterOpen)}
-          />
           <SortDropdown value={sortBy} onChange={handleSortChange} />
+          <FilterDropdown
+            label="Genre"
+            options={genres.map((genre) => ({ value: genre._id, label: genre.name }))}
+            value={filters.genres[0] || null}
+            placeholder="All genres"
+            onChange={(value) => handleFilterSelect('genres', value)}
+          />
+          <FilterDropdown
+            label="Category"
+            options={categories.map((category) => ({ value: category._id, label: category.name }))}
+            value={filters.categories[0] || null}
+            placeholder="All categories"
+            onChange={(value) => handleFilterSelect('categories', value)}
+          />
+          {(filters.genres.length > 0 || filters.categories.length > 0) && (
+            <button type="button" className={styles.clearAllButton} onClick={clearAllFilters}>
+              Reset filters
+            </button>
+          )}
         </div>
 
         {totalResults > 0 && (

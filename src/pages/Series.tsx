@@ -5,8 +5,9 @@ import { Content } from '@/types/content'
 import Layout from '@/components/layout/Layout'
 import ContentCard from '@/components/content/ContentCard'
 import FeaturedHero from '@/components/content/FeaturedHero'
-import FilterPanel, { SearchFilters } from '@/components/search/FilterPanel'
+import { SearchFilters } from '@/types/filters'
 import SortDropdown, { SortOption } from '@/components/search/SortDropdown'
+import FilterDropdown from '@/components/search/FilterDropdown'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
 import { extractCollection } from '@/utils/collection'
@@ -20,7 +21,6 @@ const Series: React.FC = () => {
   const selectedId = searchParams.get('selected')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [genres, setGenres] = useState<Array<{ _id: string; name: string }>>([])
   const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([])
   const [filters, setFilters] = useState<SearchFilters>({
@@ -141,10 +141,6 @@ const Series: React.FC = () => {
         return sorted.sort((a, b) => a.title.localeCompare(b.title))
       case 'title-desc':
         return sorted.sort((a, b) => b.title.localeCompare(a.title))
-      case 'rating-high':
-        return sorted.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
-      case 'rating-low':
-        return sorted.sort((a, b) => (a.averageRating || 0) - (b.averageRating || 0))
       case 'price-low':
         return sorted.sort((a, b) => (a.priceInRwf || 0) - (b.priceInRwf || 0))
       case 'price-high':
@@ -154,10 +150,20 @@ const Series: React.FC = () => {
     }
   }
 
+  const clearAllFilters = () => setFilters({ genres: [], categories: [] })
+
+  const handleFilterSelect = (key: 'genres' | 'categories', value: string | null) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value ? [value] : []
+    }))
+  }
+
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort)
     setSearchParams({ sort: newSort })
   }
+  const hasFilters = filters.genres.length > 0 || filters.categories.length > 0
 
   return (
     <Layout>
@@ -170,21 +176,27 @@ const Series: React.FC = () => {
       )}
 
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Series</h1>
-          <p className={styles.subtitle}>Explore captivating series and shows</p>
-        </div>
-
         <div className={styles.controls}>
-          <FilterPanel
-            filters={filters}
-            onFiltersChange={setFilters}
-            genres={genres}
-            categories={categories}
-            isOpen={isFilterOpen}
-            onToggle={() => setIsFilterOpen(!isFilterOpen)}
-          />
           <SortDropdown value={sortBy} onChange={handleSortChange} />
+          <FilterDropdown
+            label="Genre"
+            options={genres.map((genre) => ({ value: genre._id, label: genre.name }))}
+            value={filters.genres[0] || null}
+            placeholder="All genres"
+            onChange={(value) => handleFilterSelect('genres', value)}
+          />
+          <FilterDropdown
+            label="Category"
+            options={categories.map((category) => ({ value: category._id, label: category.name }))}
+            value={filters.categories[0] || null}
+            placeholder="All categories"
+            onChange={(value) => handleFilterSelect('categories', value)}
+          />
+          {hasFilters && (
+            <button type="button" className={styles.clearAllButton} onClick={clearAllFilters}>
+              Reset filters
+            </button>
+          )}
         </div>
 
         <div className={styles.content}>
