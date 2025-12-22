@@ -13,12 +13,12 @@ const faqs = [
   },
   {
     question: 'Which payment methods are accepted?',
-    answer: 'We support Rwanda local wallets, bank cards, and Flutterwave. Top up your in-app wallet for instant checkout.'
+    answer: 'We support instant Flutterwave checkout with Visa, Mastercard, and MTN/Airtel Mobile Money—pay per unlock with no in-app wallet required.'
   },
   {
     question: 'How do refunds work?',
     answer:
-      'If streaming fails due to a platform error, open a ticket within 24 hours from the Help Center and we will credit your wallet.'
+      'If streaming fails due to a platform error, open a ticket within 24 hours from the Help Center and we will refund the original card or mobile money charge.'
   }
 ]
 

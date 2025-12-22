@@ -12,7 +12,6 @@ import {
   FiBookOpen
 } from 'react-icons/fi'
 import { getInitials } from '@/utils/formatters'
-import { getWalletBalance } from '@/api/wallet'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
 import randaPlusLogo from '@/assets/randa-plus-logo.svg'
@@ -25,7 +24,6 @@ const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const [walletBalance, setWalletBalance] = useState<{ balance: number; bonusBalance?: number } | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
@@ -61,20 +59,7 @@ const Navbar: React.FC = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadWalletBalance()
-    }
-  }, [isAuthenticated])
-
-  const loadWalletBalance = async () => {
-    try {
-      const balance = await getWalletBalance()
-      setWalletBalance(balance)
-    } catch (error) {
-      console.error('Failed to load wallet balance:', error)
-    }
-  }
+  
 
   const handleLogout = () => {
     logout()
@@ -142,21 +127,6 @@ const Navbar: React.FC = () => {
       <div className={styles.actions}>
         {isAuthenticated ? (
           <>
-            {walletBalance && (
-              <button
-                className={styles.walletButton}
-                onClick={() => navigate('/wallet')}
-                title="Wallet"
-              >
-                <span className={styles.walletPrefix}>FRW</span>
-                  <span className={styles.walletAmount}>
-                    {new Intl.NumberFormat('en-RW', {
-                      minimumFractionDigits: 0
-                    }).format(walletBalance.balance)}
-                  </span>
-              </button>
-            )}
-
             <div className={styles.notificationWrapper} ref={notificationRef}>
               <button
                 className={styles.actionButton}

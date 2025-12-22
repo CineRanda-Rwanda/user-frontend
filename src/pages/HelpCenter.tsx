@@ -5,7 +5,7 @@ import styles from './SupportPages.module.css'
 const quickActions = [
   {
     title: 'Account & Billing',
-    description: 'Reset your PIN, manage wallets, and secure your membership in minutes.',
+    description: 'Reset your PIN, manage billing, and secure your membership in minutes.',
     to: '/profile'
   },
   {
@@ -21,7 +21,7 @@ const quickActions = [
 ]
 
 const tutorialSteps = [
-  'Create an account or sign in, then personalize your profile and wallet.',
+  'Create an account or sign in, then personalize your profile and devices.',
   'Browse spotlight rows or use search filters to find the perfect title.',
   'Tap “Watch” to stream instantly, or hit the download icon for offline viewing.',
   'Rate what you watch to improve recommendations and unlock tailored alerts.'
@@ -41,7 +41,7 @@ const HelpCenter: React.FC = () => {
         </button>
         <p className={styles.sectionLabel}>Support</p>
         <h1>Help Center</h1>
-        <p>Clear, human answers for everything from streaming quality to wallet top-ups.</p>
+        <p>Clear, human answers for everything from streaming quality to checkout questions.</p>
       </header>
 
       <section className={styles.section}>

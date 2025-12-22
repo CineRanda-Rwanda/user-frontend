@@ -16,7 +16,7 @@ const sections = [
   {
     title: '3. Payments & Refunds',
     body:
-      'Charges are non-refundable except where required by law or if uptime drops below 95%. Wallet refunds post within 24 hours; card refunds can take 5–7 business days.'
+      'Charges are non-refundable except where required by law or if uptime drops below 95%. Refunds return to your original payment method (Flutterwave, card, or mobile money) within 5–7 business days.'
   },
   {
     title: '4. Privacy',

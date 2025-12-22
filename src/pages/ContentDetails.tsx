@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { contentAPI } from '../api/content';
 import { Content, Episode, Season } from '../types/content';
@@ -8,12 +8,8 @@ import ContentCard from '../components/content/ContentCard';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import {
-  purchaseContentWithWallet,
-  purchaseSeasonWithWallet,
-  purchaseEpisodeWithWallet,
-} from '../api/payment';
-import { getWalletBalance, WalletBalance } from '../api/wallet';
+import { initiateContentPurchase } from '../api/payment';
+import { InitiateContentPurchaseRequest } from '../types/payment';
 import { formatCurrency } from '../utils/formatters';
 import styles from './ContentDetails.module.css';
 
@@ -27,27 +23,14 @@ const ContentDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
   const [activeSeason, setActiveSeason] = useState<number>(1);
-  const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [contentUnlocking, setContentUnlocking] = useState(false);
+  const [paymentPolling, setPaymentPolling] = useState(false);
+  const paymentPollRef = useRef<number | null>(null);
+  const [pendingTransactionRef, setPendingTransactionRef] = useState<string | null>(null);
   const [seasonUnlockingId, setSeasonUnlockingId] = useState<string | null>(null);
   const [episodeUnlockingId, setEpisodeUnlockingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      loadContentDetails();
-      loadRelatedContent();
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadWalletDetails();
-    } else {
-      setWallet(null);
-    }
-  }, [isAuthenticated]);
-
-  const loadContentDetails = async () => {
+  const loadContentDetails = useCallback(async () => {
     try {
       setLoading(true);
       const contentResponse = await contentAPI.getContentById(id!);
@@ -88,9 +71,9 @@ const ContentDetails: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  const loadRelatedContent = async () => {
+  const loadRelatedContent = useCallback(async () => {
     try {
       const response = await contentAPI.getPublishedMovies(1, 10);
       const movies = response?.data?.data?.movies || response?.data?.data || [];
@@ -98,16 +81,20 @@ const ContentDetails: React.FC = () => {
     } catch (error) {
       console.error('Error loading related content:', error);
     }
-  };
+  }, []);
 
-  const loadWalletDetails = async () => {
-    try {
-      const walletData = await getWalletBalance();
-      setWallet(walletData);
-    } catch (error) {
-      console.error('Error loading wallet details:', error);
+  useEffect(() => {
+    if (id) {
+      loadContentDetails();
+      loadRelatedContent();
     }
-  };
+  }, [id, loadContentDetails, loadRelatedContent]);
+
+  useEffect(() => () => {
+    if (paymentPollRef.current) {
+      window.clearInterval(paymentPollRef.current);
+    }
+  }, []);
 
   const resolveContentId = () => content?._id || (content as unknown as { id?: string })?.id || '';
 
@@ -116,21 +103,6 @@ const ContentDetails: React.FC = () => {
     toast.info('Please sign in to continue.');
     navigate('/login', { state: { from: redirectPath } });
     return false;
-  };
-
-  const ensureWalletHasAmount = (amount: number) => {
-    if (amount <= 0) return true;
-    if (!wallet) {
-      toast.error('Wallet balance unavailable. Please visit your wallet before purchasing.');
-      navigate('/wallet');
-      return false;
-    }
-    if (wallet.balance < amount) {
-      toast.error('Insufficient wallet balance. Please top up to continue.');
-      navigate('/wallet');
-      return false;
-    }
-    return true;
   };
 
   const handlePlayFullVideo = () => {
@@ -149,6 +121,84 @@ const ContentDetails: React.FC = () => {
     }
   };
 
+  const beginPaymentPolling = useCallback(
+    (contentId: string) => {
+      if (paymentPollRef.current) {
+        window.clearInterval(paymentPollRef.current);
+      }
+
+      setPaymentPolling(true);
+      const startedAt = Date.now();
+
+      paymentPollRef.current = window.setInterval(() => {
+        (async () => {
+          try {
+            const response = await contentAPI.checkAccess(contentId);
+            const accessPayload = response?.data?.data || response?.data;
+            const hasUnlocked = Boolean(
+              accessPayload?.isPurchased ||
+                accessPayload?.hasAccess ||
+                accessPayload?.userAccess?.isPurchased
+            );
+
+            if (hasUnlocked) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current);
+                paymentPollRef.current = null;
+              }
+              setPaymentPolling(false);
+              setPendingTransactionRef(null);
+              toast.success('Payment confirmed! Enjoy the show.');
+              await loadContentDetails();
+            } else if (Date.now() - startedAt > 5 * 60 * 1000) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current);
+                paymentPollRef.current = null;
+              }
+              setPaymentPolling(false);
+              setPendingTransactionRef(null);
+              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.');
+            }
+          } catch (pollError) {
+            console.error('Error polling payment status:', pollError);
+          }
+        })();
+      }, 5000);
+    },
+    [loadContentDetails]
+  );
+
+  const openCheckoutTab = (url: string) => {
+    const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!checkoutWindow) {
+      window.location.href = url;
+    }
+  };
+
+  const startDirectCheckout = useCallback(
+    async ({
+      contentId,
+      scopeLabel,
+      payloadOverrides,
+    }: {
+      contentId: string;
+      scopeLabel: string;
+      payloadOverrides?: Partial<InitiateContentPurchaseRequest>;
+    }) => {
+      const response = await initiateContentPurchase({ contentId, ...payloadOverrides });
+      const paymentLink = response?.paymentLink;
+      if (!paymentLink) {
+        throw new Error('Payment link unavailable.');
+      }
+
+      setPendingTransactionRef(response.transactionRef);
+      toast.info(`Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`);
+      openCheckoutTab(paymentLink);
+      beginPaymentPolling(contentId);
+    },
+    [beginPaymentPolling]
+  );
+
   const handleUnlockContent = async () => {
     if (!content) return;
     const contentId = resolveContentId();
@@ -161,39 +211,17 @@ const ContentDetails: React.FC = () => {
       return;
     }
 
-    if (!ensureWalletHasAmount(content.priceInRwf || 0)) {
-      return;
-    }
-
     try {
       setContentUnlocking(true);
-      await purchaseContentWithWallet(contentId);
-      toast.success('Content unlocked! Enjoy the show.');
-      setContent((prev) =>
-        prev
-          ? {
-              ...prev,
-              isPurchased: true,
-              userAccess: {
-                ...(prev.userAccess || { unlockedEpisodes: [] }),
-                isPurchased: true,
-                unlockedEpisodes: prev.userAccess?.unlockedEpisodes || [],
-              },
-              seasons: prev.seasons?.map((season) => ({
-                ...season,
-                userAccess: {
-                  ...(season.userAccess || { unlockedEpisodes: [] }),
-                  isPurchased: true,
-                  unlockedEpisodes: season.episodes?.map((episode) => episode._id) || [],
-                },
-              })),
-            }
-          : prev
-      );
-      await loadWalletDetails();
-      handlePlayFullVideo();
+      await startDirectCheckout({
+        contentId,
+        scopeLabel: content.title || 'this title',
+        payloadOverrides: {
+          scope: 'content',
+        },
+      });
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to unlock content.';
+      const message = error?.response?.data?.message || error?.message || 'Unable to initiate payment.';
       toast.error(message);
     } finally {
       setContentUnlocking(false);
@@ -213,53 +241,19 @@ const ContentDetails: React.FC = () => {
       return;
     }
 
-    const seasonPrice = getSeasonPriceInRwf(season);
-    if (!ensureWalletHasAmount(seasonPrice)) {
-      return;
-    }
-
     try {
       setSeasonUnlockingId(season._id);
-      await purchaseSeasonWithWallet({
+      await startDirectCheckout({
         contentId,
-        seasonId: season._id,
-        seasonNumber: season.seasonNumber,
+        scopeLabel: `Season ${season.seasonNumber}`,
+        payloadOverrides: {
+          scope: 'season',
+          seasonId: season._id,
+          seasonNumber: season.seasonNumber,
+        },
       });
-      toast.success(`Season ${season.seasonNumber} unlocked!`);
-      setContent((prev) => {
-        if (!prev) return prev;
-        const resolvedSeason = prev.seasons?.find((entry) => entry._id === season._id);
-        const episodesToUnlock = resolvedSeason?.episodes || season.episodes || [];
-        const unlockedIds = episodesToUnlock.map((episode) => episode._id);
-        const mergedUserAccess = new Set(prev.userAccess?.unlockedEpisodes || []);
-        unlockedIds.forEach((id) => mergedUserAccess.add(id));
-
-        return {
-          ...prev,
-          hasUnlockedEpisodes: true,
-          seasons: prev.seasons?.map((entry) => {
-            if (entry._id !== season._id) return entry;
-            const seasonUnlocked = new Set(entry.userAccess?.unlockedEpisodes || []);
-            unlockedIds.forEach((id) => seasonUnlocked.add(id));
-            return {
-              ...entry,
-              userAccess: {
-                ...(entry.userAccess || { unlockedEpisodes: [] }),
-                isPurchased: true,
-                unlockedEpisodes: Array.from(seasonUnlocked),
-              },
-            };
-          }),
-          userAccess: {
-            ...(prev.userAccess || { unlockedEpisodes: [] }),
-            isPurchased: prev.userAccess?.isPurchased || prev.isPurchased || false,
-            unlockedEpisodes: Array.from(mergedUserAccess),
-          },
-        };
-      });
-      await loadWalletDetails();
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to unlock this season.';
+      const message = error?.response?.data?.message || error?.message || 'Unable to initiate payment.';
       toast.error(message);
     } finally {
       setSeasonUnlockingId(null);
@@ -279,10 +273,6 @@ const ContentDetails: React.FC = () => {
       return;
     }
 
-    if (!ensureWalletHasAmount(episode.priceInRwf || 0)) {
-      return;
-    }
-
     const owningSeason =
       parentSeason ||
       content.seasons?.find((entry) => entry.episodes?.some((item) => item._id === episode._id));
@@ -294,47 +284,19 @@ const ContentDetails: React.FC = () => {
 
     try {
       setEpisodeUnlockingId(episode._id);
-      await purchaseEpisodeWithWallet({
+      await startDirectCheckout({
         contentId,
-        episodeId: episode._id,
-        seasonNumber: owningSeason.seasonNumber,
+        scopeLabel: `Episode ${episode.episodeNumber}`,
+        payloadOverrides: {
+          scope: 'episode',
+          seasonId: owningSeason._id,
+          episodeId: episode._id,
+          seasonNumber: owningSeason.seasonNumber,
+          episodeNumber: episode.episodeNumber,
+        },
       });
-      toast.success(`Episode ${episode.episodeNumber} unlocked!`);
-      setContent((prev) => {
-        if (!prev) return prev;
-        const mergedUserAccess = new Set(prev.userAccess?.unlockedEpisodes || []);
-        mergedUserAccess.add(episode._id);
-
-        const resolvedSeason = owningSeason;
-
-        const updatedSeasons = prev.seasons?.map((entry) => {
-          if (!resolvedSeason || entry._id !== resolvedSeason._id) return entry;
-          const seasonUnlocked = new Set(entry.userAccess?.unlockedEpisodes || []);
-          seasonUnlocked.add(episode._id);
-          return {
-            ...entry,
-            userAccess: {
-              ...(entry.userAccess || { unlockedEpisodes: [] }),
-              isPurchased: entry.userAccess?.isPurchased || false,
-              unlockedEpisodes: Array.from(seasonUnlocked),
-            },
-          };
-        });
-
-        return {
-          ...prev,
-          hasUnlockedEpisodes: true,
-          seasons: updatedSeasons,
-          userAccess: {
-            ...(prev.userAccess || { unlockedEpisodes: [] }),
-            isPurchased: prev.userAccess?.isPurchased || prev.isPurchased || false,
-            unlockedEpisodes: Array.from(mergedUserAccess),
-          },
-        };
-      });
-      await loadWalletDetails();
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to unlock this episode.';
+      const message = error?.response?.data?.message || error?.message || 'Unable to initiate payment.';
       toast.error(message);
     } finally {
       setEpisodeUnlockingId(null);
@@ -483,7 +445,7 @@ const ContentDetails: React.FC = () => {
     (isSeries && activeEpisode ? isEpisodeUnlocked(activeEpisode) : false);
   const isLocked = !canStream;
   const heroPriceLabel = formatCurrency(content.priceInRwf || 0);
-  const hasWalletShortfall = wallet ? wallet.balance < (content.priceInRwf || 0) : false;
+  const shortTransactionRef = pendingTransactionRef ? pendingTransactionRef.slice(-8).toUpperCase() : null;
   const heroTitle =
     isSeries && activeEpisode
       ? `${content.title} - S${activeSeason}:E${activeEpisode.episodeNumber} - ${activeEpisode.title}`
@@ -496,6 +458,7 @@ const ContentDetails: React.FC = () => {
   const primaryGenres = genreNames.slice(0, 3).join(' • ') || 'Drama';
   const primaryCreator = content.director || content.cast?.[0] || 'CinéRanda Studio';
   const primaryLanguage = content.language || content.countryOfOrigin || 'Kinyarwanda';
+  const unlockInProgress = contentUnlocking || paymentPolling;
 
   const getEpisodeArtwork = (episode?: Episode | null) => {
     if (!content) return '';
@@ -532,11 +495,11 @@ const ContentDetails: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleUnlockContent}
-                          disabled={contentUnlocking}
+                          disabled={unlockInProgress}
                           className={styles.posterUnlockButton}
                         >
-                          {contentUnlocking ? (
-                            'Unlocking...'
+                          {unlockInProgress ? (
+                            paymentPolling ? 'Confirming...' : 'Unlocking...'
                           ) : (
                             <>
                               <FiUnlock size={18} />
@@ -545,12 +508,17 @@ const ContentDetails: React.FC = () => {
                           )}
                         </button>
                         <p className={styles.posterHint}>
-                          {wallet
-                            ? hasWalletShortfall
-                              ? 'Add more funds to continue.'
-                              : 'Charged directly from your wallet.'
-                            : 'Sign in to unlock this title.'}
+                          {!isAuthenticated
+                            ? 'Sign in to unlock this title.'
+                            : paymentPolling
+                            ? 'Waiting for payment confirmation...'
+                            : 'Complete the secure checkout to unlock instantly.'}
                         </p>
+                        {shortTransactionRef && (
+                          <p className={styles.posterHint}>
+                            Ref: <strong>{shortTransactionRef}</strong>
+                          </p>
+                        )}
                       </div>
                       <div className={styles.posterLockBadge}>
                         <FiLock size={18} />
@@ -614,15 +582,15 @@ const ContentDetails: React.FC = () => {
                   <button
                     onClick={canStream ? handlePlayFullVideo : handleUnlockContent}
                     className={styles.primaryCta}
-                    disabled={!canStream && contentUnlocking}
+                    disabled={!canStream && unlockInProgress}
                   >
                     {canStream ? (
                       <>
                         <FiPlay size={22} />
                         Watch Now
                       </>
-                    ) : contentUnlocking ? (
-                      'Unlocking...'
+                    ) : unlockInProgress ? (
+                      paymentPolling ? 'Confirming...' : 'Unlocking...'
                     ) : (
                       <>
                         <FiUnlock size={22} />
@@ -644,20 +612,13 @@ const ContentDetails: React.FC = () => {
                     <div className={styles.priceTag}>{heroPriceLabel}</div>
                     <div>
                       <p>Unlock once and stream in full HD forever.</p>
-                      {wallet ? (
-                        <>
-                          <p className={styles.walletHint}>Wallet balance: {formatCurrency(wallet.balance)}</p>
-                          {hasWalletShortfall && (
-                            <p className={styles.walletWarning}>
-                              Add funds to continue.{' '}
-                              <button type="button" className={styles.topUpLink} onClick={() => navigate('/wallet')}>
-                                Top up wallet
-                              </button>
-                            </p>
-                          )}
-                        </>
-                      ) : (
-                        <p className={styles.walletHint}>Sign in to unlock this title with your wallet.</p>
+                      <p className={styles.walletHint}>
+                        Secure checkout powered by Flutterwave. No wallet balance required.
+                      </p>
+                      {paymentPolling && (
+                        <p className={styles.walletWarning}>
+                          Waiting for payment confirmation{shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''}.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -748,9 +709,9 @@ const ContentDetails: React.FC = () => {
                           type="button"
                           className={styles.seasonUnlockButton}
                           onClick={() => handleUnlockSeason(season)}
-                          disabled={seasonUnlocking}
+                          disabled={seasonUnlocking || paymentPolling}
                         >
-                          {seasonUnlocking ? 'Unlocking...' : 'Unlock Season'}
+                          {seasonUnlocking ? 'Unlocking...' : paymentPolling ? 'Confirming...' : 'Unlock Season'}
                         </button>
                       )}
                     </div>
@@ -825,9 +786,9 @@ const ContentDetails: React.FC = () => {
                                     event.stopPropagation();
                                     handleUnlockEpisode(episode, season);
                                   }}
-                                  disabled={unlockingEpisode}
+                                  disabled={unlockingEpisode || paymentPolling}
                                 >
-                                  {unlockingEpisode ? 'Unlocking...' : 'Unlock Episode'}
+                                  {unlockingEpisode ? 'Unlocking...' : paymentPolling ? 'Confirming...' : 'Unlock Episode'}
                                 </button>
                               )}
                             </div>

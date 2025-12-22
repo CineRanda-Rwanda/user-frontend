@@ -17,7 +17,6 @@ const ContentDetails = lazy(() => import('./pages/ContentDetails'))
 const Watch = lazy(() => import('./pages/Watch'))
 const Search = lazy(() => import('./pages/Search'))
 const MyLibrary = lazy(() => import('./pages/MyLibrary'))
-const Wallet = lazy(() => import('./pages/Wallet'))
 const Profile = lazy(() => import('./pages/Profile'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -160,14 +159,6 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute>
                   <MyLibrary />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/wallet"
-              element={
-                <ProtectedRoute>
-                  <Wallet />
                 </ProtectedRoute>
               }
             />

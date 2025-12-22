@@ -113,7 +113,7 @@ const Profile: React.FC = () => {
           <div className={styles.pinHeader}>
             <div>
               <h2 className={styles.cardTitle}>Change PIN</h2>
-              <p className={styles.cardSubtitle}>Secure purchases and wallet withdrawals.</p>
+              <p className={styles.cardSubtitle}>Secure instant-checkout purchases with your streaming PIN.</p>
             </div>
           </div>
           <form className={styles.form} onSubmit={handlePinSubmit}>

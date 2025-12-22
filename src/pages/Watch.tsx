@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { contentAPI } from '../api/content'
-import { purchaseContentWithWallet } from '../api/payment'
-import { getWalletBalance, WalletBalance } from '../api/wallet'
+import { initiateContentPurchase } from '../api/payment'
 import { Content, Episode } from '../types/content'
 import Loader from '../components/common/Loader'
 import { formatCurrency } from '../utils/formatters'
@@ -35,8 +34,10 @@ const Watch: React.FC = () => {
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null)
   const [episodesOpen, setEpisodesOpen] = useState(true)
 
-  const [wallet, setWallet] = useState<WalletBalance | null>(null)
   const [purchasing, setPurchasing] = useState(false)
+  const [paymentPolling, setPaymentPolling] = useState(false)
+  const paymentPollRef = useRef<number | null>(null)
+  const [pendingTransactionRef, setPendingTransactionRef] = useState<string | null>(null)
 
   const [streamSource, setStreamSource] = useState('')
   const [streamLoading, setStreamLoading] = useState(false)
@@ -103,14 +104,6 @@ const Watch: React.FC = () => {
     content && (isSeries ? activeEpisode && isEpisodeUnlocked(activeEpisode) : isContentUnlocked)
   )
 
-  const loadWallet = useCallback(async () => {
-    try {
-      const balance = await getWalletBalance()
-      setWallet(balance)
-    } catch (error) {
-      console.error('Failed to load wallet', error)
-    }
-  }, [])
 
   const loadContent = useCallback(async () => {
     if (!id) return
@@ -205,9 +198,82 @@ const Watch: React.FC = () => {
     loadAccessInfo()
   }, [loadAccessInfo])
 
-  useEffect(() => {
-    loadWallet()
-  }, [loadWallet])
+  useEffect(() => () => {
+    if (paymentPollRef.current) {
+      window.clearInterval(paymentPollRef.current)
+    }
+  }, [])
+
+  const beginPaymentPolling = useCallback(
+    (contentId: string) => {
+      if (paymentPollRef.current) {
+        window.clearInterval(paymentPollRef.current)
+      }
+
+      setPaymentPolling(true)
+      const startedAt = Date.now()
+
+      paymentPollRef.current = window.setInterval(() => {
+        (async () => {
+          try {
+            const response = await contentAPI.checkAccess(contentId)
+            const payload = response?.data?.data || response?.data
+            const hasUnlocked = Boolean(
+              payload?.hasAccess ||
+                payload?.accessGranted ||
+                payload?.isPurchased ||
+                payload?.userAccess?.isPurchased
+            )
+
+            if (hasUnlocked) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current)
+                paymentPollRef.current = null
+              }
+              setPaymentPolling(false)
+              setPendingTransactionRef(null)
+              toast.success('Payment confirmed! Enjoy your stream.')
+              await Promise.all([loadAccessInfo(), loadContent()])
+            } else if (Date.now() - startedAt > 5 * 60 * 1000) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current)
+                paymentPollRef.current = null
+              }
+              setPaymentPolling(false)
+              setPendingTransactionRef(null)
+              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.')
+            }
+          } catch (error) {
+            console.error('Error polling payment status:', error)
+          }
+        })()
+      }, 5000)
+    },
+    [loadAccessInfo, loadContent]
+  )
+
+  const openCheckoutTab = (url: string) => {
+    const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer')
+    if (!checkoutWindow) {
+      window.location.href = url
+    }
+  }
+
+  const startDirectCheckout = useCallback(
+    async (contentId: string, scopeLabel: string) => {
+      const response = await initiateContentPurchase({ contentId, scope: 'content' })
+      const paymentLink = response?.paymentLink
+      if (!paymentLink) {
+        throw new Error('Payment link unavailable.')
+      }
+      setPendingTransactionRef(response.transactionRef)
+      toast.info(`Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`)
+      openCheckoutTab(paymentLink)
+      beginPaymentPolling(contentId)
+    },
+    [beginPaymentPolling]
+  )
+
 
   const fetchStreamSource = useCallback(async () => {
     if (!content) return
@@ -360,23 +426,10 @@ const Watch: React.FC = () => {
     if (!content) return
     const identifier = resolveContentIdentifier(content)
     if (!identifier) return
-    if (!wallet) {
-      navigate('/wallet')
-      return
-    }
-
-    const totalPrice = content.priceInRwf || 0
-    if (wallet.balance < totalPrice) {
-      toast.error('Insufficient balance. Redirecting to wallet.')
-      navigate('/wallet')
-      return
-    }
 
     try {
       setPurchasing(true)
-      await purchaseContentWithWallet(identifier)
-      toast.success('Content unlocked!')
-      await Promise.all([loadContent(), loadWallet(), loadAccessInfo()])
+      await startDirectCheckout(identifier, content.title || 'this title')
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Purchase failed. Please try again.'
       toast.error(message)
@@ -403,6 +456,8 @@ const Watch: React.FC = () => {
   const description =
     isSeries && activeEpisode ? activeEpisode.description : content.description
 
+  const shortTransactionRef = pendingTransactionRef ? pendingTransactionRef.slice(-8).toUpperCase() : null
+
   const durationLabel =
     content.contentType === 'Movie'
       ? `${content.duration ?? Math.round((content.watchProgress?.duration || 0) / 60)} min`
@@ -410,9 +465,7 @@ const Watch: React.FC = () => {
       ? `${activeEpisode.duration} min`
       : '—'
 
-  const insufficientFunds = wallet ? wallet.balance < (content.priceInRwf || 0) : false
-
-  const unlockButtonDisabled = !wallet || purchasing || insufficientFunds
+  const unlockButtonDisabled = purchasing || paymentPolling
 
   const currentSeason = orderedSeasons.find((season) => season.seasonNumber === activeSeason)
 
@@ -462,9 +515,9 @@ const Watch: React.FC = () => {
                       onClick={handlePurchase}
                       disabled={unlockButtonDisabled}
                     >
-                      {purchasing ? 'Processing...' : (
+                      {purchasing ? 'Opening checkout...' : paymentPolling ? 'Confirming...' : (
                         <>
-                          <FiUnlock size={18} /> Unlock with Wallet
+                          <FiUnlock size={18} /> Pay & Unlock
                         </>
                       )}
                     </button>
@@ -475,19 +528,13 @@ const Watch: React.FC = () => {
                     >
                       <FiPlay size={16} /> View Details
                     </button>
-                    {insufficientFunds && (
-                      <button
-                        type="button"
-                        className={`${styles.ctaButton} ${styles.secondaryCta}`}
-                        onClick={() => navigate('/wallet')}
-                      >
-                        Top Up Wallet
-                      </button>
-                    )}
                   </div>
-                  {wallet && (
-                    <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
-                      Wallet balance: {formatCurrency(wallet.balance)}
+                  <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
+                    Secure checkout powered by Flutterwave. Keep this page open while we confirm your payment.
+                  </p>
+                  {paymentPolling && (
+                    <p style={{ marginTop: 4, color: 'var(--text-gray)' }}>
+                      Waiting for confirmation{shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''}.
                     </p>
                   )}
                 </div>

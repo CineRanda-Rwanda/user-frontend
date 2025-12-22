@@ -18,9 +18,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
   const isLocked = isPremium && !isUnlockedPremium && !content.isFree
 
   const handleClick = () => {
-    // Navigate to the appropriate listing page with the content selected in the Hero section
-    const route = content.contentType === 'Series' ? '/series' : '/movies'
-    navigate(`${route}?selected=${content._id}`)
+    navigate(`/content/${content._id}`)
   }
 
   return (

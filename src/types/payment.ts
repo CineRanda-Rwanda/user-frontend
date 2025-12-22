@@ -1,37 +1,50 @@
-// Payment types
+// Shared payment types pulled from the backend collection
+
+export type PaymentMethod = 'flutterwave' | 'card' | 'wallet'
+
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded'
+
 export interface Transaction {
   _id: string
   userId: string
   contentId?: string
-  transactionType: 'PURCHASE' | 'COIN_PURCHASE' | 'REFUND'
-  paymentMethod: 'FLUTTERWAVE' | 'COINS'
+  transactionType: 'content' | 'season' | 'episode' | 'wallet'
+  paymentMethod: PaymentMethod
   amount: number
   currency: string
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+  status: TransactionStatus
+  transactionRef?: string
   paymentProvider?: string
   providerReference?: string
-  metadata?: any
+  metadata?: Record<string, unknown>
   createdAt: string
   updatedAt: string
 }
 
-export interface InitiatePaymentRequest {
+export type PurchaseScope = 'content' | 'season' | 'episode'
+
+export interface InitiateContentPurchaseRequest {
   contentId: string
-  paymentMethod: 'FLUTTERWAVE' | 'COINS'
-  email?: string
-  phoneNumber?: string
+  paymentMethod?: PaymentMethod
+  scope?: PurchaseScope
+  seasonId?: string
+  episodeId?: string
+  seasonNumber?: number
+  episodeNumber?: number
 }
 
-export interface InitiatePaymentResponse {
-  transactionId: string
-  paymentUrl?: string
-  reference: string
-  status: string
+export interface InitiateContentPurchaseResponse {
+  paymentLink: string
+  transactionRef: string
+  amount: number
+  currency: string
+  discount?: number
+  status?: string
 }
 
 export interface PaymentStatusResponse {
-  transactionId: string
-  status: 'PENDING' | 'COMPLETED' | 'FAILED'
+  transactionRef: string
+  status: TransactionStatus
   message?: string
 }
 
