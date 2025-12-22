@@ -18,7 +18,6 @@ const Watch = lazy(() => import('./pages/Watch'))
 const Search = lazy(() => import('./pages/Search'))
 const MyLibrary = lazy(() => import('./pages/MyLibrary'))
 const Profile = lazy(() => import('./pages/Profile'))
-const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const TrailerPlayer = lazy(() => import('./pages/TrailerPlayer'))
 const HelpCenter = lazy(() => import('./pages/HelpCenter'))
@@ -167,14 +166,6 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute>
                   <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <NotificationsPage />
                 </ProtectedRoute>
               }
             />

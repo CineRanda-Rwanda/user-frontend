@@ -155,10 +155,6 @@ const Navbar: React.FC = () => {
               </button>
               {isNotificationsOpen && (
                 <NotificationOverlay
-                  onViewAll={() => {
-                    setIsNotificationsOpen(false)
-                    navigate('/notifications')
-                  }}
                   onClose={() => setIsNotificationsOpen(false)}
                 />
               )}

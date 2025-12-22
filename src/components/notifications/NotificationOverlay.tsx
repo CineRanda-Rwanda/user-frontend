@@ -6,11 +6,10 @@ import { formatRelativeTime, isNotificationUnread, sortNotificationsByDate } fro
 import styles from './NotificationOverlay.module.css'
 
 interface NotificationOverlayProps {
-  onViewAll: () => void
   onClose: () => void
 }
 
-const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onViewAll, onClose }) => {
+const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead, refresh } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [expanded, setExpanded] = useState(true)
@@ -161,9 +160,6 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onViewAll, on
               <FiMaximize2 /> Expand
             </>
           )}
-        </button>
-        <button type="button" className={styles.viewAllButton} onClick={onViewAll}>
-          <FiCheckCircle /> Open inbox
         </button>
       </footer>
     </div>
