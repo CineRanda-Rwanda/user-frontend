@@ -7,6 +7,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xl);
+  flex-wrap: nowrap;
   background: rgba(5, 5, 5, 0.95);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 12px 32px var(--shadow-black);
@@ -43,6 +44,8 @@
 .nav {
   display: flex;
   gap: var(--spacing-md);
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .navLink {
@@ -79,10 +82,12 @@
 }
 
 .searchContainer {
-  flex: 1;
-  max-width: 520px;
-  margin-left: auto;
+  flex: 1 1 320px;
+  min-width: clamp(180px, 24vw, 360px);
+  max-width: 560px;
   display: flex;
+  align-items: center;
+  margin-left: 0;
 }
 
 .navbarSearch {
@@ -93,6 +98,8 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .notificationWrapper {
@@ -406,13 +413,59 @@
   display: none;
 }
 
+.mobileSearchBar {
+  display: none;
+  width: 100%;
+  padding: 0 var(--page-padding) var(--spacing-md);
+  background: rgba(5, 5, 5, 0.95);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 1100px) {
+  .navbar {
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .nav {
+    order: 2;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    row-gap: var(--spacing-xs);
+  }
+
+  .searchContainer {
+    display: flex;
+    order: 4;
+    flex: 1 1 100%;
+    min-width: 100%;
+    max-width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .actions {
+    order: 3;
+    margin-left: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .nav {
     display: none;
   }
 
+  .navbar {
+    gap: var(--spacing-sm);
+  }
+
   .searchContainer {
     display: none;
+  }
+
+  .mobileSearchBar {
+    display: block;
+    padding-top: var(--spacing-xs);
   }
 
   .mobileMenuButton {

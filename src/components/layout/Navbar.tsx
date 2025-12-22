@@ -73,7 +73,8 @@ const Navbar: React.FC = () => {
   }
 
   return (
-    <nav className={styles.navbar}>
+    <>
+      <nav className={styles.navbar}>
       <button
         className={styles.mobileMenuButton}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -258,7 +259,18 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
-    </nav>
+      </nav>
+      <div className={styles.mobileSearchBar}>
+        <GlobalSearchBar
+          variant="compact"
+          className={styles.navbarSearch}
+          showHeading={false}
+          showFilters={false}
+          placeholder="Search catalog"
+          showSubmitButton={false}
+        />
+      </div>
+    </>
   )
 }
 

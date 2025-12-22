@@ -13,6 +13,7 @@ interface GlobalSearchBarProps {
   showHeading?: boolean
   variant?: 'default' | 'compact'
   showFilters?: boolean
+  showSubmitButton?: boolean
 }
 
 interface OptionItem {
@@ -45,7 +46,8 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   className,
   showHeading = false,
   variant = 'default',
-  showFilters = true
+  showFilters = true,
+  showSubmitButton = true
 }) => {
   const navigate = useNavigate()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -219,9 +221,11 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           placeholder={placeholder}
           className={styles.input}
         />
-        <button type="submit" className={styles.searchButton}>
-          Search
-        </button>
+        {showSubmitButton && (
+          <button type="submit" className={styles.searchButton}>
+            Search
+          </button>
+        )}
       </form>
 
       {showSuggestions && (
