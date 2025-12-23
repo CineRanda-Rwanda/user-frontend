@@ -26,8 +26,11 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
     refresh
   } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread' | 'archived'>('all')
+  const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set())
   const swipeStartXRef = useRef<number | null>(null)
   const swipeStartIdRef = useRef<string | null>(null)
+
+  const EXIT_ANIMATION_MS = 220
 
   const sortedNotifications = useMemo(() => sortNotificationsByDate(notifications), [notifications])
   const filteredNotifications = useMemo(
@@ -47,9 +50,14 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
   )
 
   const isInteractiveTarget = (target: EventTarget | null) => {
-    if (!(target instanceof HTMLElement)) return false
+    if (!(target instanceof Element)) return false
     return Boolean(target.closest('button,a,input,label'))
   }
+
+  const trashCount = useMemo(
+    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived)).length,
+    [sortedNotifications]
+  )
 
   const resolveActionUrl = (rawUrl?: string) => {
     if (!rawUrl) return null
@@ -144,6 +152,26 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
     }
   }
 
+  const startExit = (notificationId: string, action: () => Promise<void>) => {
+    setExitingIds((prev) => {
+      if (prev.has(notificationId)) return prev
+      const next = new Set(prev)
+      next.add(notificationId)
+      return next
+    })
+
+    window.setTimeout(() => {
+      void action().finally(() => {
+        setExitingIds((prev) => {
+          if (!prev.has(notificationId)) return prev
+          const next = new Set(prev)
+          next.delete(notificationId)
+          return next
+        })
+      })
+    }, EXIT_ANIMATION_MS)
+  }
+
   const handleMarkAll = async () => {
     try {
       await markAllAsRead()
@@ -207,6 +235,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
             onClick={() => setFilter('archived')}
           >
             Trash
+            {trashCount > 0 && <span className={styles.filterCount}>{trashCount}</span>}
           </button>
         </div>
         <button
@@ -236,7 +265,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
               return (
                 <li
                   key={notification._id}
-                  className={`${styles.item} ${unread ? styles.itemUnread : ''}`}
+                  className={`${styles.item} ${unread ? styles.itemUnread : ''} ${exitingIds.has(notification._id) ? styles.itemExiting : ''}`}
                   onClick={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
@@ -246,19 +275,21 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                   onPointerDown={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
+                    if (exitingIds.has(notification._id)) return
                     swipeStartXRef.current = event.clientX
                     swipeStartIdRef.current = notification._id
                   }}
                   onPointerUp={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
+                    if (exitingIds.has(notification._id)) return
                     if (!swipeStartIdRef.current || swipeStartIdRef.current !== notification._id) return
                     if (swipeStartXRef.current == null) return
                     const deltaX = event.clientX - swipeStartXRef.current
                     swipeStartXRef.current = null
                     swipeStartIdRef.current = null
                     if (Math.abs(deltaX) < 45) return
-                    void handleArchive(notification._id)
+                    startExit(notification._id, () => handleArchive(notification._id))
                   }}
                 >
                   <div className={styles.itemMain}>
@@ -282,14 +313,16 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                         <button
                           type="button"
                           className={styles.itemMark}
-                          onClick={() => handleRestore(notification._id)}
+                          onClick={() => startExit(notification._id, () => handleRestore(notification._id))}
+                          disabled={exitingIds.has(notification._id)}
                         >
                           Restore
                         </button>
                         <button
                           type="button"
                           className={styles.itemDanger}
-                          onClick={() => handleDelete(notification._id)}
+                          onClick={() => startExit(notification._id, () => handleDelete(notification._id))}
+                          disabled={exitingIds.has(notification._id)}
                         >
                           Delete
                         </button>
@@ -299,7 +332,8 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                         <button
                           type="button"
                           className={styles.itemTrash}
-                          onClick={() => handleArchive(notification._id)}
+                          onClick={() => startExit(notification._id, () => handleArchive(notification._id))}
+                          disabled={exitingIds.has(notification._id)}
                           title="Move to trash"
                         >
                           <FiTrash />
@@ -309,6 +343,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                             type="button"
                             className={styles.itemMark}
                             onClick={() => handleMarkSingle(notification._id)}
+                            disabled={exitingIds.has(notification._id)}
                           >
                             <FiCheckCircle />
                             Mark read
@@ -318,6 +353,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                             type="button"
                             className={styles.itemMark}
                             onClick={() => handleMarkUnread(notification._id)}
+                            disabled={exitingIds.has(notification._id)}
                           >
                             Mark unread
                           </button>

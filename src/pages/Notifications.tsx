@@ -47,8 +47,11 @@ const NotificationsPage: React.FC = () => {
   } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread' | 'archived'>('all')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set())
   const swipeStartXRef = useRef<number | null>(null)
   const swipeStartIdRef = useRef<string | null>(null)
+
+  const EXIT_ANIMATION_MS = 220
 
   const sortedNotifications = useMemo(
     () => sortNotificationsByDate(notifications),
@@ -78,9 +81,14 @@ const NotificationsPage: React.FC = () => {
   }, [markUnreadAsReadOnExit])
 
   const isInteractiveTarget = (target: EventTarget | null) => {
-    if (!(target instanceof HTMLElement)) return false
+    if (!(target instanceof Element)) return false
     return Boolean(target.closest('button,a,input,label'))
   }
+
+  const trashCount = useMemo(
+    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived)).length,
+    [sortedNotifications]
+  )
 
   const resolveActionUrl = (rawUrl?: string) => {
     if (!rawUrl) return null
@@ -170,6 +178,26 @@ const NotificationsPage: React.FC = () => {
     } catch {
       // Toast handled inside context
     }
+  }
+
+  const startExit = (notificationId: string, action: () => Promise<void>) => {
+    setExitingIds((prev) => {
+      if (prev.has(notificationId)) return prev
+      const next = new Set(prev)
+      next.add(notificationId)
+      return next
+    })
+
+    window.setTimeout(() => {
+      void action().finally(() => {
+        setExitingIds((prev) => {
+          if (!prev.has(notificationId)) return prev
+          const next = new Set(prev)
+          next.delete(notificationId)
+          return next
+        })
+      })
+    }, EXIT_ANIMATION_MS)
   }
 
   const toggleSelected = (notificationId: string) => {
@@ -271,6 +299,7 @@ const NotificationsPage: React.FC = () => {
               onClick={() => setFilter('archived')}
             >
               Trash
+              {trashCount > 0 && <span className={styles.filterCount}>{trashCount}</span>}
             </button>
           </div>
 
@@ -322,7 +351,7 @@ const NotificationsPage: React.FC = () => {
               return (
                 <li
                   key={notification._id}
-                  className={cardClasses}
+                  className={`${cardClasses} ${exitingIds.has(notification._id) ? styles.cardExiting : ''}`}
                   onClick={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
@@ -332,19 +361,21 @@ const NotificationsPage: React.FC = () => {
                   onPointerDown={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
+                    if (exitingIds.has(notification._id)) return
                     swipeStartXRef.current = event.clientX
                     swipeStartIdRef.current = notification._id
                   }}
                   onPointerUp={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
+                    if (exitingIds.has(notification._id)) return
                     if (!swipeStartIdRef.current || swipeStartIdRef.current !== notification._id) return
                     if (swipeStartXRef.current == null) return
                     const deltaX = event.clientX - swipeStartXRef.current
                     swipeStartXRef.current = null
                     swipeStartIdRef.current = null
                     if (Math.abs(deltaX) < 60) return
-                    void handleArchive(notification._id)
+                    startExit(notification._id, () => handleArchive(notification._id))
                   }}
                 >
                   {filter !== 'archived' && (
@@ -386,14 +417,16 @@ const NotificationsPage: React.FC = () => {
                           <button
                             type="button"
                             className={styles.markButton}
-                            onClick={() => handleRestore(notification._id)}
+                            onClick={() => startExit(notification._id, () => handleRestore(notification._id))}
+                            disabled={exitingIds.has(notification._id)}
                           >
                             Restore
                           </button>
                           <button
                             type="button"
                             className={styles.dangerButton}
-                            onClick={() => handleDelete(notification._id)}
+                            onClick={() => startExit(notification._id, () => handleDelete(notification._id))}
+                            disabled={exitingIds.has(notification._id)}
                           >
                             Delete permanently
                           </button>
@@ -403,7 +436,8 @@ const NotificationsPage: React.FC = () => {
                           <button
                             type="button"
                             className={styles.trashButton}
-                            onClick={() => handleArchive(notification._id)}
+                            onClick={() => startExit(notification._id, () => handleArchive(notification._id))}
+                            disabled={exitingIds.has(notification._id)}
                             title="Move to trash"
                           >
                             <FiTrash />
@@ -413,6 +447,7 @@ const NotificationsPage: React.FC = () => {
                               type="button"
                               className={styles.markButton}
                               onClick={() => handleMarkSingle(notification._id)}
+                              disabled={exitingIds.has(notification._id)}
                             >
                               Mark as read
                             </button>
@@ -421,6 +456,7 @@ const NotificationsPage: React.FC = () => {
                               type="button"
                               className={styles.markButton}
                               onClick={() => handleMarkUnread(notification._id)}
+                              disabled={exitingIds.has(notification._id)}
                             >
                               Mark unread
                             </button>
