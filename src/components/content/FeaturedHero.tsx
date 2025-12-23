@@ -156,6 +156,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
               size="large"
               icon={current.contentType === 'Series' ? <FiEye /> : <FiPlay />}
               onClick={handleWatchClick}
+              className={styles.heroButton}
             >
               {current.contentType === 'Series' ? 'View' : 'Watch'}
             </Button>
@@ -175,6 +176,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
             size="large"
             icon={<FiInfo />}
             onClick={handleMoreInfo}
+            className={styles.heroButton}
           >
             More Info
           </Button>

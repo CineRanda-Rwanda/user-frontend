@@ -39,8 +39,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 clamp(1.5rem, 8vw, 6rem);
-  max-width: 720px;
+  padding: 0 clamp(1.5rem, 7vw, 3rem) clamp(1.5rem, 10vw, 7rem) 0;
+  max-width: min(720px, 58%);
+  margin-right: auto;
 }
 
 .badge {
@@ -57,7 +58,7 @@
 }
 
 .title {
-  font-size: var(--fs-hero);
+  font-size: clamp(2.25rem, 4.5vw, var(--fs-hero));
   font-weight: var(--fw-black);
   color: var(--text-white);
   margin-bottom: var(--spacing-md);
@@ -69,7 +70,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  font-size: var(--fs-lg);
+  font-size: clamp(0.95rem, 1.4vw, var(--fs-lg));
   color: var(--text-gray);
   margin-bottom: var(--spacing-lg);
   flex-wrap: wrap;
@@ -84,9 +85,9 @@
 }
 
 .description {
-  font-size: var(--fs-lg);
+  font-size: clamp(1rem, 1.5vw, var(--fs-lg));
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: clamp(1.4, 2vw, 1.7);
   margin-bottom: var(--spacing-2xl);
   max-width: 580px;
 }
@@ -102,6 +103,12 @@
 .watchButtonContainer {
   position: relative;
   z-index: 10;
+}
+
+.heroButton {
+  font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+  padding: clamp(0.55rem, 1.4vw, 0.9rem) clamp(1rem, 3vw, 1.8rem);
+  min-height: clamp(38px, 7.5vw, 48px);
 }
 
 .indicators {
@@ -130,27 +137,62 @@
 
 @media (max-width: 768px) {
   .hero {
-    height: 60vh;
-    min-height: 400px;
+    min-height: 380px;
   }
 
   .content {
-    padding: 0 var(--spacing-lg);
+    padding: 0 clamp(1rem, 6vw, 2rem) clamp(1.5rem, 10vw, 4rem) 0;
+    max-width: min(420px, 62%);
   }
 
   .title {
-    font-size: var(--fs-3xl);
+    font-size: clamp(26px, 6.4vw, 32px);
   }
 
   .meta {
-    font-size: var(--fs-base);
+    font-size: clamp(13px, 3.4vw, 15px);
   }
 
   .description {
-    font-size: var(--fs-base);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: clamp(13px, 3.4vw, 15px);
+    /* Keep the same hero look on mobile: no truncation/clamping. */
+  }
+}
+
+@media (max-width: 480px) {
+  .badge {
+    font-size: var(--fs-xs);
+    padding: 5px 12px;
+  }
+
+  .title {
+    font-size: clamp(22px, 7.2vw, 28px);
+  }
+
+  .meta {
+    gap: var(--spacing-sm);
+  }
+
+  .description {
+    line-height: 1.55;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .heroButton {
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 42px;
+  }
+
+  .content {
+    max-width: min(340px, 70%);
+    padding: 0 clamp(0.75rem, 5vw, 1.5rem) clamp(1rem, 8vw, 3rem) 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .heroButton {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--fs-xs);
+    min-height: 38px;
   }
 }
