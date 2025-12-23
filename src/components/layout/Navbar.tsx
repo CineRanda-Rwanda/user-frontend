@@ -218,42 +218,52 @@ const Navbar: React.FC = () => {
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <div className={styles.mobileNav}>
-          <div className={styles.mobileNavHeader}>
-            <Link
-              to="/"
-              className={styles.logo}
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="Randa Plus home"
-            >
-              <img src={randaPlusLogo} alt="Randa Plus" className={styles.logoImage} />
-            </Link>
-            <button
-              className={`${styles.mobileMenuButton} ${styles.menuButtonActive}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FiX />
-            </button>
-          </div>
           <div className={styles.mobileNavLinks}>
             {primaryLinks.map((link) => (
-              <Link key={link.path} to={link.path} onClick={() => setIsMobileMenuOpen(false)}>
+              <NavLink
+                key={link.path}
+                to={link.path}
+                end={link.path === '/'}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
+                }
+              >
                 {link.label}
-              </Link>
+              </NavLink>
             ))}
             {isAuthenticated ? (
               <>
-                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                <NavLink
+                  to="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
+                  }
+                >
                   Profile
-                </Link>
+                </NavLink>
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <NavLink
+                  to="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
+                  }
+                >
                   Login
-                </Link>
-                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
+                  }
+                >
                   Sign Up
-                </Link>
+                </NavLink>
               </>
             )}
           </div>
