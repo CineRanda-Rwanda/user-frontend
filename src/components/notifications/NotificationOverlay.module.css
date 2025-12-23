@@ -192,12 +192,12 @@
   min-height: 108px;
   max-height: 148px;
   overflow: hidden;
-  transition: transform 200ms ease, opacity 200ms ease, max-height 200ms ease, padding 200ms ease, margin 200ms ease;
+  transition: transform 420ms ease, opacity 420ms ease, max-height 420ms ease, padding 420ms ease, margin 420ms ease;
 }
 
 .itemExiting {
   opacity: 0;
-  transform: translateX(18px);
+  transform: translateX(42px);
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;

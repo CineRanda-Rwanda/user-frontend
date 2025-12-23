@@ -30,7 +30,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
   const swipeStartXRef = useRef<number | null>(null)
   const swipeStartIdRef = useRef<string | null>(null)
 
-  const EXIT_ANIMATION_MS = 220
+  const EXIT_ANIMATION_MS = 420
 
   const sortedNotifications = useMemo(() => sortNotificationsByDate(notifications), [notifications])
   const filteredNotifications = useMemo(
@@ -55,7 +55,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
   }
 
   const trashCount = useMemo(
-    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived)).length,
+    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived) && isNotificationUnread(notification)).length,
     [sortedNotifications]
   )
 

@@ -23,8 +23,9 @@ interface NotificationsContextValue {
 
 const NotificationsContext = createContext<NotificationsContextValue | undefined>(undefined)
 
+// Unread badge represents unread items in the inbox (non-archived).
 const calculateUnreadCount = (list: UserNotification[]) =>
-  list.filter((notification) => isNotificationUnread(notification)).length
+  list.filter((notification) => !notification.isArchived).filter((notification) => isNotificationUnread(notification)).length
 
 export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
@@ -104,9 +105,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         archivedOnly: params?.archivedOnly
       })
       const nextNotifications = Array.isArray(payload.notifications) ? payload.notifications : []
-      const fallbackUnread = calculateUnreadCount(nextNotifications)
-      const serverUnread = typeof payload.unreadCount === 'number' ? payload.unreadCount : undefined
-      const resolvedUnread = Math.max(serverUnread ?? 0, fallbackUnread)
+      const resolvedUnread = calculateUnreadCount(nextNotifications)
 
       setNotifications(nextNotifications)
       setUnreadCount(resolvedUnread)
@@ -139,7 +138,9 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       await notificationsAPI.markAsRead(notificationId)
       setNotifications((prev) => {
-        const wasUnread = prev.some((notification) => notification._id === notificationId && isNotificationUnread(notification))
+        const wasUnread = prev.some(
+          (notification) => notification._id === notificationId && !notification.isArchived && isNotificationUnread(notification)
+        )
         if (wasUnread) {
           setUnreadCount((count) => Math.max(0, count - 1))
         }
@@ -171,9 +172,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
 
     try {
       await notificationsAPI.markAllAsRead()
+      // Only affect inbox items; trash can keep its own unread state.
       setNotifications((prev) =>
         prev.map((notification) =>
-          isNotificationUnread(notification)
+          !notification.isArchived && isNotificationUnread(notification)
             ? { ...notification, status: 'read', isRead: true, readAt: notification.readAt ?? new Date().toISOString() }
             : notification
         )
@@ -203,7 +205,8 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         prev.map((notification) => {
           if (notification._id !== notificationId) return notification
           if (!isNotificationUnread(notification)) {
-            delta = 1
+            // Unread badge tracks inbox only.
+            delta = notification.isArchived ? 0 : 1
           }
           const { readAt: _omit, ...rest } = notification
           return { ...rest, status: 'unread', isRead: false }
@@ -237,30 +240,18 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       setNotifications((prev) =>
         prev.map((notification) => {
           if (notification._id !== notificationId) return notification
-          if (isNotificationUnread(notification)) {
-            unreadDelta = -1
-          }
+          // Moving an unread inbox item to trash should reduce the inbox unread badge.
+          if (!notification.isArchived && isNotificationUnread(notification)) unreadDelta = -1
           return {
             ...notification,
             isArchived: true,
-            archivedAt: archivedTimestamp,
-            status: 'read',
-            isRead: true,
-            readAt: notification.readAt ?? archivedTimestamp
+            archivedAt: archivedTimestamp
           }
         })
       )
       if (unreadDelta) {
         setUnreadCount((count) => Math.max(0, count + unreadDelta))
       }
-
-      setManualUnreadIds((prev) => {
-        if (!prev.has(notificationId)) return prev
-        const next = new Set(prev)
-        next.delete(notificationId)
-        persistManualUnreadIds(next)
-        return next
-      })
     } catch (err) {
       console.error('Failed to archive notification:', err)
       toast.error('Failed to move notification to archive')
@@ -273,13 +264,19 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
 
     try {
       await notificationsAPI.restoreNotification(notificationId)
+      let unreadDelta = 0
       setNotifications((prev) =>
-        prev.map((notification) =>
-          notification._id === notificationId
-            ? { ...notification, isArchived: false, archivedAt: null }
-            : notification
-        )
+        prev.map((notification) => {
+          if (notification._id !== notificationId) return notification
+          // If it's unread in trash, restoring brings it back into inbox unread count.
+          if (notification.isArchived && isNotificationUnread(notification)) unreadDelta = 1
+          return { ...notification, isArchived: false, archivedAt: null }
+        })
       )
+
+      if (unreadDelta) {
+        setUnreadCount((count) => count + unreadDelta)
+      }
     } catch (err) {
       console.error('Failed to restore notification:', err)
       toast.error('Failed to restore notification')
@@ -296,7 +293,8 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       setNotifications((prev) =>
         prev.filter((notification) => {
           if (notification._id !== notificationId) return true
-          removedUnread = isNotificationUnread(notification)
+          // Only adjust inbox unread badge when deleting an unread inbox item.
+          removedUnread = !notification.isArchived && isNotificationUnread(notification)
           return false
         })
       )

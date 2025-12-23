@@ -51,7 +51,7 @@ const NotificationsPage: React.FC = () => {
   const swipeStartXRef = useRef<number | null>(null)
   const swipeStartIdRef = useRef<string | null>(null)
 
-  const EXIT_ANIMATION_MS = 220
+  const EXIT_ANIMATION_MS = 420
 
   const sortedNotifications = useMemo(
     () => sortNotificationsByDate(notifications),
@@ -86,7 +86,7 @@ const NotificationsPage: React.FC = () => {
   }
 
   const trashCount = useMemo(
-    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived)).length,
+    () => sortedNotifications.filter((notification) => Boolean(notification.isArchived) && isNotificationUnread(notification)).length,
     [sortedNotifications]
   )
 
