@@ -232,18 +232,17 @@ const Navbar: React.FC = () => {
                 {link.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/help"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
+              }
+            >
+              Help
+            </NavLink>
             {isAuthenticated ? (
-              <>
-                <NavLink
-                  to="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
-                  }
-                >
-                  Profile
-                </NavLink>
-              </>
+              null
             ) : (
               <>
                 <NavLink

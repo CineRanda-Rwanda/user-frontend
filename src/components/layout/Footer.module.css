@@ -83,25 +83,6 @@
 
 @media (max-width: 640px) {
   .footer {
-    padding: var(--spacing-2xl) var(--spacing-md);
-  }
-
-  .footerContent {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(220px, 80vw);
-    grid-template-columns: none;
-    overflow-x: auto;
-    padding-bottom: var(--spacing-md);
-    scroll-snap-type: x mandatory;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .footerContent::-webkit-scrollbar {
     display: none;
-  }
-
-  .footerSection {
-    scroll-snap-align: start;
   }
 }
