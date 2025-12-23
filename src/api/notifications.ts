@@ -4,8 +4,8 @@ import { NotificationsEnvelope, NotificationsQuery, UserNotification } from '@/t
 const normalizeNotificationsResponse = (payload: any): NotificationsEnvelope => {
   const root = payload?.data ?? payload
   const notifications = (root?.notifications ?? root?.data?.notifications ?? root?.items ?? []) as UserNotification[]
-  const unreadCount = root?.unreadCount ?? root?.meta?.unreadCount ?? 0
-  const pagination = root?.pagination ?? root?.meta?.pagination
+  const pagination = root?.pagination ?? root?.meta?.pagination ?? root?.data?.pagination
+  const unreadCount = root?.unreadCount ?? root?.meta?.unreadCount ?? pagination?.unreadCount ?? 0
 
   return {
     notifications,
@@ -22,6 +22,18 @@ export const notificationsAPI = {
 
   markAsRead: (notificationId: string) =>
     api.put(`/notifications/${notificationId}/read`),
+
+  markAsUnread: (notificationId: string) =>
+    api.put(`/notifications/${notificationId}/unread`),
+
+  archiveNotification: (notificationId: string) =>
+    api.put(`/notifications/${notificationId}/archive`),
+
+  restoreNotification: (notificationId: string) =>
+    api.put(`/notifications/${notificationId}/unarchive`),
+
+  deleteNotification: (notificationId: string) =>
+    api.delete(`/notifications/${notificationId}`),
 
   markAllAsRead: () =>
     api.put('/notifications/read-all')

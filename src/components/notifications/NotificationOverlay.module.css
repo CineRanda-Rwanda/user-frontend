@@ -17,11 +17,6 @@
   overflow: hidden;
 }
 
-.overlayExpanded {
-  width: min(460px, calc(100vw - 24px));
-  max-height: min(640px, calc(100vh - 110px));
-}
-
 .overlayHeader {
   display: flex;
   justify-content: space-between;
@@ -161,10 +156,6 @@
   scrollbar-gutter: stable both-edges;
 }
 
-.overlayExpanded .list {
-  max-height: calc(100% - var(--spacing-sm));
-}
-
 .list::-webkit-scrollbar {
   width: 4px;
 }
@@ -174,7 +165,7 @@
 }
 
 .list::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.7), rgba(255, 0, 0, 0.85));
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 999px;
 }
 
@@ -234,6 +225,8 @@
   width: 24px;
   height: 24px;
   background: rgba(255, 255, 255, 0.12);
+  border: none;
+  cursor: pointer;
 }
 
 .itemMark {
@@ -245,6 +238,38 @@
   color: var(--primary-yellow);
   font-size: var(--fs-2xs);
   cursor: pointer;
+}
+
+.itemTrash {
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-white);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.itemTrash:hover {
+  background: rgba(255, 215, 0, 0.18);
+  color: var(--primary-yellow);
+}
+
+.itemDanger {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-white);
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: var(--fs-2xs);
+}
+
+.itemDanger:hover {
+  background: rgba(255, 0, 0, 0.14);
 }
 
 .moreHint {

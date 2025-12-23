@@ -1,0 +1,28 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  color: var(--text-gray);
+}
+
+.dangerText {
+  color: var(--accent-red);
+  font-weight: var(--fw-semibold);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.dangerButton {
+  background: rgba(255, 77, 77, 0.2);
+  color: #ffb3b3;
+  border: 1px solid rgba(255, 77, 77, 0.4);
+}
+
+.dangerButton:hover {
+  background: rgba(255, 77, 77, 0.3);
+  color: #ffe0e0;
+}

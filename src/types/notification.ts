@@ -4,19 +4,24 @@ export type NotificationMetadata = Record<string, any>
 
 export interface UserNotification {
   _id: string
+  notificationId?: string
   title: string
   message: string
   type?: string
+  actionType?: string
   status?: NotificationStatus
   category?: string
   actionLabel?: string
   actionUrl?: string
-  readAt?: string
+  readAt?: string | null
   createdAt: string
+  receivedAt?: string
   updatedAt?: string
   metadata?: NotificationMetadata
   priority?: 'low' | 'medium' | 'high'
   isRead?: boolean
+  isArchived?: boolean
+  archivedAt?: string | null
 }
 
 export interface NotificationsPagination {
@@ -31,6 +36,9 @@ export interface NotificationsQuery {
   page?: number
   limit?: number
   status?: NotificationStatus | 'all'
+  unreadOnly?: boolean
+  includeArchived?: boolean
+  archivedOnly?: boolean
 }
 
 export interface NotificationsEnvelope {

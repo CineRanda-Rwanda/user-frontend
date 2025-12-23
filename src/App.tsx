@@ -24,6 +24,7 @@ const HelpCenter = lazy(() => import('./pages/HelpCenter'))
 const ContactPage = lazy(() => import('./pages/Contact'))
 const FAQPage = lazy(() => import('./pages/FAQ'))
 const TermsPage = lazy(() => import('./pages/Terms'))
+const NotificationsPage = lazy(() => import('./pages/Notifications'))
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -199,6 +200,15 @@ const AppRoutes = () => {
                 <PublicRoute>
                   <TermsPage />
                 </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
               }
             />
 

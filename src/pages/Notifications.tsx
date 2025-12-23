@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react'
-import { FiBell, FiCheckCircle, FiInbox, FiRefreshCcw } from 'react-icons/fi'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { FiBell, FiCheckCircle, FiInbox, FiRefreshCcw, FiTrash } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import Loader from '@/components/common/Loader'
 import Button from '@/components/common/Button'
@@ -29,18 +30,107 @@ const resolveTypeClass = (type?: string) => {
 }
 
 const NotificationsPage: React.FC = () => {
-  const { notifications, unreadCount, loading, error, refresh, markAsRead, markAllAsRead } = useNotifications()
-  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const navigate = useNavigate()
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    error,
+    refresh,
+    markAsRead,
+    markAsUnread,
+    markAllAsRead,
+    archiveNotification,
+    restoreNotification,
+    deleteNotification,
+    markUnreadAsReadOnExit
+  } = useNotifications()
+  const [filter, setFilter] = useState<'all' | 'unread' | 'archived'>('all')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const swipeStartXRef = useRef<number | null>(null)
+  const swipeStartIdRef = useRef<string | null>(null)
 
   const sortedNotifications = useMemo(
     () => sortNotificationsByDate(notifications),
     [notifications]
   )
 
-  const filteredNotifications = useMemo(
-    () => (filter === 'unread' ? sortedNotifications.filter((notification) => isNotificationUnread(notification)) : sortedNotifications),
-    [filter, sortedNotifications]
-  )
+  const filteredNotifications = useMemo(() => {
+    if (filter === 'archived') {
+      return sortedNotifications.filter((notification) => Boolean(notification.isArchived))
+    }
+
+    const inbox = sortedNotifications.filter((notification) => !notification.isArchived)
+    if (filter === 'unread') {
+      return inbox.filter((notification) => isNotificationUnread(notification))
+    }
+    return inbox
+  }, [filter, sortedNotifications])
+
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [filter])
+
+  useEffect(() => {
+    return () => {
+      void markUnreadAsReadOnExit().catch(() => undefined)
+    }
+  }, [markUnreadAsReadOnExit])
+
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false
+    return Boolean(target.closest('button,a,input,label'))
+  }
+
+  const resolveActionUrl = (rawUrl?: string) => {
+    if (!rawUrl) return null
+    const url = rawUrl.trim()
+    if (!url) return null
+    if (url.startsWith('#')) return null
+    if (url.startsWith('/')) return { kind: 'internal' as const, url }
+    if (url.startsWith('?')) return { kind: 'internal' as const, url }
+    if (/^https?:\/\//i.test(url)) return { kind: 'external' as const, url }
+
+    const looksLikeDomain = /^www\./i.test(url) || /^[^/]+\.[^/]+/.test(url)
+    if (looksLikeDomain) return { kind: 'external' as const, url: `https://${url}` }
+
+    return { kind: 'internal' as const, url: `/${url}` }
+  }
+
+  const resolveInternalFromActionType = (actionType?: string, metadata?: Record<string, any>) => {
+    const slug = (actionType || '').toLowerCase().trim()
+    const metaId = metadata?.contentId ?? metadata?.id ?? metadata?._id
+
+    if (!slug) return null
+    if (slug === 'profile') return '/profile'
+    if (slug === 'browse' || slug === 'home') return '/browse'
+    if (slug === 'movies') return '/movies'
+    if (slug === 'series') return '/series'
+    if (slug === 'search') return '/search'
+    if ((slug === 'content' || slug === 'details') && metaId) return `/content/${String(metaId)}`
+    if (slug === 'watch' && metaId) return `/watch/${String(metaId)}`
+
+    return '/browse'
+  }
+
+  const handleOpenNotification = (notification: { actionUrl?: string; actionType?: string; metadata?: Record<string, any> }) => {
+    const internalFromType = resolveInternalFromActionType(notification.actionType, notification.metadata)
+    const resolved = resolveActionUrl(notification.actionUrl)
+
+    if (internalFromType) {
+      navigate(internalFromType)
+      return
+    }
+
+    if (!resolved) return
+
+    if (resolved.kind === 'internal') {
+      navigate(resolved.url)
+      return
+    }
+
+    window.open(resolved.url, '_blank', 'noopener,noreferrer')
+  }
 
   const handleMarkSingle = async (notificationId: string) => {
     try {
@@ -48,6 +138,62 @@ const NotificationsPage: React.FC = () => {
     } catch {
       // Toast handled inside context
     }
+  }
+
+  const handleMarkUnread = async (notificationId: string) => {
+    try {
+      await markAsUnread(notificationId)
+    } catch {
+      // Toast handled inside context
+    }
+  }
+
+  const handleArchive = async (notificationId: string) => {
+    try {
+      await archiveNotification(notificationId)
+    } catch {
+      // Toast handled inside context
+    }
+  }
+
+  const handleRestore = async (notificationId: string) => {
+    try {
+      await restoreNotification(notificationId)
+    } catch {
+      // Toast handled inside context
+    }
+  }
+
+  const handleDelete = async (notificationId: string) => {
+    try {
+      await deleteNotification(notificationId)
+    } catch {
+      // Toast handled inside context
+    }
+  }
+
+  const toggleSelected = (notificationId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(notificationId)) {
+        next.delete(notificationId)
+      } else {
+        next.add(notificationId)
+      }
+      return next
+    })
+  }
+
+  const handleMarkSelectedUnread = async () => {
+    const ids = Array.from(selectedIds)
+    if (!ids.length) return
+
+    await Promise.all(
+      ids.map((id) =>
+        markAsUnread(id).catch(() => undefined)
+      )
+    )
+    setSelectedIds(new Set())
   }
 
   const handleMarkAll = async () => {
@@ -66,11 +212,18 @@ const NotificationsPage: React.FC = () => {
     }
   }
 
-  const emptyStateTitle = filter === 'unread' ? 'No unread notifications' : 'No notifications yet'
+  const emptyStateTitle =
+    filter === 'archived'
+      ? 'Trash is empty'
+      : filter === 'unread'
+        ? 'No unread notifications'
+        : 'No notifications yet'
   const emptyStateCopy =
-    filter === 'unread'
-      ? 'Take a breather—you are fully caught up.'
-      : 'We will ping you when you earn bonuses, unlock titles, or need to take action.'
+    filter === 'archived'
+      ? 'Items you move to trash will show up here.'
+      : filter === 'unread'
+        ? 'Take a breather—you are fully caught up.'
+        : 'We will ping you when you earn bonuses, unlock titles, or need to take action.'
 
   return (
     <Layout>
@@ -112,7 +265,36 @@ const NotificationsPage: React.FC = () => {
               Unread
               {unreadCount > 0 && <span className={styles.filterCount}>{unreadCount}</span>}
             </button>
+            <button
+              type="button"
+              className={`${styles.filterButton} ${filter === 'archived' ? styles.filterButtonActive : ''}`}
+              onClick={() => setFilter('archived')}
+            >
+              Trash
+            </button>
           </div>
+
+          {filter !== 'archived' && (
+            <div className={styles.bulkActions}>
+              <button
+                type="button"
+                className={styles.markButton}
+                disabled={selectedIds.size === 0}
+                onClick={handleMarkSelectedUnread}
+              >
+                Mark selected unread
+              </button>
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  className={styles.clearSelection}
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {error && <div className={styles.errorBanner}>{error}</div>}
@@ -134,9 +316,47 @@ const NotificationsPage: React.FC = () => {
           <ul className={styles.list}>
             {filteredNotifications.map((notification) => {
               const unread = isNotificationUnread(notification)
-              const cardClasses = [styles.card, unread ? styles.cardUnread : ''].filter(Boolean).join(' ')
+              const cardClasses = [styles.card, unread ? styles.cardUnread : '', notification.isArchived ? styles.cardArchived : '']
+                .filter(Boolean)
+                .join(' ')
               return (
-                <li key={notification._id} className={cardClasses}>
+                <li
+                  key={notification._id}
+                  className={cardClasses}
+                  onClick={(event) => {
+                    if (filter === 'archived') return
+                    if (isInteractiveTarget(event.target)) return
+                    if (!notification.actionUrl && !notification.actionType) return
+                    handleOpenNotification(notification)
+                  }}
+                  onPointerDown={(event) => {
+                    if (filter === 'archived') return
+                    if (isInteractiveTarget(event.target)) return
+                    swipeStartXRef.current = event.clientX
+                    swipeStartIdRef.current = notification._id
+                  }}
+                  onPointerUp={(event) => {
+                    if (filter === 'archived') return
+                    if (isInteractiveTarget(event.target)) return
+                    if (!swipeStartIdRef.current || swipeStartIdRef.current !== notification._id) return
+                    if (swipeStartXRef.current == null) return
+                    const deltaX = event.clientX - swipeStartXRef.current
+                    swipeStartXRef.current = null
+                    swipeStartIdRef.current = null
+                    if (Math.abs(deltaX) < 60) return
+                    void handleArchive(notification._id)
+                  }}
+                >
+                  {filter !== 'archived' && (
+                    <label className={styles.selectBox}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(notification._id)}
+                        onChange={() => toggleSelected(notification._id)}
+                      />
+                      <span className={styles.selectIndicator} />
+                    </label>
+                  )}
                   <div className={styles.cardIcon}>{unread ? <FiBell /> : <FiCheckCircle />}</div>
                   <div className={styles.cardContent}>
                     <div className={styles.cardHeader}>
@@ -152,23 +372,60 @@ const NotificationsPage: React.FC = () => {
                     )}
                     <div className={styles.cardActions}>
                       {notification.actionUrl && (
-                        <a
-                          className={styles.actionLink}
-                          href={notification.actionUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {notification.actionLabel || 'View details'}
-                        </a>
-                      )}
-                      {unread && (
                         <button
                           type="button"
-                          className={styles.markButton}
-                          onClick={() => handleMarkSingle(notification._id)}
+                          className={styles.actionLink}
+                          onClick={() => handleOpenNotification(notification)}
                         >
-                          Mark as read
+                          {notification.actionLabel || 'View details'}
                         </button>
+                      )}
+
+                      {filter === 'archived' ? (
+                        <>
+                          <button
+                            type="button"
+                            className={styles.markButton}
+                            onClick={() => handleRestore(notification._id)}
+                          >
+                            Restore
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.dangerButton}
+                            onClick={() => handleDelete(notification._id)}
+                          >
+                            Delete permanently
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className={styles.trashButton}
+                            onClick={() => handleArchive(notification._id)}
+                            title="Move to trash"
+                          >
+                            <FiTrash />
+                          </button>
+                          {unread ? (
+                            <button
+                              type="button"
+                              className={styles.markButton}
+                              onClick={() => handleMarkSingle(notification._id)}
+                            >
+                              Mark as read
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.markButton}
+                              onClick={() => handleMarkUnread(notification._id)}
+                            >
+                              Mark unread
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
