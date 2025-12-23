@@ -104,7 +104,7 @@ const Browse: React.FC = () => {
         )}
 
         <div className={styles.sectionStack}>
-          <ContentRow title="Trending Now" content={trending} hidePrice />
+          <ContentRow title="Trending Now" content={trending} hidePrice autoAdvance />
           <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
           <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
         </div>

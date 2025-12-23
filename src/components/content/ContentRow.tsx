@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { Content } from '@/types/content'
@@ -11,6 +11,8 @@ interface ContentRowProps {
   viewAllLink?: string
   showBadge?: boolean
   hidePrice?: boolean
+  autoAdvance?: boolean
+  autoAdvanceIntervalMs?: number
 }
 
 const ContentRow: React.FC<ContentRowProps> = ({
@@ -19,6 +21,8 @@ const ContentRow: React.FC<ContentRowProps> = ({
   viewAllLink,
   showBadge = false,
   hidePrice = false,
+  autoAdvance = false,
+  autoAdvanceIntervalMs = 3500,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -33,6 +37,64 @@ const ContentRow: React.FC<ContentRowProps> = ({
   }
 
   if (content.length === 0) return null
+
+  useEffect(() => {
+    if (!autoAdvance) return
+    if (content.length <= 1) return
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (prefersReducedMotion) return
+
+    const el = scrollRef.current
+    if (!el) return
+
+    const tick = () => {
+      const node = scrollRef.current
+      if (!node) return
+
+      const items = Array.from(node.children).filter((child): child is HTMLElement => child instanceof HTMLElement)
+      if (items.length <= 1) return
+
+      const maxScrollLeft = Math.max(0, node.scrollWidth - node.clientWidth)
+      if (maxScrollLeft <= 0) return
+
+      // Build a list of reachable scroll positions (some cards near the end can have offsetLeft > maxScrollLeft).
+      const rawPositions = items
+        .map((item) => Math.min(item.offsetLeft, maxScrollLeft))
+        .sort((a, b) => a - b)
+
+      // Deduplicate (avoid multiple cards mapping to the same maxScrollLeft).
+      const positions: number[] = []
+      for (const pos of rawPositions) {
+        if (!positions.length || Math.abs(positions[positions.length - 1] - pos) > 2) {
+          positions.push(pos)
+        }
+      }
+
+      if (positions.length <= 1) return
+
+      const current = node.scrollLeft
+      let currentIndex = 0
+      let bestDistance = Number.POSITIVE_INFINITY
+      for (let index = 0; index < positions.length; index += 1) {
+        const distance = Math.abs(positions[index] - current)
+        if (distance < bestDistance) {
+          bestDistance = distance
+          currentIndex = index
+        }
+      }
+
+      const nextIndex = (currentIndex + 1) % positions.length
+      node.scrollTo({ left: positions[nextIndex], behavior: 'smooth' })
+    }
+
+    const id = window.setInterval(tick, Math.max(1200, autoAdvanceIntervalMs))
+    return () => window.clearInterval(id)
+  }, [autoAdvance, autoAdvanceIntervalMs, content.length])
 
   return (
     <div className={styles.row}>
