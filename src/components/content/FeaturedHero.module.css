@@ -32,6 +32,43 @@
   z-index: 1;
 }
 
+.centerPlayButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: clamp(54px, 10vw, 92px);
+  height: clamp(54px, 10vw, 92px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 0, 0.85);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.35), rgba(0, 0, 0, 0.9));
+  color: var(--primary-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 4vw, 32px);
+  cursor: pointer;
+  box-shadow:
+    0 0 25px rgba(255, 0, 0, 0.35),
+    0 12px 40px rgba(0, 0, 0, 0.7);
+  transition:
+    transform var(--transition-base),
+    background var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.centerPlayButton:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  background: radial-gradient(circle at 40% 35%, rgba(255, 215, 0, 0.55), rgba(229, 9, 20, 0.35));
+  border-color: rgba(229, 9, 20, 0.9);
+  color: #fff4b0;
+  box-shadow:
+    0 0 35px rgba(255, 215, 0, 0.45),
+    0 14px 50px rgba(0, 0, 0, 0.75);
+}
+
 .content {
   position: relative;
   z-index: 2;

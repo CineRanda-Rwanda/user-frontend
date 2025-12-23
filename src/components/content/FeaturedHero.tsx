@@ -57,6 +57,11 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
     }
   }
 
+  const handleCenterPlay = () => {
+    // Center play button should expose play options regardless of content type
+    setShowWatchMenu(true)
+  }
+
   // Check if content has trailer (either from API endpoint or in content data)
   const hasTrailer = current.contentType === 'Movie' || !!current.trailerYoutubeLink
 
@@ -125,6 +130,15 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
 
       <div className={styles.overlay} />
 
+      <button
+        type="button"
+        className={styles.centerPlayButton}
+        onClick={handleCenterPlay}
+        aria-label={current.contentType === 'Series' ? 'View title' : 'Watch title'}
+      >
+        <FiPlay />
+      </button>
+
       <div className={styles.content}>
         <div className={styles.badge}>Featured</div>
 
@@ -160,15 +174,13 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
             >
               {current.contentType === 'Series' ? 'View' : 'Watch'}
             </Button>
-            {current.contentType !== 'Series' && (
-              <WatchMenu
-                isOpen={showWatchMenu}
-                onClose={() => setShowWatchMenu(false)}
-                onTrailer={handleTrailer}
-                onFullVideo={handleFullVideo}
-                hasTrailer={hasTrailer}
-              />
-            )}
+            <WatchMenu
+              isOpen={showWatchMenu}
+              onClose={() => setShowWatchMenu(false)}
+              onTrailer={handleTrailer}
+              onFullVideo={handleFullVideo}
+              hasTrailer={hasTrailer}
+            />
           </div>
 
           <Button
