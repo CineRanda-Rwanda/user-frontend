@@ -1,16 +1,25 @@
 .footer {
   background: var(--bg-dark);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--spacing-3xl) var(--spacing-xl);
-  margin-top: var(--spacing-3xl);
+  padding: var(--section-spacing) var(--page-padding);
+  margin-top: var(--section-spacing);
 }
 
 .footerContent {
-  max-width: 1400px;
+  width: 100%;
+  max-width: var(--container-max, 1400px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-2xl);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(var(--spacing-xl), 4vw, var(--spacing-3xl));
+  align-items: flex-start;
+}
+
+.footerSection {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .footerSection h3 {
@@ -62,7 +71,8 @@
 }
 
 .footerBottom {
-  max-width: 1400px;
+  width: 100%;
+  max-width: var(--container-max, 1400px);
   margin: var(--spacing-2xl) auto 0;
   padding-top: var(--spacing-xl);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,11 +83,25 @@
 
 @media (max-width: 640px) {
   .footer {
-    padding: var(--spacing-xl) var(--spacing-md);
+    padding: var(--spacing-2xl) var(--spacing-md);
   }
 
   .footerContent {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 80vw);
+    grid-template-columns: none;
+    overflow-x: auto;
+    padding-bottom: var(--spacing-md);
+    scroll-snap-type: x mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .footerContent::-webkit-scrollbar {
+    display: none;
+  }
+
+  .footerSection {
+    scroll-snap-align: start;
   }
 }

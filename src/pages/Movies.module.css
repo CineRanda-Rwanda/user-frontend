@@ -1,3 +1,4 @@
+
 .container {
   max-width: 1600px;
   margin: 0 auto;
@@ -35,16 +36,20 @@
 
 .controls {
   display: flex;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.controls > * {
+  min-width: 0;
 }
 
 .searchContainer {
   flex: 1;
 }
-
 
 .clearAllButton {
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -55,6 +60,8 @@
   cursor: pointer;
   font-weight: 600;
   transition: color 0.2s ease, border-color 0.2s ease;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .clearAllButton:hover {
@@ -132,13 +139,8 @@
     padding: var(--spacing-lg) var(--spacing-md);
   }
 
-  .searchSection {
-    margin-bottom: var(--spacing-xl);
-  }
-
   .controls {
-    flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 
   .grid {
