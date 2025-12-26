@@ -37,38 +37,13 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
   const inFlightRef = useRef(false)
   const lastFetchAtRef = useRef(0)
 
-  const manualUnreadStorageKey = 'notifications.manualUnreadIds'
-
+  // Manual-unread is a temporary “keep unread for this exit” intent.
+  // It should not persist across reloads/sessions.
   useEffect(() => {
     if (!isAuthenticated) {
       setManualUnreadIds(new Set())
-      try {
-        localStorage.removeItem(manualUnreadStorageKey)
-      } catch {
-        // ignore
-      }
-      return
-    }
-
-    try {
-      const raw = localStorage.getItem(manualUnreadStorageKey)
-      if (!raw) return
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed)) {
-        setManualUnreadIds(new Set(parsed.filter((id) => typeof id === 'string')))
-      }
-    } catch {
-      // ignore
     }
   }, [isAuthenticated])
-
-  const persistManualUnreadIds = useCallback((next: Set<string>) => {
-    try {
-      localStorage.setItem(manualUnreadStorageKey, JSON.stringify(Array.from(next)))
-    } catch {
-      // ignore
-    }
-  }, [])
 
   const fetchNotifications = useCallback(async (params?: NotificationsQuery, options?: { silent?: boolean; force?: boolean }) => {
     if (!isAuthenticated) {
@@ -155,7 +130,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         if (!prev.has(notificationId)) return prev
         const next = new Set(prev)
         next.delete(notificationId)
-        persistManualUnreadIds(next)
         return next
       })
     } catch (err) {
@@ -163,7 +137,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       toast.error('Failed to update notification')
       throw err
     }
-  }, [persistManualUnreadIds])
+  }, [])
 
   const markAllAsRead = useCallback(async () => {
     if (!unreadCount) {
@@ -185,7 +159,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       setManualUnreadIds((prev) => {
         if (!prev.size) return prev
         const next = new Set<string>()
-        persistManualUnreadIds(next)
         return next
       })
     } catch (err) {
@@ -193,7 +166,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       toast.error('Failed to update notifications')
       throw err
     }
-  }, [persistManualUnreadIds, unreadCount])
+  }, [unreadCount])
 
   const markAsUnread = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -220,7 +193,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         if (prev.has(notificationId)) return prev
         const next = new Set(prev)
         next.add(notificationId)
-        persistManualUnreadIds(next)
         return next
       })
     } catch (err) {
@@ -228,7 +200,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       toast.error('Failed to update notification')
       throw err
     }
-  }, [persistManualUnreadIds])
+  }, [])
 
   const archiveNotification = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -257,7 +229,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       toast.error('Failed to move notification to archive')
       throw err
     }
-  }, [persistManualUnreadIds])
+  }, [])
 
   const restoreNotification = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -306,7 +278,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         if (!prev.has(notificationId)) return prev
         const next = new Set(prev)
         next.delete(notificationId)
-        persistManualUnreadIds(next)
         return next
       })
     } catch (err) {
@@ -314,31 +285,49 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       toast.error('Failed to delete notification')
       throw err
     }
-  }, [persistManualUnreadIds])
+  }, [])
 
   const markUnreadAsReadOnExit = useCallback(async () => {
-    const toMarkRead = notifications
-      .filter((notification) => !notification.isArchived)
-      .filter((notification) => isNotificationUnread(notification))
-      .map((notification) => notification._id)
-      .filter((id) => !manualUnreadIds.has(id))
+    const manualSnapshot = manualUnreadIds
+    const unreadNow = notifications.filter((notification) => isNotificationUnread(notification))
 
-    if (!toMarkRead.length) return
+    if (!unreadNow.length) {
+      if (manualSnapshot.size) setManualUnreadIds(new Set())
+      return
+    }
 
-    await Promise.all(
-      toMarkRead.map((id) =>
-        notificationsAPI
-          .markAsRead(id)
-          .then(() => {
-            setNotifications((prev) =>
-              prev.map((n) => (n._id === id ? { ...n, status: 'read', isRead: true, readAt: n.readAt ?? new Date().toISOString() } : n))
-            )
-          })
-          .catch(() => undefined)
-      )
+    const nowIso = new Date().toISOString()
+    const unreadNonManual = unreadNow.filter((n) => !manualSnapshot.has(n._id))
+    const manualUnread = unreadNow.filter((n) => manualSnapshot.has(n._id))
+    const inboxMarkedCount = unreadNonManual.filter((n) => !n.isArchived).length
+
+    // Optimistic UI update: mark everything read except the current manual-unread set.
+    setNotifications((prev) =>
+      prev.map((n) => {
+        if (!isNotificationUnread(n)) return n
+        if (manualSnapshot.has(n._id)) return n
+        return { ...n, status: 'read', isRead: true, readAt: n.readAt ?? nowIso }
+      })
     )
+    if (inboxMarkedCount) {
+      setUnreadCount((count) => Math.max(0, count - inboxMarkedCount))
+    }
 
-    setUnreadCount((count) => Math.max(0, count - toMarkRead.length))
+    // Persist to backend using bulk "read all" for reliability, then restore manual ones to unread.
+    const bulkResult = await Promise.allSettled([notificationsAPI.markAllAsRead()])
+    const bulkFailed = bulkResult.some((r) => r.status === 'rejected')
+
+    const restoreResults = manualUnread.length
+      ? await Promise.allSettled(manualUnread.map((n) => notificationsAPI.markAsUnread(n._id)))
+      : []
+    const restoreFailed = restoreResults.some((r) => r.status === 'rejected')
+
+    if (bulkFailed || restoreFailed) {
+      toast.error('Some notifications could not be synced.')
+    }
+
+    // One-time exemption: next exit treats these normally.
+    if (manualSnapshot.size) setManualUnreadIds(new Set())
   }, [manualUnreadIds, notifications])
 
   const refresh = useCallback(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/contexts/NotificationsContext'
@@ -19,7 +19,7 @@ import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth()
-  const { unreadCount } = useNotifications()
+  const { unreadCount, markUnreadAsReadOnExit } = useNotifications()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -28,6 +28,11 @@ const Navbar: React.FC = () => {
   const [hasSeries, setHasSeries] = useState(true)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
+
+  const closeNotifications = useCallback(() => {
+    setIsNotificationsOpen(false)
+    void markUnreadAsReadOnExit().catch(() => undefined)
+  }, [markUnreadAsReadOnExit])
 
   useEffect(() => {
     let isCancelled = false
@@ -70,15 +75,16 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (!isNotificationsOpen) return
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setIsNotificationsOpen(false)
+        closeNotifications()
       }
     }
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsNotificationsOpen(false)
-      }
+      if (event.key !== 'Escape') return
+      if (!isNotificationsOpen) return
+      closeNotifications()
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -87,7 +93,7 @@ const Navbar: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [])
+  }, [closeNotifications, isNotificationsOpen])
 
   
 
@@ -176,7 +182,13 @@ const Navbar: React.FC = () => {
               <button
                 className={styles.actionButton}
                 onClick={() => {
-                  setIsNotificationsOpen((prev) => !prev)
+                  setIsNotificationsOpen((prev) => {
+                    if (prev) {
+                      closeNotifications()
+                      return false
+                    }
+                    return true
+                  })
                   setIsProfileOpen(false)
                 }}
                 title="Notifications"
@@ -188,7 +200,7 @@ const Navbar: React.FC = () => {
               </button>
               {isNotificationsOpen && (
                 <NotificationOverlay
-                  onClose={() => setIsNotificationsOpen(false)}
+                  onClose={closeNotifications}
                 />
               )}
             </div>
