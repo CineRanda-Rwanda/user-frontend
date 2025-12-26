@@ -39,6 +39,8 @@ const Watch: React.FC = () => {
   const paymentPollRef = useRef<number | null>(null)
   const [pendingTransactionRef, setPendingTransactionRef] = useState<string | null>(null)
 
+  const lastCheckoutRef = useRef<{ url: string; openedAt: number } | null>(null)
+
   const [streamSource, setStreamSource] = useState('')
   const [streamLoading, setStreamLoading] = useState(false)
   const [streamError, setStreamError] = useState<string | null>(null)
@@ -69,20 +71,18 @@ const Watch: React.FC = () => {
         !accessInfo?.accessType)
   )
 
-  const isContentUnlocked = isSeries
-    ? Boolean(content?.isFree || content?.priceInRwf === 0 || hasServerFullAccess)
-    : Boolean(
-        content?.isFree ||
-          content?.priceInRwf === 0 ||
-          content?.isPurchased ||
-          content?.userAccess?.isPurchased ||
-          hasServerFullAccess
-      )
+  const isContentUnlocked = Boolean(
+    content?.isFree ||
+      content?.priceInRwf === 0 ||
+      content?.isPurchased ||
+      content?.userAccess?.isPurchased ||
+      hasServerFullAccess
+  )
 
   const isEpisodeUnlocked = useCallback(
     (episode?: Episode | null) => {
       if (!content) return false
-      if (hasServerFullAccess) return true
+      if (isContentUnlocked) return true
       if (!episode) return false
       if (episode.isFree || episode.isUnlocked) return true
 
@@ -94,11 +94,13 @@ const Watch: React.FC = () => {
       const seasonWithEpisode = content.seasons?.find((season) =>
         season.episodes?.some((entry) => entry._id === episode._id)
       )
+
+      if (seasonWithEpisode?.userAccess?.isPurchased) return true
       if (seasonWithEpisode?.userAccess?.unlockedEpisodes?.includes(episode._id)) return true
 
       return false
     },
-    [content, accessInfo, hasServerFullAccess]
+    [content, isContentUnlocked, accessInfo]
   )
 
   const canPlayCurrent = Boolean(
@@ -254,9 +256,24 @@ const Watch: React.FC = () => {
   )
 
   const openCheckoutTab = (url: string) => {
+    const now = Date.now()
+    const last = lastCheckoutRef.current
+    if (last && last.url === url && now - last.openedAt < 1500) {
+      return
+    }
+    lastCheckoutRef.current = { url, openedAt: now }
+
     const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer')
     if (!checkoutWindow) {
-      window.location.href = url
+      toast.info(
+        <span>
+          Popup blocked.{' '}
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            Click here to open checkout
+          </a>
+          .
+        </span>
+      )
     }
   }
 

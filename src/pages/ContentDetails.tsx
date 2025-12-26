@@ -8,7 +8,7 @@ import ContentCard from '../components/content/ContentCard';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { initiateContentPurchase, purchaseEpisodeWithWallet } from '../api/payment';
+import { initiateContentPurchase } from '../api/payment';
 import { InitiateContentPurchaseRequest } from '../types/payment';
 import { formatCurrency } from '../utils/formatters';
 import styles from './ContentDetails.module.css';
@@ -28,6 +28,8 @@ const ContentDetails: React.FC = () => {
   const paymentPollRef = useRef<number | null>(null);
   const [pendingTransactionRef, setPendingTransactionRef] = useState<string | null>(null);
   const [episodeUnlockingId, setEpisodeUnlockingId] = useState<string | null>(null);
+  const [seasonUnlockingId, setSeasonUnlockingId] = useState<string | null>(null);
+  const lastCheckoutRef = useRef<{ url: string; openedAt: number } | null>(null);
 
   const resolveEpisodeId = (episode?: Episode | null) => {
     if (!episode) return '';
@@ -38,6 +40,31 @@ const ContentDetails: React.FC = () => {
     if (!episode) return null;
     const maybe = (episode as unknown as { priceInRwf?: unknown })?.priceInRwf;
     return typeof maybe === 'number' ? maybe : null;
+  };
+
+  const resolveSeriesDiscountPercent = (series?: Content | null): number => {
+    if (!series) return 0;
+    const fromPercent = (series as unknown as { seriesDiscountPercent?: unknown })?.seriesDiscountPercent;
+    if (typeof fromPercent === 'number' && Number.isFinite(fromPercent) && fromPercent > 0) return fromPercent;
+
+    const fromFinal = (series as unknown as { finalSeriesPrice?: { discount?: unknown } })?.finalSeriesPrice?.discount;
+    if (typeof fromFinal === 'number' && Number.isFinite(fromFinal) && fromFinal > 0) return fromFinal;
+
+    return 0;
+  };
+
+  const resolveEpisodeEffectivePriceInRwf = (episode?: Episode | null, series?: Content | null): number | null => {
+    const base = resolveEpisodePriceInRwf(episode);
+    if (typeof base !== 'number') return null;
+    if (!series || series.contentType !== 'Series') return base;
+
+    const discountPercent = resolveSeriesDiscountPercent(series);
+    if (!discountPercent || discountPercent <= 0) return base;
+    if (base <= 0) return base;
+
+    // Match typical backend discounting; 500 with 9% discount => 455.
+    const discounted = Math.round(base * (100 - discountPercent) / 100);
+    return discounted;
   };
 
   const resolveSeriesIsFree = (series: Content): boolean => {
@@ -112,7 +139,10 @@ const ContentDetails: React.FC = () => {
               const unlockedIds = resolveUnlockedEpisodeIds(mergedContent, season);
               const explicitPrice = resolveEpisodePriceInRwf(episode);
               const isUnlocked = Boolean(
-                mergedContent.isFree ||
+                mergedContent.isPurchased ||
+                  mergedContent.userAccess?.isPurchased ||
+                  mergedContent.isFree ||
+                  season.userAccess?.isPurchased ||
                   episode.isFree ||
                   episode.isUnlocked ||
                   (typeof explicitPrice === 'number' && explicitPrice === 0) ||
@@ -250,6 +280,59 @@ const ContentDetails: React.FC = () => {
     [loadContentDetails]
   );
 
+  const beginSeasonUnlockPolling = useCallback(
+    ({ contentId, seasonId }: { contentId: string; seasonId: string }) => {
+      if (paymentPollRef.current) {
+        window.clearInterval(paymentPollRef.current);
+      }
+
+      setPaymentPolling(true);
+      const startedAt = Date.now();
+
+      paymentPollRef.current = window.setInterval(() => {
+        (async () => {
+          try {
+            const response = await contentAPI.getContentById(contentId);
+            const payload = response?.data?.data;
+            const resolvedContent = payload?.movie || payload?.series || payload?.content || payload || response?.data;
+            const normalized = resolvedContent?.content ?? resolvedContent;
+
+            const seasons: Season[] = Array.isArray(normalized?.seasons) ? normalized.seasons : [];
+            const targetSeason = seasons.find((season) => season?._id === seasonId);
+
+            const hasUnlocked = Boolean(
+              targetSeason?.userAccess?.isPurchased ||
+                // Some variants may expose season-level unlock flags differently.
+                (targetSeason as unknown as { isUnlocked?: boolean })?.isUnlocked
+            );
+
+            if (hasUnlocked) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current);
+                paymentPollRef.current = null;
+              }
+              setPaymentPolling(false);
+              setPendingTransactionRef(null);
+              toast.success('Season unlocked! Enjoy the episodes.');
+              await loadContentDetails();
+            } else if (Date.now() - startedAt > 5 * 60 * 1000) {
+              if (paymentPollRef.current) {
+                window.clearInterval(paymentPollRef.current);
+                paymentPollRef.current = null;
+              }
+              setPaymentPolling(false);
+              setPendingTransactionRef(null);
+              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.');
+            }
+          } catch (pollError) {
+            console.error('Error polling season unlock status:', pollError);
+          }
+        })();
+      }, 5000);
+    },
+    [loadContentDetails]
+  );
+
   const beginEpisodeUnlockPolling = useCallback(
     ({ contentId, episodeId }: { contentId: string; episodeId: string }) => {
       if (paymentPollRef.current) {
@@ -320,9 +403,24 @@ const ContentDetails: React.FC = () => {
   );
 
   const openCheckoutTab = (url: string) => {
+    const now = Date.now();
+    const last = lastCheckoutRef.current;
+    if (last && last.url === url && now - last.openedAt < 1500) {
+      return;
+    }
+    lastCheckoutRef.current = { url, openedAt: now };
+
     const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer');
     if (!checkoutWindow) {
-      window.location.href = url;
+      toast.info(
+        <span>
+          Popup blocked.{' '}
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            Click here to open checkout
+          </a>
+          .
+        </span>
+      );
     }
   };
 
@@ -343,21 +441,32 @@ const ContentDetails: React.FC = () => {
       }
 
       setPendingTransactionRef(response.transactionRef);
-      toast.info(`Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`);
+      const amount = typeof response?.amount === 'number' ? response.amount : null;
+      const discount = typeof response?.discount === 'number' ? response.discount : null;
+      const amountLabel = amount !== null ? formatCurrency(amount) : null;
+      toast.info(
+        amountLabel
+          ? discount && discount > 0
+            ? `Checkout opened in a new tab. Pay ${amountLabel} (discount applied) to unlock ${scopeLabel}.`
+            : `Checkout opened in a new tab. Pay ${amountLabel} to unlock ${scopeLabel}.`
+          : `Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`
+      );
       openCheckoutTab(paymentLink);
       if (payloadOverrides?.scope === 'episode' && payloadOverrides.episodeId) {
         beginEpisodeUnlockPolling({ contentId, episodeId: payloadOverrides.episodeId });
+      } else if (payloadOverrides?.scope === 'season' && payloadOverrides.seasonId) {
+        beginSeasonUnlockPolling({ contentId, seasonId: payloadOverrides.seasonId });
       } else {
         beginPaymentPolling(contentId);
       }
     },
-    [beginEpisodeUnlockPolling, beginPaymentPolling]
+    [beginEpisodeUnlockPolling, beginPaymentPolling, beginSeasonUnlockPolling]
   );
 
   const handleUnlockContent = async () => {
     if (!content) return;
     if (content.contentType === 'Series') {
-      toast.info('To avoid purchase errors, series can be unlocked one episode at a time.');
+      toast.info('Select a season or episode to unlock.');
       return;
     }
     const contentId = resolveContentId();
@@ -412,21 +521,54 @@ const ContentDetails: React.FC = () => {
 
     try {
       setEpisodeUnlockingId(episodeId);
-      const explicitPrice = resolveEpisodePriceInRwf(episode);
-      if (episode.isFree || (typeof explicitPrice === 'number' && explicitPrice === 0)) {
-        toast.success('This episode is free.');
-        await loadContentDetails();
-        return;
-      }
-
-      await purchaseEpisodeWithWallet({ contentId, episodeId });
-      toast.info('Processing wallet purchase… confirming unlock.');
-      beginEpisodeUnlockPolling({ contentId, episodeId });
+      await startDirectCheckout({
+        contentId,
+        scopeLabel: `Episode ${episode.episodeNumber}`,
+        payloadOverrides: {
+          scope: 'episode',
+          seasonId: owningSeason._id,
+          episodeId,
+          seasonNumber: owningSeason.seasonNumber,
+          episodeNumber: episode.episodeNumber,
+        },
+      });
     } catch (error: any) {
       const message = error?.response?.data?.message || error?.message || 'Unable to initiate payment.';
       toast.error(message);
     } finally {
       setEpisodeUnlockingId(null);
+    }
+  };
+
+  const handleUnlockSeason = async (season: Season) => {
+    if (!content) return;
+    const contentId = resolveContentId();
+    if (!contentId) {
+      toast.error('Unable to determine content identifier. Please refresh and try again.');
+      return;
+    }
+
+    const redirectPath = `/content/${contentId}`;
+    if (!requireAuthentication(redirectPath)) {
+      return;
+    }
+
+    try {
+      setSeasonUnlockingId(season._id);
+      await startDirectCheckout({
+        contentId,
+        scopeLabel: `Season ${season.seasonNumber}`,
+        payloadOverrides: {
+          scope: 'season',
+          seasonId: season._id,
+          seasonNumber: season.seasonNumber,
+        },
+      });
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Unable to initiate payment.';
+      toast.error(message);
+    } finally {
+      setSeasonUnlockingId(null);
     }
   };
 
@@ -483,7 +625,7 @@ const ContentDetails: React.FC = () => {
   // IMPORTANT: for series, `userAccess.isPurchased` is not reliable as "all episodes unlocked"
   // (e.g., episodes added after a season purchase may still require per-episode unlock).
   // Only treat content-level purchase as a full unlock for movies.
-  const isContentPurchased = Boolean(!isSeriesContent && (content?.isPurchased || content?.userAccess?.isPurchased));
+  const isContentPurchased = Boolean(content?.isPurchased || content?.userAccess?.isPurchased);
   const isContentFree = content
     ? isSeriesContent
       ? resolveSeriesIsFree(content)
@@ -498,6 +640,7 @@ const ContentDetails: React.FC = () => {
   const isEpisodeUnlocked = useCallback(
     (episode?: Episode | null, parentSeason?: Season) => {
       if (!episode) return false;
+      if (isContentPurchased) return true;
 
       // IMPORTANT: Some API responses omit priceInRwf (or include other pricing fields).
       // Treat an episode as unlocked only when it's explicitly free/unlocked or appears
@@ -516,6 +659,7 @@ const ContentDetails: React.FC = () => {
           season.episodes?.some((entry) => resolveEpisodeId(entry) === episodeId)
         );
 
+      if (owningSeason?.userAccess?.isPurchased) return true;
       if (episodeId && owningSeason?.userAccess?.unlockedEpisodes?.includes(episodeId)) return true;
 
       return false;
@@ -547,16 +691,19 @@ const ContentDetails: React.FC = () => {
     setActiveSeason(next.seasonNumber);
     setActiveEpisode(next.episode);
   };
-
+    [content, isContentPurchased, unlockedEpisodeIds]
   const isSeasonUnlocked = useCallback(
     (season?: Season | null) => {
       if (!season) return false;
+      if (isContentPurchased) return true;
       if (season.isFree) return true;
       if (
         (season.priceInRwf ?? season.seasonPriceInRwf ?? season.finalSeasonPrice?.price ?? 0) === 0
       ) {
         return true;
       }
+
+      if (season.userAccess?.isPurchased) return true;
 
       const totalEpisodes = season.episodes?.length || 0;
       if (totalEpisodes === 0) return true;
@@ -566,7 +713,7 @@ const ContentDetails: React.FC = () => {
 
       return unlockedCount === totalEpisodes;
     },
-    [isEpisodeUnlocked]
+    [isContentPurchased, isEpisodeUnlocked]
   );
 
   const getSeasonPriceInRwf = (season?: Season | null) => {
@@ -615,7 +762,7 @@ const ContentDetails: React.FC = () => {
     : Boolean(isContentPurchased || isContentFree);
   const isLocked = !canStream;
 
-  const activeEpisodePrice = isSeries && activeEpisode ? resolveEpisodePriceInRwf(activeEpisode) : null;
+  const activeEpisodePrice = isSeries && activeEpisode ? resolveEpisodeEffectivePriceInRwf(activeEpisode, content) : null;
   const heroPriceLabel = isSeries
     ? activeEpisodePrice && activeEpisodePrice > 0
       ? formatCurrency(activeEpisodePrice)
@@ -919,6 +1066,8 @@ const ContentDetails: React.FC = () => {
               const seasonUnlocked = isSeasonUnlocked(season);
               const seasonPrice = getSeasonPriceInRwf(season);
               const seasonPriceLabel = seasonPrice > 0 ? formatCurrency(seasonPrice) : 'Free';
+              const showSeasonUnlock = !seasonUnlocked && !isContentPurchased && !season.isFree && seasonPrice > 0;
+              const unlockingSeason = seasonUnlockingId === season._id;
 
               return (
                 <div key={season._id} id={`season-${season.seasonNumber}`} className={styles.seasonPanel}>
@@ -930,6 +1079,16 @@ const ContentDetails: React.FC = () => {
                     <div className={styles.seasonActions}>
                       <p className={styles.sectionSubtitle}>{season.episodes?.length || 0} Episodes</p>
                       <span className={styles.seasonPrice}>{seasonPriceLabel}</span>
+                      {showSeasonUnlock && (
+                        <button
+                          type="button"
+                          className={styles.seasonUnlockButton}
+                          onClick={() => handleUnlockSeason(season)}
+                          disabled={unlockingSeason || paymentPolling}
+                        >
+                          {unlockingSeason ? 'Unlocking...' : paymentPolling ? 'Confirming...' : 'Unlock Season'}
+                        </button>
+                      )}
                       {seasonUnlocked && (
                         <span className={styles.seasonUnlockedBadge}>
                           <FiUnlock size={14} /> Season unlocked
@@ -942,8 +1101,8 @@ const ContentDetails: React.FC = () => {
                     {season.episodes?.map((episode) => {
                       const isActive = activeEpisode?._id === episode._id;
                       const episodeUnlocked = isEpisodeUnlocked(episode, season);
-                      const episodePrice = resolveEpisodePriceInRwf(episode);
-                      const showEpisodeUnlock = !episodeUnlocked && !episode.isFree;
+                      const episodePrice = resolveEpisodeEffectivePriceInRwf(episode, content);
+                      const showEpisodeUnlock = !episodeUnlocked && !episode.isFree && !seasonUnlocked && !isContentPurchased;
                       const resolvedEpisodeId = resolveEpisodeId(episode);
                       const unlockingEpisode = episodeUnlockingId === resolvedEpisodeId;
                       const episodeClassName = `${styles.episodeCard} ${isActive ? styles.episodeCardActive : ''}`;
