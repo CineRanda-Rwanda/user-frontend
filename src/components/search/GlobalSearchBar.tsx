@@ -4,6 +4,7 @@ import { FiSearch, FiChevronDown, FiPlay } from 'react-icons/fi'
 import { contentAPI } from '@/api/content'
 import { Content } from '@/types/content'
 import { extractCollection } from '@/utils/collection'
+import { PLACEHOLDER_IMAGE } from '@/utils/constants'
 import styles from './GlobalSearchBar.module.css'
 
 interface GlobalSearchBarProps {
@@ -14,6 +15,11 @@ interface GlobalSearchBarProps {
   variant?: 'default' | 'compact'
   showFilters?: boolean
   showSubmitButton?: boolean
+  /**
+   * Keeps the compact search UI in a single-row layout on small screens.
+   * Useful when embedding the search bar in a tight header.
+   */
+  lockCompactLayout?: boolean
 }
 
 interface OptionItem {
@@ -47,7 +53,8 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   showHeading = false,
   variant = 'default',
   showFilters = true,
-  showSubmitButton = true
+  showSubmitButton = true,
+  lockCompactLayout = false
 }) => {
   const navigate = useNavigate()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -187,18 +194,37 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       className={styles.suggestionItem}
       onClick={() => handleSuggestionNavigate(item)}
     >
-      <div>
-        <p className={styles.suggestionTitle}>{item.title}</p>
-        <p className={styles.suggestionMeta}>
-          {item.contentType || 'Content'}
-          {item.releaseYear ? ` • ${item.releaseYear}` : ''}
-        </p>
+      <div className={styles.suggestionLeft}>
+        <img
+          className={styles.suggestionPoster}
+          src={item.posterImageUrl || PLACEHOLDER_IMAGE}
+          alt=""
+          loading="lazy"
+          onError={(event) => {
+            const target = event.currentTarget
+            if (target.src !== PLACEHOLDER_IMAGE) {
+              target.src = PLACEHOLDER_IMAGE
+            }
+          }}
+        />
+        <div>
+          <p className={styles.suggestionTitle}>{item.title}</p>
+          <p className={styles.suggestionMeta}>
+            {item.contentType || 'Content'}
+            {item.releaseYear ? ` • ${item.releaseYear}` : ''}
+          </p>
+        </div>
       </div>
       <FiPlay size={16} />
     </button>
   )
 
-  const wrapperClasses = [styles.wrapper, variant === 'compact' ? styles.compact : '', className]
+  const wrapperClasses = [
+    styles.wrapper,
+    variant === 'compact' ? styles.compact : '',
+    lockCompactLayout ? styles.lockCompactLayout : '',
+    className
+  ]
     .filter(Boolean)
     .join(' ')
 

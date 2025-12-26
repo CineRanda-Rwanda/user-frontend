@@ -85,6 +85,22 @@
   transition: background 0.2s ease;
 }
 
+.suggestionLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-width: 0;
+}
+
+.suggestionPoster {
+  width: 34px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.06);
+  flex: 0 0 auto;
+}
+
 .suggestionItem + .suggestionItem {
   margin-top: 0.25rem;
 }
@@ -96,6 +112,9 @@
 .suggestionTitle {
   margin: 0;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .suggestionMeta {
@@ -196,6 +215,22 @@
   right: 0;
 }
 
+/*
+  When the search bar is embedded in the navbar, we need it to stay compact on mobile.
+  The default responsive rules below intentionally stack the controls, which looks too large in a header.
+*/
+.lockCompactLayout .inputShell {
+  flex-wrap: nowrap;
+}
+
+.lockCompactLayout .searchIcon {
+  font-size: 1.1rem;
+}
+
+.lockCompactLayout .input {
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .inputShell {
     flex-wrap: wrap;
@@ -219,6 +254,11 @@
     left: 0;
     right: 0;
   }
+
+  .lockCompactLayout .inputShell {
+    flex-wrap: nowrap;
+    padding: 0.5rem 0.75rem 0.5rem 1.1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -233,5 +273,14 @@
 
   .searchButton {
     width: 100%;
+  }
+
+  .lockCompactLayout .inputShell {
+    flex-direction: row;
+    gap: var(--spacing-md);
+  }
+
+  .lockCompactLayout .searchIcon {
+    align-self: center;
   }
 }

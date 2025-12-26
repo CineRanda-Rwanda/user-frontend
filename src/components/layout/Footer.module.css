@@ -1,8 +1,8 @@
 .footer {
   background: var(--bg-dark);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--section-spacing) var(--page-padding);
-  margin-top: var(--section-spacing);
+  padding: var(--spacing-3xl) var(--page-padding);
+  margin-top: var(--spacing-3xl);
 }
 
 .footerContent {

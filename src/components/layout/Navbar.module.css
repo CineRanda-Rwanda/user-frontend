@@ -529,13 +529,40 @@
     flex-wrap: nowrap;
   }
 
+  .mobileMenuButton {
+    order: 0;
+  }
+
+  .logo {
+    order: 1;
+  }
+
   .searchContainer {
-    display: none;
+    display: flex;
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    margin-top: 0;
+    justify-content: center;
+  }
+
+  .actions {
+    order: 3;
+  }
+
+  .navbarSearch {
+    width: 100%;
+    max-width: clamp(180px, 55vw, 520px);
+  }
+
+  .navbarSearch form svg {
+    display: block;
+    flex-shrink: 0;
   }
 
   .mobileSearchBar {
-    display: block;
-    padding-top: var(--spacing-xs);
+    display: none;
   }
 
   .mobileMenuButton {

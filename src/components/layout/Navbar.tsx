@@ -25,7 +25,6 @@ const Navbar: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -132,7 +131,9 @@ const Navbar: React.FC = () => {
           className={styles.navbarSearch}
           showHeading={false}
           showFilters={false}
-          placeholder="Search catalog"
+          placeholder="Search"
+          showSubmitButton={false}
+          lockCompactLayout
         />
       </div>
 
@@ -269,16 +270,6 @@ const Navbar: React.FC = () => {
         </div>
       )}
       </nav>
-      <div className={styles.mobileSearchBar}>
-        <GlobalSearchBar
-          variant="compact"
-          className={styles.navbarSearch}
-          showHeading={false}
-          showFilters={false}
-          placeholder="Search catalog"
-          showSubmitButton={false}
-        />
-      </div>
     </>
   )
 }
