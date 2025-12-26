@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiPlay, FiInfo, FiStar, FiEye } from 'react-icons/fi'
+import { FiPlay, FiStar } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { Content } from '@/types/content'
 import { contentAPI } from '@/api/content'
 import Button from '@/components/common/Button'
-import WatchMenu from '@/components/common/WatchMenu'
-import { useAuth } from '@/contexts/AuthContext'
 import styles from './FeaturedHero.module.css'
 
 interface FeaturedHeroProps {
@@ -20,9 +18,7 @@ const ROTATION_INTERVAL_MS = 8000
 
 const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null }) => {
   const [autoIndex, setAutoIndex] = useState(0)
-  const [showWatchMenu, setShowWatchMenu] = useState(false)
   const [loadingTrailer, setLoadingTrailer] = useState(false)
-  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -48,23 +44,10 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
 
   if (!current) return null
 
-  const handleWatchClick = () => {
-    if (current.contentType === 'Series') {
-      navigate(`/content/${current._id}`)
-    } else {
-      // For movies, toggle the watch menu
-      setShowWatchMenu(!showWatchMenu)
-    }
-  }
-
   const handleCenterPlay = () => {
     // The hero center play should always play the trailer.
     handleTrailer()
   }
-
-  // Both Movies and Series can have trailers. The lightweight list payload may omit
-  // trailerYoutubeLink, so we allow the action and resolve it on demand.
-  const hasTrailer = current.contentType === 'Movie' || current.contentType === 'Series' || !!current.trailerYoutubeLink
 
   const resolveTrailerFromContentDetails = async (): Promise<string> => {
     const response = await contentAPI.getContentById(current._id)
@@ -115,19 +98,6 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
       }
     } finally {
       setLoadingTrailer(false)
-    }
-  }
-
-  const handleFullVideo = () => {
-    const isPurchased = current.isPurchased || current.userAccess?.isPurchased
-    const isFree = current.isFree || current.priceInRwf === 0
-    
-    if (isAuthenticated && (isPurchased || isFree)) {
-      navigate(`/watch/${current._id}`)
-    } else if (!isAuthenticated) {
-      navigate('/login')
-    } else {
-      navigate(`/content/${current._id}`)
     }
   }
 
@@ -182,34 +152,15 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
 
         <p className={styles.description}>{current.description}</p>
 
-          <div className={styles.actions}>
-          <div className={styles.watchButtonContainer}>
-            <Button
-              variant="primary"
-              size="large"
-              icon={current.contentType === 'Series' ? <FiEye /> : <FiPlay />}
-              onClick={handleWatchClick}
-              className={styles.heroButton}
-            >
-              {current.contentType === 'Series' ? 'View' : 'Watch'}
-            </Button>
-            <WatchMenu
-              isOpen={showWatchMenu}
-              onClose={() => setShowWatchMenu(false)}
-              onTrailer={handleTrailer}
-              onFullVideo={handleFullVideo}
-              hasTrailer={hasTrailer}
-            />
-          </div>
-
+        <div className={styles.actions}>
           <Button
-            variant="ghost"
+            variant="primary"
             size="large"
-            icon={<FiInfo />}
+            icon={<FiPlay />}
             onClick={handleMoreInfo}
             className={styles.heroButton}
           >
-            More Info
+            Full video
           </Button>
         </div>
       </div>
