@@ -27,6 +27,21 @@ interface OptionItem {
   name: string
 }
 
+const resolvePosterUrl = (item: unknown): string => {
+  if (!item || typeof item !== 'object') return ''
+  const record = item as Record<string, unknown>
+  const candidate =
+    record.posterImageUrl ||
+    record.posterUrl ||
+    record.poster ||
+    record.thumbnailUrl ||
+    record.thumbnailImageUrl ||
+    record.coverImageUrl ||
+    record.imageUrl
+
+  return typeof candidate === 'string' ? candidate : ''
+}
+
 const normalizeOptions = (source: unknown[]): OptionItem[] => {
   return source
     .map((item) => {
@@ -197,9 +212,9 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       <div className={styles.suggestionLeft}>
         <img
           className={styles.suggestionPoster}
-          src={item.posterImageUrl || PLACEHOLDER_IMAGE}
+          src={resolvePosterUrl(item) || PLACEHOLDER_IMAGE}
           alt=""
-          loading="lazy"
+          decoding="async"
           onError={(event) => {
             const target = event.currentTarget
             if (target.src !== PLACEHOLDER_IMAGE) {

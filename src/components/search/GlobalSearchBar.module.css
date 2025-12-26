@@ -89,16 +89,18 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  flex: 1;
   min-width: 0;
 }
 
 .suggestionPoster {
-  width: 34px;
-  height: 48px;
+  width: 40px;
+  height: 56px;
   border-radius: 10px;
   object-fit: cover;
   background: rgba(255, 255, 255, 0.06);
   flex: 0 0 auto;
+  display: block;
 }
 
 .suggestionItem + .suggestionItem {
@@ -253,6 +255,14 @@
   .suggestionsPanel {
     left: 0;
     right: 0;
+  }
+
+  /* Navbar-embedded search: keep the suggestions panel centered and a bit wider than the input. */
+  .lockCompactLayout .suggestionsPanel {
+    left: 50%;
+    right: auto;
+    width: min(82vw, 540px);
+    transform: translateX(-50%);
   }
 
   .lockCompactLayout .inputShell {
