@@ -58,27 +58,46 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
   }
 
   const handleCenterPlay = () => {
-    // Center play button should expose play options regardless of content type
-    setShowWatchMenu(true)
+    // The hero center play should always play the trailer.
+    handleTrailer()
   }
 
-  // Check if content has trailer (either from API endpoint or in content data)
-  const hasTrailer = current.contentType === 'Movie' || !!current.trailerYoutubeLink
+  // Both Movies and Series can have trailers. The lightweight list payload may omit
+  // trailerYoutubeLink, so we allow the action and resolve it on demand.
+  const hasTrailer = current.contentType === 'Movie' || current.contentType === 'Series' || !!current.trailerYoutubeLink
+
+  const resolveTrailerFromContentDetails = async (): Promise<string> => {
+    const response = await contentAPI.getContentById(current._id)
+    const payload = response?.data?.data
+    const resolvedContent = payload?.movie || payload?.series || payload?.content || payload || response?.data
+    const normalizedContent = resolvedContent?.content ?? resolvedContent
+    const link = (normalizedContent as { trailerYoutubeLink?: string })?.trailerYoutubeLink
+    return typeof link === 'string' ? link : ''
+  }
 
   const handleTrailer = async () => {
     if (loadingTrailer) return
     
     try {
       setLoadingTrailer(true)
-      
-      // Fetch trailer from API
-      const response = current.contentType === 'Movie'
-        ? await contentAPI.getMovieTrailer(current._id)
-        : null // Series trailer endpoint would be different
-      
-      const trailerLink = response?.data?.data?.movie?.trailerYoutubeLink || 
-                         response?.data?.data?.series?.trailerYoutubeLink ||
-                         current.trailerYoutubeLink
+
+      let trailerLink = current.trailerYoutubeLink || ''
+
+      // The hero usually receives a lightweight content object; fetch full details
+      // to get trailerYoutubeLink (this is why it works on the More Info page).
+      if (!trailerLink || !trailerLink.trim()) {
+        trailerLink = await resolveTrailerFromContentDetails()
+      }
+
+      // Final fallback: call the trailer endpoint used elsewhere (it may return
+      // series trailers too even if the name says “movie”).
+      if (!trailerLink || !trailerLink.trim()) {
+        const response = await contentAPI.getMovieTrailer(current._id)
+        trailerLink =
+          response?.data?.data?.movie?.trailerYoutubeLink ||
+          response?.data?.data?.series?.trailerYoutubeLink ||
+          ''
+      }
       
       if (trailerLink && trailerLink.trim()) {
         // Navigate to trailer page
@@ -134,7 +153,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
         type="button"
         className={styles.centerPlayButton}
         onClick={handleCenterPlay}
-        aria-label={current.contentType === 'Series' ? 'View title' : 'Watch title'}
+        aria-label="Play trailer"
       >
         <FiPlay />
       </button>
