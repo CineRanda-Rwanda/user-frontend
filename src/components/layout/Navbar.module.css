@@ -410,10 +410,10 @@
   align-items: center;
   justify-content: center;
   width: 44px;
-  height: 34px;
+  height: 44px;
   border-radius: 12px;
   background: rgba(10, 10, 10, 0.75);
-  border: 1px solid rgba(255, 215, 0, 0.6);
+  border: none;
   color: var(--primary-yellow);
   font-size: var(--fs-xl);
   cursor: pointer;
@@ -424,6 +424,8 @@
 
 .mobileMenuButton svg {
   pointer-events: none;
+  width: 22px;
+  height: 22px;
 }
 
 .menuIcon {
@@ -453,20 +455,18 @@
 }
 
 .mobileMenuButton:hover {
-  border-color: rgba(255, 215, 0, 0.9);
   box-shadow: 0 16px 36px rgba(255, 215, 0, 0.25);
 }
 
 .menuButtonActive {
   background: linear-gradient(135deg, rgba(229, 9, 20, 0.15), rgba(255, 60, 60, 0.25));
-  border-color: rgba(255, 80, 80, 0.8);
   color: var(--accent-red);
   box-shadow: 0 20px 40px rgba(255, 64, 64, 0.35);
   transform: translateY(1px);
 }
 
 .menuButtonActive:hover {
-  border-color: rgba(255, 120, 120, 0.9);
+  box-shadow: 0 24px 44px rgba(255, 64, 64, 0.35);
 }
 
 .mobileNav {

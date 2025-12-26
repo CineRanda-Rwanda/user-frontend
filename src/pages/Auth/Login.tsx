@@ -7,7 +7,7 @@ import { authAPI } from '@/api/auth'
 import { LoginRequest } from '@/types/auth'
 import { Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
-import randaPlusLogo from '@/assets/randa-plus-logo.svg'
+import randaPlusLogo from '@/assets/logo.png'
 import styles from './Auth.module.css'
 
 type LoginMethod = 'phone' | 'email'

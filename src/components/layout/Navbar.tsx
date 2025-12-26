@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/contexts/NotificationsContext'
 import {
   FiBell,
+  FiMenu,
   FiUser,
   FiSettings,
   FiLogOut,
@@ -13,7 +14,7 @@ import {
 import { getInitials } from '@/utils/formatters'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
-import randaPlusLogo from '@/assets/randa-plus-logo.svg'
+import randaPlusLogo from '@/assets/logo.png'
 import { contentAPI } from '@/api/content'
 import styles from './Navbar.module.css'
 
@@ -137,11 +138,7 @@ const Navbar: React.FC = () => {
         {isMobileMenuOpen ? (
           <FiX />
         ) : (
-          <span className={styles.menuIcon} aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </span>
+          <FiMenu />
         )}
       </button>
 
