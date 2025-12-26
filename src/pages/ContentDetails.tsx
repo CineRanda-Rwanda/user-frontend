@@ -456,7 +456,7 @@ const ContentDetails: React.FC = () => {
   const totalEpisodes = content.seasons?.reduce((acc, season) => acc + (season.episodes?.length || 0), 0) || 0;
   const genreNames = Array.isArray(content.genres) ? content.genres.map((g) => g.name) : [];
   const primaryGenres = genreNames.slice(0, 3).join(' • ') || 'Drama';
-  const primaryCreator = content.director || content.cast?.[0] || 'CinéRanda Studio';
+  const primaryCreator = content.director || content.cast?.[0] || 'Randa Plus Studio';
   const primaryLanguage = content.language || content.countryOfOrigin || 'Kinyarwanda';
   const unlockInProgress = contentUnlocking || paymentPolling;
 
@@ -672,7 +672,7 @@ const ContentDetails: React.FC = () => {
             <div className={styles.sectionHeader}>
               <div>
                 <div className={styles.badgeRow}>
-                  <span>CinéRanda Originals</span>
+                  <span>Randa Plus Originals</span>
                 </div>
                 <h3 className={styles.sectionTitle}>Seasons & Episodes</h3>
               </div>
@@ -811,7 +811,7 @@ const ContentDetails: React.FC = () => {
               </div>
               <h3 className={styles.relatedTitle}>Recommended For You</h3>
             </div>
-            <span className={styles.relatedSubtitle}>Hand-picked from the CinéRanda vault</span>
+            <span className={styles.relatedSubtitle}>Hand-picked from the Randa Plus vault</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {relatedContent.map((item) => (

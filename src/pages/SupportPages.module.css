@@ -13,6 +13,42 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.heroTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.inlineNav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.inlineNavLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--fs-sm);
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+.inlineNavLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
 
 .sectionLabel {
   text-transform: uppercase;
@@ -40,6 +76,92 @@
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: #0c0c12;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--spacing-md);
+}
+
+.sideNav {
+  position: sticky;
+  top: 90px;
+  align-self: start;
+}
+
+.sideNavCard {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+}
+
+.sideNavTitle {
+  font-size: var(--fs-sm);
+  opacity: 0.85;
+  margin: 0 0 var(--spacing-sm);
+}
+
+.sideNavLink {
+  display: block;
+  padding: var(--spacing-sm) 0;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.sideNavLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.main {
+  min-width: 0;
+}
+
+.bulletList {
+  display: grid;
+  gap: var(--spacing-sm);
+  padding-left: var(--spacing-md);
+  margin: 0;
+}
+
+.richText {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.callout {
+  margin-top: 18px;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+}
+
+.calloutTitle {
+  margin: 0 0 6px;
+}
+
+.calloutActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 900px) {
+  .twoColumn {
+    grid-template-columns: 1fr;
+  }
+
+  .sideNav {
+    position: static;
+  }
+
+  .heroTopRow {
+    align-items: flex-start;
+  }
 }
 
 .sectionHeader {

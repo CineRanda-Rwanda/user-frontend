@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useNavigate } from 'react-router-dom'
 import { authAPI } from '@/api/auth'
 import { userAPI } from '@/api/user'
-import { User } from '@/types/user'
+import { UpdateUserProfile, User } from '@/types/user'
 import { LoginRequest, RegisterRequest, VerifyRegistrationRequest, VerifyEmailRequest, AuthResponse } from '@/types/auth'
 import { STORAGE_KEYS } from '@/utils/constants'
 import { toast } from 'react-toastify'
@@ -234,7 +234,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateProfile = async (profileData: Partial<User>) => {
     try {
-      const { data } = await userAPI.updateProfile(profileData)
+      const payload: UpdateUserProfile = {
+        username: profileData.username,
+        phoneNumber: profileData.phoneNumber ?? undefined,
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        preferredLanguage: profileData.preferredLanguage,
+        theme: profileData.theme,
+      }
+
+      const { data } = await userAPI.updateProfile(payload)
       const userData = (data as any).data?.user || (data as any).user || data
       setUser(userData as any)
     } catch (error) {
