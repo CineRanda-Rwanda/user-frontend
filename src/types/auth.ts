@@ -71,7 +71,8 @@ export interface Wallet {
 export interface AuthUser {
   _id: string
   username?: string
-  phoneNumber: string
+  phoneNumber?: string | null
+  authProvider?: 'email' | 'phone' | 'google' | string
   email?: string
   firstName?: string
   lastName?: string

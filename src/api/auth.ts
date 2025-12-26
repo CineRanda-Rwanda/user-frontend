@@ -108,6 +108,9 @@ export const authAPI = {
   resetPassword: (payload: ResetPasswordRequest) =>
     api.post('/auth/reset-password', payload),
 
+  changePassword: (payload: { currentPassword: string; newPassword: string }) =>
+    api.post('/auth/change-password', payload),
+
   exchangeGoogleAuthorizationCode: (payload: { code: string; redirectUri: string }) =>
     api.post<AuthResponse>('/auth/google/exchange', payload, { withCredentials: true }),
 

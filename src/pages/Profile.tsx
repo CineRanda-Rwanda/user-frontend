@@ -12,6 +12,8 @@ const Profile: React.FC = () => {
   const navigate = useNavigate()
   const [pinForm, setPinForm] = useState({ oldPin: '', newPin: '', confirmPin: '' })
   const [pinError, setPinError] = useState<string | null>(null)
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (loading || !user) {
@@ -25,6 +27,8 @@ const Profile: React.FC = () => {
   const initials = user.username?.slice(0, 2).toUpperCase() || 'ME'
   const displayName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username || 'Member'
   const planLabel = user.location === 'international' ? 'Global plan' : 'Rwanda plan'
+  const canChangePin = user.authProvider === 'phone' || (!user.authProvider && !user.email && Boolean(user.phoneNumber))
+  const canChangePassword = user.authProvider === 'email'
 
   const infoRows = useMemo(
     () => [
@@ -49,6 +53,11 @@ const Profile: React.FC = () => {
     event.preventDefault()
     setPinError(null)
 
+    if (!canChangePin) {
+      toast.error('PIN is only available for phone-based accounts.')
+      return
+    }
+
     if (!pinForm.oldPin || pinForm.oldPin.length < 4) {
       setPinError('Enter your current 4-digit PIN')
       return
@@ -72,6 +81,47 @@ const Profile: React.FC = () => {
       refreshUser()
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Unable to update PIN right now'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handlePasswordSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setPasswordError(null)
+
+    if (!canChangePassword) {
+      toast.info('Your password is managed by your sign-in provider.')
+      return
+    }
+
+    if (!passwordForm.currentPassword || passwordForm.currentPassword.length < 6) {
+      setPasswordError('Enter your current password')
+      return
+    }
+
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
+      setPasswordError('Choose a new password with at least 8 characters')
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Password confirmation does not match')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      await authAPI.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      })
+      toast.success('Password updated successfully')
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      refreshUser()
+    } catch (error: any) {
+      const message = error?.response?.data?.message || 'Unable to update password right now'
       toast.error(message)
     } finally {
       setIsSubmitting(false)
@@ -109,53 +159,103 @@ const Profile: React.FC = () => {
           </div>
         </section>
 
-        <section className={`${styles.card} ${styles.pinCard}`}>
-          <div className={styles.pinHeader}>
-            <div>
-              <h2 className={styles.cardTitle}>Change PIN</h2>
-              <p className={styles.cardSubtitle}>Secure instant-checkout purchases with your streaming PIN.</p>
+        {canChangePin && (
+          <section className={`${styles.card} ${styles.pinCard}`}>
+            <div className={styles.pinHeader}>
+              <div>
+                <h2 className={styles.cardTitle}>Change PIN</h2>
+                <p className={styles.cardSubtitle}>Secure instant-checkout purchases with your streaming PIN.</p>
+              </div>
             </div>
-          </div>
-          <form className={styles.form} onSubmit={handlePinSubmit}>
-            <label className={styles.field}>
-              <span>Current PIN</span>
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="current-password"
-                maxLength={6}
-                value={pinForm.oldPin}
-                onChange={(event) => setPinForm({ ...pinForm, oldPin: event.target.value })}
-              />
-            </label>
-            <label className={styles.field}>
-              <span>New PIN</span>
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="new-password"
-                maxLength={6}
-                value={pinForm.newPin}
-                onChange={(event) => setPinForm({ ...pinForm, newPin: event.target.value })}
-              />
-            </label>
-            <label className={styles.field}>
-              <span>Confirm PIN</span>
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="new-password"
-                maxLength={6}
-                value={pinForm.confirmPin}
-                onChange={(event) => setPinForm({ ...pinForm, confirmPin: event.target.value })}
-              />
-            </label>
-            {pinError && <p className={styles.errorText}>{pinError}</p>}
-            <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
-              {isSubmitting ? 'Updating...' : 'Save new PIN'}
-            </button>
-          </form>
-        </section>
+            <form className={styles.form} onSubmit={handlePinSubmit}>
+              <label className={styles.field}>
+                <span>Current PIN</span>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="current-password"
+                  maxLength={6}
+                  value={pinForm.oldPin}
+                  onChange={(event) => setPinForm({ ...pinForm, oldPin: event.target.value })}
+                />
+              </label>
+              <label className={styles.field}>
+                <span>New PIN</span>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="new-password"
+                  maxLength={6}
+                  value={pinForm.newPin}
+                  onChange={(event) => setPinForm({ ...pinForm, newPin: event.target.value })}
+                />
+              </label>
+              <label className={styles.field}>
+                <span>Confirm PIN</span>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="new-password"
+                  maxLength={6}
+                  value={pinForm.confirmPin}
+                  onChange={(event) => setPinForm({ ...pinForm, confirmPin: event.target.value })}
+                />
+              </label>
+              {pinError && <p className={styles.errorText}>{pinError}</p>}
+              <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
+                {isSubmitting ? 'Updating...' : 'Save new PIN'}
+              </button>
+            </form>
+          </section>
+        )}
+
+        {canChangePassword && (
+          <section className={`${styles.card} ${styles.pinCard}`}>
+            <div className={styles.pinHeader}>
+              <div>
+                <h2 className={styles.cardTitle}>Change password</h2>
+                <p className={styles.cardSubtitle}>Update your email account password.</p>
+              </div>
+            </div>
+            <form className={styles.form} onSubmit={handlePasswordSubmit}>
+              <label className={styles.field}>
+                <span>Current password</span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={passwordForm.currentPassword}
+                  onChange={(event) =>
+                    setPasswordForm({ ...passwordForm, currentPassword: event.target.value })
+                  }
+                />
+              </label>
+              <label className={styles.field}>
+                <span>New password</span>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })}
+                />
+              </label>
+              <label className={styles.field}>
+                <span>Confirm new password</span>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) =>
+                    setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })
+                  }
+                />
+              </label>
+              {passwordError && <p className={styles.errorText}>{passwordError}</p>}
+              <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
+                {isSubmitting ? 'Updating...' : 'Save new password'}
+              </button>
+            </form>
+          </section>
+        )}
       </section>
     </div>
   )

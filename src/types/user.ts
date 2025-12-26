@@ -19,7 +19,8 @@ export interface User {
   _id: string
   username?: string
   email?: string
-  phoneNumber: string
+  phoneNumber?: string | null
+  authProvider?: 'email' | 'phone' | 'google' | string
   firstName?: string
   lastName?: string
   profilePictureUrl?: string
