@@ -45,6 +45,31 @@
   padding-bottom: var(--spacing-md);
 }
 
+.gridSingle {
+  grid-auto-flow: row;
+  grid-auto-columns: unset;
+  grid-template-columns: 200px;
+  justify-content: start;
+  overflow-x: hidden;
+}
+
+.gridSingle > * {
+  width: 100%;
+}
+
+.gridFew {
+  --content-count: 4;
+  grid-auto-flow: row;
+  grid-auto-columns: unset;
+  grid-template-columns: repeat(var(--content-count), 200px);
+  justify-content: start;
+  overflow-x: hidden;
+}
+
+.gridFew > * {
+  width: 100%;
+}
+
 .grid::-webkit-scrollbar {
   height: 8px;
 }
@@ -109,6 +134,22 @@
   .grid {
     grid-auto-columns: minmax(150px, 1fr);
     gap: var(--spacing-sm);
+  }
+
+  .gridSingle {
+    grid-template-columns: 150px;
+  }
+
+  .gridSingle > * {
+    width: 100%;
+  }
+
+  .gridFew {
+    grid-template-columns: repeat(var(--content-count), 150px);
+  }
+
+  .gridFew > * {
+    width: 100%;
   }
 
   .scrollButton {

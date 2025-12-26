@@ -458,6 +458,13 @@ const ContentDetails: React.FC = () => {
   const primaryGenres = genreNames.slice(0, 3).join(' • ') || 'Drama';
   const primaryCreator = content.director || content.cast?.[0] || 'Randa Plus Studio';
   const primaryLanguage = content.language || content.countryOfOrigin || 'Kinyarwanda';
+  const castNames = Array.isArray(content.cast) ? content.cast.filter(Boolean) : [];
+  const castPreview = (() => {
+    if (!castNames.length) return 'Not listed';
+    const shown = castNames.slice(0, 3);
+    const remaining = castNames.length - shown.length;
+    return remaining > 0 ? `${shown.join(', ')} +${remaining} more` : shown.join(', ');
+  })();
   const unlockInProgress = contentUnlocking || paymentPolling;
 
   const getEpisodeArtwork = (episode?: Episode | null) => {
@@ -628,6 +635,10 @@ const ContentDetails: React.FC = () => {
                   <div className={styles.statCard}>
                     <p className={styles.statLabel}>Creator</p>
                     <p className={styles.statValue}>{primaryCreator}</p>
+                  </div>
+                  <div className={styles.statCard}>
+                    <p className={styles.statLabel}>Cast</p>
+                    <p className={styles.statValue}>{castPreview}</p>
                   </div>
                   <div className={styles.statCard}>
                     <p className={styles.statLabel}>Language</p>

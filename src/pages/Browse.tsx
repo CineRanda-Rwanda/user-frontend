@@ -88,7 +88,36 @@ const Browse: React.FC = () => {
       : series
 
   const heroItems = heroPool.slice(0, 5)
-  const hasAnyRows = trending.length > 0 || movies.length > 0 || series.length > 0
+
+  const dedupeById = (items: Content[]) => {
+    const seen = new Set<string>()
+    const out: Content[] = []
+    for (const item of items) {
+      if (!item?._id) continue
+      if (seen.has(item._id)) continue
+      seen.add(item._id)
+      out.push(item)
+    }
+    return out
+  }
+
+  const allUnique = dedupeById([...(movies || []), ...(series || [])])
+  const catalogSize = allUnique.length
+  const heroPrimaryId = heroItems[0]?._id
+
+  const hasMovies = movies.length > 0
+  const hasSeries = series.length > 0
+
+  const smallCatalogPicks = allUnique.filter((c) => c._id !== heroPrimaryId)
+  // Only show the extra "Explore" row when we have at least 3 titles.
+  // With 2 titles (e.g., 1 movie + 1 series), the hero rotation already gives both visibility and a single-item row looks awkward.
+  const showSmallCatalogRow = catalogSize >= 3 && catalogSize <= 6 && smallCatalogPicks.length > 0
+
+  const smallCatalogTitle = hasSeries && !hasMovies ? 'Explore series' : hasMovies && !hasSeries ? 'Explore movies' : 'Explore titles'
+  const smallCatalogViewAllLink = hasSeries && !hasMovies ? '/series' : hasMovies && !hasSeries ? '/movies' : undefined
+
+  const showFullRows = catalogSize > 6
+  const hasAnyRows = catalogSize > 0
   const showEmptyState = !loading && !hasAnyRows
 
   return (
@@ -104,9 +133,22 @@ const Browse: React.FC = () => {
         )}
 
         <div className={styles.sectionStack}>
-          <ContentRow title="Trending Now" content={trending} hidePrice autoAdvance />
-          <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
-          <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
+          {showSmallCatalogRow && (
+            <ContentRow
+              title={smallCatalogTitle}
+              content={smallCatalogPicks}
+              viewAllLink={smallCatalogViewAllLink}
+              hidePrice
+            />
+          )}
+
+          {showFullRows && (
+            <>
+              <ContentRow title="Trending Now" content={trending} hidePrice autoAdvance />
+              <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
+              <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
+            </>
+          )}
         </div>
 
         {showEmptyState && (

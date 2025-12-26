@@ -25,6 +25,8 @@ const ContentRow: React.FC<ContentRowProps> = ({
   autoAdvanceIntervalMs = 3500,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const isSingle = content.length === 1
+  const isFew = content.length > 1 && content.length <= 4
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -41,6 +43,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
   useEffect(() => {
     if (!autoAdvance) return
     if (content.length <= 1) return
+    if (isFew) return
 
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
@@ -94,7 +97,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
 
     const id = window.setInterval(tick, Math.max(1200, autoAdvanceIntervalMs))
     return () => window.clearInterval(id)
-  }, [autoAdvance, autoAdvanceIntervalMs, content.length])
+  }, [autoAdvance, autoAdvanceIntervalMs, content.length, isFew])
 
   return (
     <div className={styles.row}>
@@ -108,25 +111,41 @@ const ContentRow: React.FC<ContentRowProps> = ({
       </div>
 
       <div className={styles.scrollContainer}>
-        <button
-          className={`${styles.scrollButton} ${styles.left}`}
-          onClick={() => scroll('left')}
-        >
-          <FiChevronLeft />
-        </button>
+        {!isSingle && !isFew && (
+          <button
+            className={`${styles.scrollButton} ${styles.left}`}
+            onClick={() => scroll('left')}
+            aria-label="Scroll left"
+            type="button"
+          >
+            <FiChevronLeft />
+          </button>
+        )}
 
-        <div className={styles.grid} ref={scrollRef}>
+        <div
+          className={`${styles.grid} ${isSingle ? styles.gridSingle : ''} ${isFew ? styles.gridFew : ''}`}
+          ref={scrollRef}
+          style={
+            isFew
+              ? ({ ['--content-count' as any]: content.length } as React.CSSProperties)
+              : undefined
+          }
+        >
           {content.map((item) => (
             <ContentCard key={item._id} content={item} showBadge={showBadge} hidePrice={hidePrice} />
           ))}
         </div>
 
-        <button
-          className={`${styles.scrollButton} ${styles.right}`}
-          onClick={() => scroll('right')}
-        >
-          <FiChevronRight />
-        </button>
+        {!isSingle && !isFew && (
+          <button
+            className={`${styles.scrollButton} ${styles.right}`}
+            onClick={() => scroll('right')}
+            aria-label="Scroll right"
+            type="button"
+          >
+            <FiChevronRight />
+          </button>
+        )}
       </div>
     </div>
   )
