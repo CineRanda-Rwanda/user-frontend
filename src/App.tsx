@@ -26,6 +26,7 @@ const FAQPage = lazy(() => import('./pages/FAQ'))
 const TermsPage = lazy(() => import('./pages/Terms'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const OAuthCallback = lazy(() => import('./pages/Auth/OAuthCallback'))
+const PaymentFailed = lazy(() => import('./pages/PaymentFailed'))
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -208,6 +209,15 @@ const AppRoutes = () => {
               element={
                 <PublicRoute>
                   <TermsPage />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/payment-failed"
+              element={
+                <PublicRoute>
+                  <PaymentFailed />
                 </PublicRoute>
               }
             />
