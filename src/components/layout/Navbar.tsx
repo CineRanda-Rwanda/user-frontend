@@ -14,6 +14,7 @@ import { getInitials } from '@/utils/formatters'
 import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
 import randaPlusLogo from '@/assets/randa-plus-logo.svg'
+import { contentAPI } from '@/api/content'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
@@ -23,8 +24,39 @@ const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [hasMovies, setHasMovies] = useState(true)
+  const [hasSeries, setHasSeries] = useState(true)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const readContentCount = (raw: any) => {
+      const list = raw?.data?.data?.content || raw?.data?.content || []
+      return Array.isArray(list) ? list.length : 0
+    }
+
+    const loadAvailability = async () => {
+      try {
+        const [moviesRes, seriesRes] = await Promise.all([
+          contentAPI.getContentByType('Movie', 1, 1),
+          contentAPI.getContentByType('Series', 1, 1),
+        ])
+
+        if (isCancelled) return
+        setHasMovies(readContentCount(moviesRes) > 0)
+        setHasSeries(readContentCount(seriesRes) > 0)
+      } catch {
+        // If the check fails (network/backend down), keep links visible.
+      }
+    }
+
+    loadAvailability()
+    return () => {
+      isCancelled = true
+    }
+  }, [])
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -72,8 +104,8 @@ const Navbar: React.FC = () => {
 
   const primaryLinks = [
     { path: '/', label: 'Home' },
-    { path: '/movies', label: 'Movies' },
-    { path: '/series', label: 'Series' },
+    ...(hasMovies ? [{ path: '/movies', label: 'Movies' }] : []),
+    ...(hasSeries ? [{ path: '/series', label: 'Series' }] : []),
     { path: '/my-library', label: 'My Library' }
   ]
 
