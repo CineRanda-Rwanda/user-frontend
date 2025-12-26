@@ -65,21 +65,24 @@ const Watch: React.FC = () => {
     accessInfo?.hasAccess &&
       (accessInfo?.accessType === 'full' ||
         accessInfo?.accessType === 'free' ||
+        accessInfo?.accessType === 'content' ||
         !accessInfo?.accessType)
   )
 
-  const isContentUnlocked = Boolean(
-    content?.isFree ||
-      content?.priceInRwf === 0 ||
-      content?.isPurchased ||
-      content?.userAccess?.isPurchased ||
-      hasServerFullAccess
-  )
+  const isContentUnlocked = isSeries
+    ? Boolean(content?.isFree || content?.priceInRwf === 0 || hasServerFullAccess)
+    : Boolean(
+        content?.isFree ||
+          content?.priceInRwf === 0 ||
+          content?.isPurchased ||
+          content?.userAccess?.isPurchased ||
+          hasServerFullAccess
+      )
 
   const isEpisodeUnlocked = useCallback(
     (episode?: Episode | null) => {
       if (!content) return false
-      if (isContentUnlocked) return true
+      if (hasServerFullAccess) return true
       if (!episode) return false
       if (episode.isFree || episode.isUnlocked) return true
 
@@ -91,13 +94,11 @@ const Watch: React.FC = () => {
       const seasonWithEpisode = content.seasons?.find((season) =>
         season.episodes?.some((entry) => entry._id === episode._id)
       )
-
-      if (seasonWithEpisode?.userAccess?.isPurchased) return true
       if (seasonWithEpisode?.userAccess?.unlockedEpisodes?.includes(episode._id)) return true
 
       return false
     },
-    [content, isContentUnlocked, accessInfo]
+    [content, accessInfo, hasServerFullAccess]
   )
 
   const canPlayCurrent = Boolean(
@@ -427,6 +428,12 @@ const Watch: React.FC = () => {
     const identifier = resolveContentIdentifier(content)
     if (!identifier) return
 
+    if (content.contentType === 'Series') {
+      toast.info('Unlock episodes from the details page to avoid purchase errors.')
+      navigate(`/content/${identifier}`)
+      return
+    }
+
     try {
       setPurchasing(true)
       await startDirectCheckout(identifier, content.title || 'this title')
@@ -509,18 +516,20 @@ const Watch: React.FC = () => {
                   </p>
                   <div className={styles.lockedPrice}>{formatCurrency(content.priceInRwf || 0)}</div>
                   <div className={styles.lockedActions}>
-                    <button
-                      type="button"
-                      className={`${styles.ctaButton} ${styles.primaryCta}`}
-                      onClick={handlePurchase}
-                      disabled={unlockButtonDisabled}
-                    >
-                      {purchasing ? 'Opening checkout...' : paymentPolling ? 'Confirming...' : (
-                        <>
-                          <FiUnlock size={18} /> Pay & Unlock
-                        </>
-                      )}
-                    </button>
+                    {!isSeries && (
+                      <button
+                        type="button"
+                        className={`${styles.ctaButton} ${styles.primaryCta}`}
+                        onClick={handlePurchase}
+                        disabled={unlockButtonDisabled}
+                      >
+                        {purchasing ? 'Opening checkout...' : paymentPolling ? 'Confirming...' : (
+                          <>
+                            <FiUnlock size={18} /> Pay & Unlock
+                          </>
+                        )}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className={`${styles.ctaButton} ${styles.secondaryCta}`}

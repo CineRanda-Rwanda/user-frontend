@@ -18,6 +18,15 @@ export const initiateContentPurchase = async (
   return response.data?.data ?? response.data;
 }
 
+export const purchaseEpisodeWithWallet = async (payload: {
+  contentId: string
+  episodeId: string
+}): Promise<unknown> => {
+  const response = await api.post('/payments/episode/purchase/wallet', payload)
+  return response.data?.data ?? response.data
+}
+
 export const paymentAPI = {
   initiateContentPurchase,
+  purchaseEpisodeWithWallet,
 }

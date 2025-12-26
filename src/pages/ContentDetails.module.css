@@ -494,6 +494,34 @@
   border-color: #f5c518;
 }
 
+.upNextNavRow {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.upNextNavButton {
+  flex: 1;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.7rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upNextNavButton:hover {
+  border-color: rgba(245, 197, 24, 0.7);
+  color: #f5c518;
+}
+
+.upNextNavButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .seasonsSection {
   padding: 4rem 5vw;
   background: #050505;
