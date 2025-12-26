@@ -16,9 +16,10 @@ interface AuthContextType {
   register: (data: RegisterRequest) => Promise<any>
   verifyRegistration: (payload: VerifyRegistrationRequest) => Promise<void>
   verifyEmail: (payload: VerifyEmailRequest) => Promise<void>
-  logout: () => void
+  logout: (options?: { silent?: boolean }) => void
   refreshUser: () => Promise<void>
   updateProfile: (data: Partial<User>) => Promise<void>
+  completeOAuthLogin: (payload: OAuthCallbackPayload) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -28,6 +29,13 @@ type NormalizedAuthPayload = {
   token?: string
   refreshToken?: string
   welcomeBonus?: number
+  message?: string
+}
+
+type OAuthCallbackPayload = {
+  token: string
+  refreshToken?: string
+  user?: User
   message?: string
 }
 
@@ -85,6 +93,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(sessionUser as any)
     },
     [persistTokens]
+  )
+
+  const completeOAuthLogin = useCallback(
+    async (payload: OAuthCallbackPayload) => {
+      const { token, refreshToken, user: oauthUser, message } = payload
+
+      if (!token) {
+        throw new Error('Missing token from OAuth payload')
+      }
+
+      persistTokens(token, refreshToken)
+
+      try {
+        if (oauthUser) {
+          setUser(oauthUser as any)
+        } else {
+          const { data } = await userAPI.getCurrentUser()
+          const userData = (data as any).data?.user || (data as any).user || data
+          setUser(userData as any)
+        }
+
+        toast.success(message || 'Signed in with Google!')
+        navigate('/browse', { replace: true })
+      } catch (error) {
+        console.error('Failed to finalize OAuth login:', error)
+        logout({ silent: true })
+        toast.error('Could not finish Google login. Please try again.')
+        throw error
+      }
+    },
+    [logout, navigate, persistTokens]
   )
 
 
@@ -214,7 +253,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     verifyEmail,
     logout,
     refreshUser,
-    updateProfile
+    updateProfile,
+    completeOAuthLogin
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { act, type ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import Wallet from '../Wallet';
 
 const walletApi = vi.hoisted(() => ({
@@ -44,7 +45,11 @@ const sampleTransactions = [
 
 const renderWallet = async () => {
   await act(async () => {
-    render(<Wallet />);
+    render(
+      <MemoryRouter>
+        <Wallet />
+      </MemoryRouter>,
+    );
   });
 
   await waitFor(() => expect(screen.queryByTestId('loader')).not.toBeInTheDocument());

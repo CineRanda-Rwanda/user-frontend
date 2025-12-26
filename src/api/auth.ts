@@ -23,6 +23,8 @@ const getGoogleRedirectUri = () => {
   return ''
 }
 
+export const getGoogleRedirectUriForClient = getGoogleRedirectUri
+
 const buildGoogleOAuthUrl = () => {
   const fallbackBase = `${API_BASE_URL.replace(/\/$/, '')}/auth/google`
   const base = GOOGLE_OAUTH_BASE_URL || fallbackBase
@@ -37,14 +39,11 @@ const buildGoogleOAuthUrl = () => {
     if (!target.searchParams.has('redirect_uri')) {
       target.searchParams.set('redirect_uri', redirectUri)
     }
-    if (!target.searchParams.has('redirectUrl')) {
-      target.searchParams.set('redirectUrl', redirectUri)
-    }
     return target.toString()
   } catch (error) {
     const encoded = encodeURIComponent(redirectUri)
     const separator = base.includes('?') ? '&' : '?'
-    return `${base}${separator}redirect_uri=${encoded}&redirectUrl=${encoded}`
+    return `${base}${separator}redirect_uri=${encoded}`
   }
 }
 
@@ -108,6 +107,9 @@ export const authAPI = {
 
   resetPassword: (payload: ResetPasswordRequest) =>
     api.post('/auth/reset-password', payload),
+
+  exchangeGoogleAuthorizationCode: (payload: { code: string; redirectUri: string }) =>
+    api.post<AuthResponse>('/auth/google/exchange', payload, { withCredentials: true }),
 
   // Google OAuth helper
   getGoogleOAuthUrl: () => buildGoogleOAuthUrl()

@@ -25,6 +25,7 @@ const ContactPage = lazy(() => import('./pages/Contact'))
 const FAQPage = lazy(() => import('./pages/FAQ'))
 const TermsPage = lazy(() => import('./pages/Terms'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
+const OAuthCallback = lazy(() => import('./pages/Auth/OAuthCallback'))
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -75,6 +76,14 @@ const AppRoutes = () => {
               element={
                 <PublicRoute>
                   <ResetPassword />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/oauth/google/callback"
+              element={
+                <PublicRoute>
+                  <OAuthCallback />
                 </PublicRoute>
               }
             />

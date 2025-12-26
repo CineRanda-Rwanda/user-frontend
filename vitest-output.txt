@@ -1,0 +1,30 @@
+
+ RUN  v1.6.1 C:/Users/PC/user-frontend
+
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatCurrency > formats numbers using FRW prefix by default
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatCurrency > supports overriding the display code
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatDuration > renders minute/second durations under one hour
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatDuration > renders hour/minute/second durations above one hour
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatRelativeTime > returns "Just now" for dates within a minute
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatRelativeTime > returns minutes ago inside the first hour
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatRelativeTime > falls back to formatted date for older timestamps
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > truncateText > returns the original string when length is below limit
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > truncateText > adds ellipsis when trimming longer text
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > calculatePercentage > returns 0 when divisor is 0 to avoid NaN
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > calculatePercentage > rounds the computed percentage
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatFileSize > handles bytes precisely
+ ✓ src/utils/__tests__/formatters.test.ts > formatters > formatFileSize > converts kilobytes to the closest unit
+stderr | src/pages/__tests__/Wallet.test.tsx > Wallet page > renders wallet stats after data is fetched
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/pages/__tests__/Wallet.test.tsx > Wallet page > renders wallet stats after data is fetched
+ ✓ src/pages/__tests__/Wallet.test.tsx > Wallet page > fills the amount input when a quick amount is clicked 349ms
+ ✓ src/pages/__tests__/Wallet.test.tsx > Wallet page > blocks top ups below the minimum threshold
+ ✓ src/pages/__tests__/Wallet.test.tsx > Wallet page > initiates the top up flow when the amount is valid
+
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  13:14:21
+   Duration  7.03s (transform 1.01s, setup 1.24s, collect 2.64s, tests 1.14s, environment 4.64s, prepare 863ms)
+
