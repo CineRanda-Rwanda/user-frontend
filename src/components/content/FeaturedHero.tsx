@@ -5,6 +5,10 @@ import { toast } from 'react-toastify'
 import { Content } from '@/types/content'
 import { contentAPI } from '@/api/content'
 import Button from '@/components/common/Button'
+import { useTranslation } from 'react-i18next'
+import { getLocalizedContentTitle, getLocalizedContentDescription } from '@/utils/localizeContent'
+import { useAutoTranslate } from '@/hooks/useAutoTranslate'
+import { normalizeSupportedLanguage } from '@/utils/translate'
 import styles from './FeaturedHero.module.css'
 
 interface FeaturedHeroProps {
@@ -20,6 +24,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
   const [autoIndex, setAutoIndex] = useState(0)
   const [loadingTrailer, setLoadingTrailer] = useState(false)
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
 
   useEffect(() => {
     if (content.length === 0 || selectedId) return
@@ -31,10 +36,8 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
     return () => clearInterval(interval)
   }, [content.length, selectedId])
 
-  if (content.length === 0) return null
-
   const current = useMemo(() => {
-    if (!content.length) return content[0]
+    if (!content.length) return null
     if (selectedId) {
       const found = content.find((c) => c._id === selectedId)
       if (found) return found
@@ -42,7 +45,23 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
     return content[Math.min(autoIndex, content.length - 1)]
   }, [content, autoIndex, selectedId])
 
-  if (!current) return null
+  const language = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
+  const baseTitle = current ? getLocalizedContentTitle(current, language) : ''
+  const baseDescription = current ? getLocalizedContentDescription(current, language) : ''
+
+  const translatedTitle = useAutoTranslate(baseTitle, language, {
+    enabled: language !== 'en',
+    source: 'en',
+  })
+  const translatedDescription = useAutoTranslate(baseDescription, language, {
+    enabled: language !== 'en',
+    source: 'en',
+  })
+
+  if (!content.length || !current) return null
+
+  const title = translatedTitle.text || baseTitle
+  const description = translatedDescription.text || baseDescription
 
   const handleCenterPlay = () => {
     // The hero center play should always play the trailer.
@@ -84,17 +103,17 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
       
       if (trailerLink && trailerLink.trim()) {
         // Navigate to trailer page
-        navigate(`/trailer?url=${encodeURIComponent(trailerLink)}&title=${encodeURIComponent(current.title)}`)
+        navigate(`/trailer?url=${encodeURIComponent(trailerLink)}&title=${encodeURIComponent(title)}`)
       } else {
-        toast.error('Trailer not available for this title')
+        toast.error(t('content.trailer.notAvailableForTitle'))
       }
     } catch (error) {
       console.error('Failed to load trailer:', error)
       // Fallback to trailerYoutubeLink if available
       if (current.trailerYoutubeLink) {
-        navigate(`/trailer?url=${encodeURIComponent(current.trailerYoutubeLink)}&title=${encodeURIComponent(current.title)}`)
+        navigate(`/trailer?url=${encodeURIComponent(current.trailerYoutubeLink)}&title=${encodeURIComponent(title)}`)
       } else {
-        toast.error('Trailer not available')
+        toast.error(t('content.trailer.notAvailable'))
       }
     } finally {
       setLoadingTrailer(false)
@@ -111,7 +130,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
       <div className={styles.background}>
         <img
           src={current.posterImageUrl}
-          alt={current.title}
+          alt={title}
           className={styles.backgroundImage}
           key={current._id}
         />
@@ -123,15 +142,15 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
         type="button"
         className={styles.centerPlayButton}
         onClick={handleCenterPlay}
-        aria-label="Play trailer"
+        aria-label={t('content.actions.playTrailer')}
       >
         <FiPlay />
       </button>
 
       <div className={styles.content}>
-        <div className={styles.badge}>Featured</div>
+        <div className={styles.badge}>{t('content.badge.featured')}</div>
 
-        <h1 className={styles.title}>{current.title}</h1>
+        <h1 className={styles.title}>{title}</h1>
 
         <div className={styles.meta}>
             <span className={styles.rating}>
@@ -150,7 +169,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
             )}
           </div>
 
-        <p className={styles.description}>{current.description}</p>
+        <p className={styles.description}>{description}</p>
 
         <div className={styles.actions}>
           <Button
@@ -160,7 +179,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
             onClick={handleMoreInfo}
             className={styles.heroButton}
           >
-            Full video
+            {t('content.actions.fullVideo')}
           </Button>
         </div>
       </div>

@@ -1,0 +1,168 @@
+{
+  "language": {
+    "english": "English",
+    "kinyarwanda": "Kinyarwanda",
+    "french": "Français",
+    "label": "Language"
+  },
+  "nav": {
+    "home": "Home",
+    "movies": "Movies",
+    "series": "Series",
+    "myLibrary": "My Library",
+    "help": "Help",
+    "notifications": "Notifications",
+    "toggleNavigation": "Toggle navigation menu",
+    "searchPlaceholder": "Search",
+    "logoAria": "Randa Plus home",
+    "auth": {
+      "login": "Login",
+      "signUp": "Sign Up"
+    },
+    "profile": {
+      "myProfile": "My Profile",
+      "myLibrary": "My Library",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "goToBrowse": "Go to Browse",
+    "loading": "Loading...",
+    "comingSoon": "Coming soon!"
+  },
+  "emptyState": {
+    "search": {
+      "title": "No results found",
+      "message": "Try adjusting your search or filters to find what you're looking for."
+    },
+    "content": {
+      "title": "No content available",
+      "message": "Check back later for new content."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "message": "Please try again or contact support if the problem persists."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong.",
+    "loginFailed": "Login failed. Please try again.",
+    "registrationFailed": "Registration failed. Please try again.",
+    "verificationFailed": "Verification failed. Please try again."
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue",
+      "methodPhone": "Phone number",
+      "methodEmail": "Email address",
+      "phonePlaceholder": "Phone number",
+      "pinPlaceholder": "4-digit PIN",
+      "emailPlaceholder": "Email address",
+      "passwordPlaceholder": "Password",
+      "submit": "Sign In",
+      "google": "Continue with Google",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "forgotPin": "Forgot PIN?",
+      "forgotPassword": "Forgot password?"
+    },
+    "register": {
+      "title": "Create your account",
+      "methodPhone": "Phone number",
+      "methodEmail": "Email address",
+      "username": "Username",
+      "phoneNumber": "Phone number",
+      "phonePlaceholder": "e.g. +250783000111",
+      "usernameHelper": "3-20 characters, letters, numbers, underscore",
+      "pin": "PIN",
+      "confirmPin": "Confirm PIN",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "passwordHelper": "Minimum 8 characters",
+      "submit": "Create account",
+      "verifyPhoneTitle": "Verify your phone",
+      "verifyEmailTitle": "Verify your email",
+      "verificationCode": "Verification code",
+      "verificationCodePlaceholder": "6-digit verification code",
+      "emailVerificationPlaceholder": "Enter the code from your email",
+      "sendVerificationCode": "Send verification code",
+      "orContinueWith": "or continue with",
+      "backToHome": "← Back to Home",
+      "backToDetails": "Back to details",
+      "verifyPhoneCta": "Verify & Complete Registration",
+      "verifyEmailCta": "Verify & Activate Account",
+      "sentToEmail": "Sent to {{email}}",
+      "yourInbox": "your inbox",
+      "emailReenterPrompt": "Please provide your email and password again to continue.",
+      "verify": "Verify",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "validation": {
+      "usernameMin": "Username must be at least 3 characters",
+      "phoneRequired": "Phone number is required",
+      "pinMin": "PIN must be at least 4 digits",
+      "pinMismatch": "PIN confirmation does not match",
+      "emailInvalid": "Enter a valid email address",
+      "passwordMin8": "Password must be at least 8 characters",
+      "passwordMin6": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match",
+      "verificationCodeRequired": "Verification code is required"
+    }
+  },
+  "payment": {
+    "failed": {
+      "title": "Payment failed",
+      "message": "Your payment was unsuccessful. Please try again."
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist or has been moved."
+  },
+  "footer": {
+    "aboutTitle": "Randa Plus",
+    "aboutText": "Unlock the best African films and series with instant access on Randa Plus.",
+    "quickLinks": "Quick Links",
+    "support": "Support",
+    "account": "Account",
+    "links": {
+      "browse": "Browse",
+      "movies": "Movies",
+      "series": "TV Series",
+      "myLibrary": "My Library",
+      "help": "Help Center",
+      "faq": "FAQ",
+      "contact": "Contact Us",
+      "terms": "Terms of Service",
+      "profile": "My Profile",
+      "settings": "Settings"
+    },
+    "copyright": "{{year}} Randa Plus. All rights reserved."
+  }
+  ,
+  "content": {
+    "badge": {
+      "featured": "Featured",
+      "new": "New"
+    },
+    "status": {
+      "locked": "Locked",
+      "unlocked": "Unlocked"
+    },
+    "actions": {
+      "fullVideo": "Full video",
+      "playTrailer": "Play trailer"
+    },
+    "trailer": {
+      "notAvailableForTitle": "Trailer not available for this title",
+      "notAvailable": "Trailer not available"
+    }
+  }
+}

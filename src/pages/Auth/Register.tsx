@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FcGoogle } from 'react-icons/fc'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { authAPI } from '@/api/auth'
 import { Input } from '@/components/common/Input'
@@ -25,6 +26,7 @@ type EmailRegisterForm = {
 }
 
 const Register: React.FC = () => {
+  const { t } = useTranslation()
   const { register, verifyRegistration, verifyEmail } = useAuth()
   const navigate = useNavigate()
   const [method, setMethod] = useState<RegisterMethod>('phone')
@@ -81,19 +83,19 @@ const Register: React.FC = () => {
 
   const validatePhoneForm = () => {
     if (!phoneForm.username.trim() || phoneForm.username.trim().length < 3) {
-      setErrors({ username: 'Username must be at least 3 characters' })
+      setErrors({ username: t('auth.validation.usernameMin') })
       return false
     }
     if (!phoneForm.phoneNumber.trim()) {
-      setErrors({ phoneNumber: 'Phone number is required' })
+      setErrors({ phoneNumber: t('auth.validation.phoneRequired') })
       return false
     }
     if (!phoneForm.pin || phoneForm.pin.trim().length < 4) {
-      setErrors({ pin: 'PIN must be at least 4 digits' })
+      setErrors({ pin: t('auth.validation.pinMin') })
       return false
     }
     if (phoneForm.pin !== phoneForm.confirmPin) {
-      setErrors({ confirmPin: 'PIN confirmation does not match' })
+      setErrors({ confirmPin: t('auth.validation.pinMismatch') })
       return false
     }
     return true
@@ -101,19 +103,19 @@ const Register: React.FC = () => {
 
   const validateEmailForm = () => {
     if (!emailForm.username.trim() || emailForm.username.trim().length < 3) {
-      setErrors({ username: 'Username must be at least 3 characters' })
+      setErrors({ username: t('auth.validation.usernameMin') })
       return false
     }
     if (!emailForm.email.trim() || !/^[\w.+-]+@[\w-]+\.[\w.-]+$/i.test(emailForm.email.trim())) {
-      setErrors({ email: 'Enter a valid email address' })
+      setErrors({ email: t('auth.validation.emailInvalid') })
       return false
     }
     if (!emailForm.password || emailForm.password.length < 8) {
-      setErrors({ password: 'Password must be at least 8 characters' })
+      setErrors({ password: t('auth.validation.passwordMin8') })
       return false
     }
     if (emailForm.password !== emailForm.confirmPassword) {
-      setErrors({ confirmPassword: 'Passwords do not match' })
+      setErrors({ confirmPassword: t('auth.validation.passwordMismatch') })
       return false
     }
     return true
@@ -155,7 +157,7 @@ const Register: React.FC = () => {
         }
       }
     } catch (error: any) {
-      setGeneralError(error.response?.data?.message || 'Registration failed. Please try again.')
+      setGeneralError(error.response?.data?.message || t('errors.registrationFailed'))
     } finally {
       setLoading(false)
     }
@@ -166,7 +168,7 @@ const Register: React.FC = () => {
     resetErrors()
 
     if (!phoneVerificationCode.trim()) {
-      setErrors({ verificationCode: 'Verification code is required' })
+      setErrors({ verificationCode: t('auth.validation.verificationCodeRequired') })
       return
     }
 
@@ -179,7 +181,7 @@ const Register: React.FC = () => {
         verificationCode: phoneVerificationCode
       })
     } catch (error: any) {
-      setGeneralError(error.response?.data?.message || 'Verification failed. Please try again.')
+      setGeneralError(error.response?.data?.message || t('errors.verificationFailed'))
     } finally {
       setLoading(false)
     }
@@ -190,12 +192,12 @@ const Register: React.FC = () => {
     resetErrors()
 
     if (!emailVerificationCode.trim()) {
-      setErrors({ emailVerificationCode: 'Verification code is required' })
+      setErrors({ emailVerificationCode: t('auth.validation.verificationCodeRequired') })
       return
     }
 
     if (!emailForm.email.trim() || !emailForm.password) {
-      setGeneralError('Please provide your email and password again to continue.')
+      setGeneralError(t('auth.register.emailReenterPrompt'))
       return
     }
 
@@ -207,7 +209,7 @@ const Register: React.FC = () => {
         password: emailForm.password
       })
     } catch (error: any) {
-      setGeneralError(error.response?.data?.message || 'Verification failed. Please try again.')
+      setGeneralError(error.response?.data?.message || t('errors.verificationFailed'))
     } finally {
       setLoading(false)
     }
@@ -230,7 +232,7 @@ const Register: React.FC = () => {
           <img src={randaPlusLogo} alt="Randa Plus" className={styles['logo-image']} />
         </div>
 
-        <h2 className={styles.title}>Create your account</h2>
+        <h2 className={styles.title}>{t('auth.register.title')}</h2>
 
         {generalError && <div className={styles['error-box']}>{generalError}</div>}
 
@@ -242,7 +244,7 @@ const Register: React.FC = () => {
               className={`${styles['method-tab']} ${method === option ? styles['method-tab-active'] : ''}`}
               onClick={() => handleMethodChange(option as RegisterMethod)}
             >
-              {option === 'phone' ? 'Phone number' : 'Email address'}
+              {option === 'phone' ? t('auth.register.methodPhone') : t('auth.register.methodEmail')}
             </button>
           ))}
         </div>
@@ -252,7 +254,7 @@ const Register: React.FC = () => {
             <Input
               type="text"
               name="verificationCode"
-              placeholder="6-digit verification code"
+              placeholder={t('auth.register.verificationCodePlaceholder')}
               value={phoneVerificationCode}
               onChange={(event) => setPhoneVerificationCode(event.target.value)}
               error={errors.verificationCode}
@@ -261,7 +263,7 @@ const Register: React.FC = () => {
             />
 
             <Button type="submit" variant="primary" fullWidth loading={loading}>
-              Verify & Complete Registration
+              {t('auth.register.verifyPhoneCta')}
             </Button>
 
             <Button
@@ -271,7 +273,7 @@ const Register: React.FC = () => {
               onClick={() => setStep('register')}
               disabled={loading}
             >
-              Back to details
+              {t('auth.register.backToDetails')}
             </Button>
           </form>
         ) : showEmailVerification ? (
@@ -279,17 +281,17 @@ const Register: React.FC = () => {
             <Input
               type="text"
               name="emailVerificationCode"
-              placeholder="Enter the code from your email"
+              placeholder={t('auth.register.emailVerificationPlaceholder')}
               value={emailVerificationCode}
               onChange={(event) => setEmailVerificationCode(event.target.value)}
               error={errors.emailVerificationCode}
               required
               autoComplete="one-time-code"
-              helperText={`Sent to ${emailForm.email || 'your inbox'}`}
+              helperText={t('auth.register.sentToEmail', { email: emailForm.email || t('auth.register.yourInbox') })}
             />
 
             <Button type="submit" variant="primary" fullWidth loading={loading}>
-              Verify & Activate Account
+              {t('auth.register.verifyEmailCta')}
             </Button>
 
             <Button
@@ -299,7 +301,7 @@ const Register: React.FC = () => {
               onClick={() => setStep('register')}
               disabled={loading}
             >
-              Back to details
+              {t('auth.register.backToDetails')}
             </Button>
           </form>
         ) : (
@@ -309,19 +311,19 @@ const Register: React.FC = () => {
                 <Input
                   type="text"
                   name="username"
-                  placeholder="Username"
+                  placeholder={t('auth.register.username')}
                   value={phoneForm.username}
                   onChange={handlePhoneChange}
                   error={errors.username}
                   required
                   autoComplete="username"
-                  helperText="3-20 characters, letters, numbers, underscore"
+                  helperText={t('auth.register.usernameHelper')}
                 />
 
                 <Input
                   type="tel"
                   name="phoneNumber"
-                  placeholder="e.g. +250783000111"
+                  placeholder={t('auth.register.phonePlaceholder')}
                   value={phoneForm.phoneNumber}
                   onChange={handlePhoneChange}
                   error={errors.phoneNumber}
@@ -332,7 +334,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="pin"
-                  placeholder="4-digit PIN"
+                  placeholder={t('auth.register.pin')}
                   value={phoneForm.pin}
                   onChange={handlePhoneChange}
                   error={errors.pin}
@@ -344,7 +346,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="confirmPin"
-                  placeholder="Confirm PIN"
+                  placeholder={t('auth.register.confirmPin')}
                   value={phoneForm.confirmPin}
                   onChange={handlePhoneChange}
                   error={errors.confirmPin}
@@ -360,7 +362,7 @@ const Register: React.FC = () => {
                 <Input
                   type="text"
                   name="username"
-                  placeholder="Username"
+                  placeholder={t('auth.register.username')}
                   value={emailForm.username}
                   onChange={handleEmailChange}
                   error={errors.username}
@@ -371,7 +373,7 @@ const Register: React.FC = () => {
                 <Input
                   type="email"
                   name="email"
-                  placeholder="you@example.com"
+                  placeholder={t('auth.register.emailPlaceholder')}
                   value={emailForm.email}
                   onChange={handleEmailChange}
                   error={errors.email}
@@ -382,20 +384,20 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder={t('auth.register.password')}
                   value={emailForm.password}
                   onChange={handleEmailChange}
                   error={errors.password}
                   required
                   autoComplete="new-password"
-                  helperText="Minimum 8 characters"
+                  helperText={t('auth.register.passwordHelper')}
                   togglePasswordVisibility
                 />
 
                 <Input
                   type="password"
                   name="confirmPassword"
-                  placeholder="Confirm password"
+                  placeholder={t('auth.register.confirmPassword')}
                   value={emailForm.confirmPassword}
                   onChange={handleEmailChange}
                   error={errors.confirmPassword}
@@ -408,28 +410,28 @@ const Register: React.FC = () => {
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={loading}>
-              {method === 'phone' ? 'Send verification code' : 'Create account'}
+              {method === 'phone' ? t('auth.register.sendVerificationCode') : t('auth.register.submit')}
             </Button>
 
-            <div className={styles['section-divider']}>or continue with</div>
+            <div className={styles['section-divider']}>{t('auth.register.orContinueWith')}</div>
 
             <button type="button" className={styles['google-button']} onClick={handleGoogleSignIn}>
               <span className={styles['oauth-icon']}>
                 <FcGoogle />
               </span>
-              Continue with Google
+              {t('auth.login.google')}
             </button>
           </form>
         )}
 
         <button type="button" className={styles['ghost-button']} onClick={() => navigate('/')}>
-          ← Back to Home
+          {t('auth.register.backToHome')}
         </button>
 
         <p className={styles['link-text']}>
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className={styles.link}>
-            Sign In
+            {t('auth.register.signIn')}
           </Link>
         </p>
       </div>

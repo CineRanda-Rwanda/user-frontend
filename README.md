@@ -90,6 +90,13 @@ VITE_API_BASE_URL=http://localhost:5000/api/v1
 VITE_PAYMENT_PROVIDER=FLUTTERWAVE
 VITE_FLUTTERWAVE_PUBLIC_KEY=FLWPUBK-xxxxxxxxxxxxx
 VITE_CDN_URL=https://cdn.cineranda.com
+
+# Optional: machine-translation fallback for admin-provided English content
+# Requires a running LibreTranslate instance (self-hosted recommended)
+VITE_TRANSLATION_ENABLED=false
+VITE_TRANSLATION_PROVIDER=libretranslate
+# Default uses 5001 to avoid clashing with a typical backend dev server on 5000.
+VITE_LIBRETRANSLATE_URL=http://localhost:5001
 ```
 
 > Update `VITE_API_BASE_URL` to point to staging/production backends when deploying; all HTTP modules use this single source of truth.

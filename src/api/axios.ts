@@ -1,6 +1,21 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'react-toastify'
 
+type SupportedAppLanguage = 'en' | 'fr' | 'rw'
+
+const normalizeAppLanguage = (raw?: string | null): SupportedAppLanguage => {
+  const value = String(raw || '').toLowerCase()
+  if (value.startsWith('fr')) return 'fr'
+  if (value.startsWith('rw') || value.includes('kinyarwanda') || value.startsWith('kin')) return 'rw'
+  return 'en'
+}
+
+const buildAcceptLanguage = (lng: SupportedAppLanguage) => {
+  // Prefer the selected app language but allow English fallback.
+  if (lng === 'en') return 'en'
+  return `${lng}, en;q=0.9`
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
   headers: {
@@ -16,6 +31,14 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // Let the backend know which language the user selected.
+    // If the backend supports localization, it can return translated dynamic content.
+    const appLanguage = normalizeAppLanguage(localStorage.getItem('app.language'))
+    if (config.headers) {
+      config.headers['Accept-Language'] = buildAcceptLanguage(appLanguage)
+    }
+
     return config
   },
   (error) => {

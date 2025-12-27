@@ -108,6 +108,29 @@
   margin-left: auto;
 }
 
+.languageSelect {
+  height: 44px;
+  padding: 0 var(--spacing-md);
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-white);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.languageSelect:hover {
+  border-color: rgba(255, 215, 0, 0.4);
+  color: var(--primary-yellow);
+}
+
+.languageSelect:focus-visible {
+  outline: 2px solid rgba(255, 215, 0, 0.6);
+  outline-offset: 2px;
+}
+
 .notificationWrapper {
   position: relative;
   display: flex;

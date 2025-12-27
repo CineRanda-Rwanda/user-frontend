@@ -114,7 +114,15 @@ describe('Wallet page', () => {
 
   it('initiates the top up flow when the amount is valid', async () => {
     const user = userEvent.setup();
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const originalLocation = window.location;
+    const replaceMock = vi.fn();
+
+    // jsdom makes window.location methods non-configurable, so we replace the whole location object.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).location;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).location = { ...originalLocation, replace: replaceMock };
+
     await renderWallet();
 
     const input = screen.getByPlaceholderText('Enter amount');
@@ -131,7 +139,12 @@ describe('Wallet page', () => {
     await waitFor(() => expect(walletApi.topUpWallet).toHaveBeenCalledWith(5000));
     await waitFor(() => expect(submit).toHaveTextContent('Top Up Wallet'));
     expect(toastMocks.success).toHaveBeenCalledWith('Redirecting you to Flutterwave...');
-    expect(openSpy).toHaveBeenCalledWith('https://example.com', '_blank');
-    openSpy.mockRestore();
+
+    expect(replaceMock).toHaveBeenCalledWith('https://example.com');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).location;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).location = originalLocation;
   });
 });

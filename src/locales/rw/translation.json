@@ -1,0 +1,167 @@
+{
+  "language": {
+    "english": "Icyongereza",
+    "kinyarwanda": "Ikinyarwanda",
+    "french": "Igifaransa",
+    "label": "Ururimi"
+  },
+  "nav": {
+    "home": "Ahabanza",
+    "movies": "Filimi",
+    "series": "Seriya",
+    "myLibrary": "Isomero ryanjye",
+    "help": "Ubufasha",
+    "notifications": "Ubutumwa",
+    "toggleNavigation": "Hindura menu",
+    "searchPlaceholder": "Shakisha",
+    "logoAria": "Ahabanza Randa Plus",
+    "auth": {
+      "login": "Injira",
+      "signUp": "Iyandikishe"
+    },
+    "profile": {
+      "myProfile": "Umwirondoro",
+      "myLibrary": "Isomero ryanjye",
+      "settings": "Igenamiterere",
+      "logout": "Sohoka"
+    }
+  },
+  "common": {
+    "back": "Subira inyuma",
+    "close": "Funga",
+    "goToBrowse": "Jya muri Browse",
+    "loading": "Birimo gupakira...",
+    "comingSoon": "Biraje vuba!"
+  },
+  "emptyState": {
+    "search": {
+      "title": "Nta bisubizo bibonetse",
+      "message": "Gerageza guhindura uko washakishije cyangwa filters."
+    },
+    "content": {
+      "title": "Nta bikubiyemo bihari",
+      "message": "Garuka nyuma urebe ibishya."
+    },
+    "error": {
+      "title": "Habaye ikibazo",
+      "message": "Ongera ugerageze cyangwa uhamagare ubufasha niba bikomeje."
+    }
+  },
+  "errors": {
+    "generic": "Habaye ikibazo.",
+    "loginFailed": "Kwinjira byanze. Ongera ugerageze.",
+    "registrationFailed": "Kwiyandikisha byanze. Ongera ugerageze.",
+    "verificationFailed": "Kwemeza byanze. Ongera ugerageze."
+  },
+  "auth": {
+    "login": {
+      "title": "Murakaza neza",
+      "subtitle": "Injira ukomeze",
+      "methodPhone": "Numero ya telefone",
+      "methodEmail": "Imeyili",
+      "phonePlaceholder": "Numero ya telefone",
+      "pinPlaceholder": "PIN y'imibare 4",
+      "emailPlaceholder": "Imeyili",
+      "passwordPlaceholder": "Ijambo banga",
+      "submit": "Injira",
+      "google": "Komeza ukoresheje Google",
+      "noAccount": "Nta konti ufite?",
+      "createAccount": "Fungura konti",
+      "forgotPin": "Wibagiwe PIN?",
+      "forgotPassword": "Wibagiwe ijambo banga?"
+    },
+    "register": {
+      "title": "Fungura konti",
+      "methodPhone": "Numero ya telefone",
+      "methodEmail": "Imeyili",
+      "username": "Izina ukoresha",
+      "phoneNumber": "Numero ya telefone",
+      "phonePlaceholder": "urugero: +250783000111",
+      "usernameHelper": "Inyuguti 3-20, inyuguti, imibare, underscore",
+      "pin": "PIN",
+      "confirmPin": "Emeza PIN",
+      "email": "Imeyili",
+      "emailPlaceholder": "wowe@example.com",
+      "password": "Ijambo banga",
+      "confirmPassword": "Emeza ijambo banga",
+      "passwordHelper": "Byibura inyuguti 8",
+      "submit": "Fungura konti",
+      "verifyPhoneTitle": "Emeza telefone",
+      "verifyEmailTitle": "Emeza imeyili",
+      "verificationCode": "Kode yo kwemeza",
+      "verificationCodePlaceholder": "Kode y'imibare 6",
+      "emailVerificationPlaceholder": "Andika kode yakoherejwe kuri email",
+      "sendVerificationCode": "Ohereza kode yo kwemeza",
+      "orContinueWith": "cyangwa ukomeze ukoresheje",
+      "backToHome": "← Subira ahabanza",
+      "backToDetails": "Subira ku makuru",
+      "verifyPhoneCta": "Emeza kandi urangize kwiyandikisha",
+      "verifyEmailCta": "Emeza kandi ufungure konti",
+      "sentToEmail": "Yoherejwe kuri {{email}}",
+      "yourInbox": "inbox yawe",
+      "emailReenterPrompt": "Ongera wandike email n'ijambo banga ukomeze.",
+      "verify": "Emeza",
+      "haveAccount": "Usanzwe ufite konti?",
+      "signIn": "Injira"
+    },
+    "validation": {
+      "usernameMin": "Izina ukoresha rigomba kuba byibura inyuguti 3",
+      "phoneRequired": "Numero ya telefone irakenewe",
+      "pinMin": "PIN igomba kuba byibura imibare 4",
+      "pinMismatch": "Kwemeza PIN ntibihuye",
+      "emailInvalid": "Andika imeyili nyayo",
+      "passwordMin8": "Ijambo banga rigomba kuba byibura inyuguti 8",
+      "passwordMin6": "Ijambo banga rigomba kuba byibura inyuguti 6",
+      "passwordMismatch": "Amagambo banga ntahura",
+      "verificationCodeRequired": "Kode yo kwemeza irakenewe"
+    }
+  },
+  "payment": {
+    "failed": {
+      "title": "Kwishyura byanze",
+      "message": "Kwishyura ntibyakunze. Ongera ugerageze."
+    }
+  },
+  "notFound": {
+    "title": "Urupapuro ntiruboneka",
+    "message": "Urupapuro ushaka ntirubaho cyangwa rwarimuwe."
+  },
+  "footer": {
+    "aboutTitle": "Randa Plus",
+    "aboutText": "Fungura filimi na seriya nziza z'Afurika uboneho ako kanya kuri Randa Plus.",
+    "quickLinks": "Iby'ingenzi",
+    "support": "Ubufasha",
+    "account": "Konti",
+    "links": {
+      "browse": "Browse",
+      "movies": "Filimi",
+      "series": "Seriya",
+      "myLibrary": "Isomero ryanjye",
+      "help": "Ubufasha",
+      "faq": "Ibibazo",
+      "contact": "Twandikire",
+      "terms": "Amategeko",
+      "profile": "Umwirondoro",
+      "settings": "Igenamiterere"
+    },
+    "copyright": "{{year}} Randa Plus. Uburenganzira bwose burabitswe."
+  },
+  "content": {
+    "badge": {
+      "featured": "Byatoranyijwe",
+      "new": "Gishya"
+    },
+    "status": {
+      "locked": "Birafunze",
+      "unlocked": "Byafunguwe"
+    },
+    "actions": {
+      "fullVideo": "Videwo yuzuye",
+      "playTrailer": "Reba trailer"
+    },
+    "trailer": {
+      "notAvailableForTitle": "Trailer ntiyabonetse kuri iyi title",
+      "notAvailable": "Trailer ntiyabonetse"
+    }
+  }
+}

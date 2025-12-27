@@ -1,0 +1,168 @@
+{
+  "language": {
+    "english": "Anglais",
+    "kinyarwanda": "Kinyarwanda",
+    "french": "Français",
+    "label": "Langue"
+  },
+  "nav": {
+    "home": "Accueil",
+    "movies": "Films",
+    "series": "Séries",
+    "myLibrary": "Ma bibliothèque",
+    "help": "Aide",
+    "notifications": "Notifications",
+    "toggleNavigation": "Basculer le menu de navigation",
+    "searchPlaceholder": "Rechercher",
+    "logoAria": "Accueil Randa Plus",
+    "auth": {
+      "login": "Connexion",
+      "signUp": "S'inscrire"
+    },
+    "profile": {
+      "myProfile": "Mon profil",
+      "myLibrary": "Ma bibliothèque",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    }
+  },
+  "common": {
+    "back": "Retour",
+    "close": "Fermer",
+    "goToBrowse": "Aller à Parcourir",
+    "loading": "Chargement...",
+    "comingSoon": "Bientôt disponible !"
+  },
+  "emptyState": {
+    "search": {
+      "title": "Aucun résultat",
+      "message": "Essayez d'ajuster votre recherche ou vos filtres."
+    },
+    "content": {
+      "title": "Aucun contenu disponible",
+      "message": "Revenez plus tard pour du nouveau contenu."
+    },
+    "error": {
+      "title": "Une erreur est survenue",
+      "message": "Veuillez réessayer ou contacter le support si le problème persiste."
+    }
+  },
+  "errors": {
+    "generic": "Une erreur est survenue.",
+    "loginFailed": "Échec de la connexion. Veuillez réessayer.",
+    "registrationFailed": "Échec de l'inscription. Veuillez réessayer.",
+    "verificationFailed": "Échec de la vérification. Veuillez réessayer."
+  },
+  "auth": {
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous pour continuer",
+      "methodPhone": "Numéro de téléphone",
+      "methodEmail": "Adresse e-mail",
+      "phonePlaceholder": "Numéro de téléphone",
+      "pinPlaceholder": "PIN à 4 chiffres",
+      "emailPlaceholder": "Adresse e-mail",
+      "passwordPlaceholder": "Mot de passe",
+      "submit": "Se connecter",
+      "google": "Continuer avec Google",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "Créer un compte",
+      "forgotPin": "PIN oublié ?",
+      "forgotPassword": "Mot de passe oublié ?"
+    },
+    "register": {
+      "title": "Créer votre compte",
+      "methodPhone": "Numéro de téléphone",
+      "methodEmail": "Adresse e-mail",
+      "username": "Nom d'utilisateur",
+      "phoneNumber": "Numéro de téléphone",
+      "phonePlaceholder": "ex. +250783000111",
+      "usernameHelper": "3-20 caractères, lettres, chiffres, underscore",
+      "pin": "PIN",
+      "confirmPin": "Confirmer le PIN",
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "passwordHelper": "Minimum 8 caractères",
+      "submit": "Créer un compte",
+      "verifyPhoneTitle": "Vérifiez votre téléphone",
+      "verifyEmailTitle": "Vérifiez votre e-mail",
+      "verificationCode": "Code de vérification",
+      "verificationCodePlaceholder": "Code de vérification à 6 chiffres",
+      "emailVerificationPlaceholder": "Entrez le code reçu par e-mail",
+      "sendVerificationCode": "Envoyer le code de vérification",
+      "orContinueWith": "ou continuer avec",
+      "backToHome": "← Retour à l'accueil",
+      "backToDetails": "Retour aux détails",
+      "verifyPhoneCta": "Vérifier et finaliser l'inscription",
+      "verifyEmailCta": "Vérifier et activer le compte",
+      "sentToEmail": "Envoyé à {{email}}",
+      "yourInbox": "votre boîte de réception",
+      "emailReenterPrompt": "Veuillez saisir à nouveau votre e-mail et votre mot de passe pour continuer.",
+      "verify": "Vérifier",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter"
+    },
+    "validation": {
+      "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+      "phoneRequired": "Le numéro de téléphone est requis",
+      "pinMin": "Le PIN doit contenir au moins 4 chiffres",
+      "pinMismatch": "La confirmation du PIN ne correspond pas",
+      "emailInvalid": "Entrez une adresse e-mail valide",
+      "passwordMin8": "Le mot de passe doit contenir au moins 8 caractères",
+      "passwordMin6": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "verificationCodeRequired": "Le code de vérification est requis"
+    }
+  },
+  "payment": {
+    "failed": {
+      "title": "Paiement échoué",
+      "message": "Votre paiement n'a pas abouti. Veuillez réessayer."
+    }
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "message": "La page que vous recherchez n'existe pas ou a été déplacée."
+  },
+  "footer": {
+    "aboutTitle": "Randa Plus",
+    "aboutText": "Débloquez les meilleurs films et séries africains avec un accès instantané sur Randa Plus.",
+    "quickLinks": "Liens rapides",
+    "support": "Support",
+    "account": "Compte",
+    "links": {
+      "browse": "Parcourir",
+      "movies": "Films",
+      "series": "Séries TV",
+      "myLibrary": "Ma bibliothèque",
+      "help": "Centre d'aide",
+      "faq": "FAQ",
+      "contact": "Nous contacter",
+      "terms": "Conditions d'utilisation",
+      "profile": "Mon profil",
+      "settings": "Paramètres"
+    },
+    "copyright": "{{year}} Randa Plus. Tous droits réservés."
+  }
+  ,
+  "content": {
+    "badge": {
+      "featured": "À la une",
+      "new": "Nouveau"
+    },
+    "status": {
+      "locked": "Verrouillé",
+      "unlocked": "Déverrouillé"
+    },
+    "actions": {
+      "fullVideo": "Vidéo complète",
+      "playTrailer": "Lire la bande-annonce"
+    },
+    "trailer": {
+      "notAvailableForTitle": "Bande-annonce indisponible pour ce titre",
+      "notAvailable": "Bande-annonce indisponible"
+    }
+  }
+}

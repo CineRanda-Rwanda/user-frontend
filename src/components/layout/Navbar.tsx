@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/contexts/NotificationsContext'
+import { useTranslation } from 'react-i18next'
 import {
   FiBell,
   FiMenu,
@@ -16,9 +17,11 @@ import GlobalSearchBar from '@/components/search/GlobalSearchBar'
 import NotificationOverlay from '@/components/notifications/NotificationOverlay'
 import randaPlusLogo from '@/assets/logo.png'
 import { contentAPI } from '@/api/content'
+import { supportedLanguages, type SupportedLanguage } from '@/i18n'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
+  const { t, i18n } = useTranslation()
   const { user, logout, isAuthenticated } = useAuth()
   const { unreadCount, markUnreadAsReadOnExit } = useNotifications()
   const navigate = useNavigate()
@@ -109,11 +112,16 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }
 
+  const currentLanguage = (i18n.resolvedLanguage || i18n.language || 'en') as SupportedLanguage
+  const changeLanguage = (lng: SupportedLanguage) => {
+    void i18n.changeLanguage(lng)
+  }
+
   const primaryLinks = [
-    { path: '/', label: 'Home' },
-    ...(hasMovies ? [{ path: '/movies', label: 'Movies' }] : []),
-    ...(hasSeries ? [{ path: '/series', label: 'Series' }] : []),
-    { path: '/my-library', label: 'My Library' }
+    { path: '/', label: t('nav.home') },
+    ...(hasMovies ? [{ path: '/movies', label: t('nav.movies') }] : []),
+    ...(hasSeries ? [{ path: '/series', label: t('nav.series') }] : []),
+    { path: '/my-library', label: t('nav.myLibrary') }
   ]
 
   return (
@@ -131,7 +139,7 @@ const Navbar: React.FC = () => {
           isMobileMenuOpen ? styles.menuButtonActive : ''
         }`}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Toggle navigation menu"
+        aria-label={t('nav.toggleNavigation')}
         aria-expanded={isMobileMenuOpen}
         aria-pressed={isMobileMenuOpen}
       >
@@ -142,7 +150,7 @@ const Navbar: React.FC = () => {
         )}
       </button>
 
-      <Link to="/" className={styles.logo} aria-label="Randa Plus home">
+      <Link to="/" className={styles.logo} aria-label={t('nav.logoAria')}>
         <img src={randaPlusLogo} alt="Randa Plus" className={styles.logoImage} />
       </Link>
 
@@ -166,13 +174,24 @@ const Navbar: React.FC = () => {
           className={styles.navbarSearch}
           showHeading={false}
           showFilters={false}
-          placeholder="Search"
+          placeholder={t('nav.searchPlaceholder')}
           showSubmitButton={false}
           lockCompactLayout
         />
       </div>
 
       <div className={styles.actions}>
+        <select
+          className={styles.languageSelect}
+          aria-label={t('language.label')}
+          value={supportedLanguages.includes(currentLanguage) ? currentLanguage : 'en'}
+          onChange={(e) => changeLanguage(e.target.value as SupportedLanguage)}
+        >
+          <option value="en">{t('language.english')}</option>
+          <option value="rw">{t('language.kinyarwanda')}</option>
+          <option value="fr">{t('language.french')}</option>
+        </select>
+
         {isAuthenticated ? (
           <>
             <div className={styles.notificationWrapper} ref={notificationRef}>
@@ -188,7 +207,7 @@ const Navbar: React.FC = () => {
                   })
                   setIsProfileOpen(false)
                 }}
-                title="Notifications"
+                title={t('nav.notifications')}
               >
                 <FiBell />
                 {unreadCount > 0 && (
@@ -217,28 +236,28 @@ const Navbar: React.FC = () => {
                     onClick={() => handleProfileNavigation('/profile')}
                   >
                     <FiUser />
-                    <span>My Profile</span>
+                    <span>{t('nav.profile.myProfile')}</span>
                   </button>
                   <button
                     className={styles.dropdownItem}
                     onClick={() => handleProfileNavigation('/my-library')}
                   >
                     <FiBookOpen />
-                    <span>My Library</span>
+                    <span>{t('nav.profile.myLibrary')}</span>
                   </button>
                   <button
                     className={styles.dropdownItem}
                     onClick={() => handleProfileNavigation('/profile#settings')}
                   >
                     <FiSettings />
-                    <span>Settings</span>
+                    <span>{t('nav.profile.settings')}</span>
                   </button>
                   <button
                     className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
                     onClick={handleLogout}
                   >
                     <FiLogOut />
-                    <span>Logout</span>
+                    <span>{t('nav.profile.logout')}</span>
                   </button>
                 </div>
               )}
@@ -247,10 +266,10 @@ const Navbar: React.FC = () => {
         ) : (
           <div className={styles.authButtons}>
             <button className={styles.loginButton} onClick={() => navigate('/login')}>
-              Login
+              {t('nav.auth.login')}
             </button>
             <button className={styles.signupButton} onClick={() => navigate('/register')}>
-              Sign Up
+              {t('nav.auth.signUp')}
             </button>
           </div>
         )}
@@ -281,7 +300,7 @@ const Navbar: React.FC = () => {
                 isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
               }
             >
-              Help
+              {t('nav.help')}
             </NavLink>
             {isAuthenticated ? (
               null
@@ -294,7 +313,7 @@ const Navbar: React.FC = () => {
                     isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
                   }
                 >
-                  Login
+                  {t('nav.auth.login')}
                 </NavLink>
                 <NavLink
                   to="/register"
@@ -303,7 +322,7 @@ const Navbar: React.FC = () => {
                     isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
                   }
                 >
-                  Sign Up
+                  {t('nav.auth.signUp')}
                 </NavLink>
               </>
             )}

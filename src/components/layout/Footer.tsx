@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { FiFacebook, FiTwitter, FiInstagram, FiYoutube } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './Footer.module.css'
 
 const socialLinks = [
@@ -26,21 +27,16 @@ const socialLinks = [
   }
 ].filter((link) => !!link.href)
 
-const supportLinks = [
-  { label: 'Help Center', to: '/help' },
-  { label: 'FAQ', to: '/faq' },
-  { label: 'Contact Us', to: '/contact' },
-  { label: 'Terms of Service', to: '/terms' }
-]
-
 const Footer: React.FC = () => {
+  const { t } = useTranslation()
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
         <div className={styles.footerSection}>
-          <h3>Randa Plus</h3>
+          <h3>{t('footer.aboutTitle')}</h3>
           <p style={{ color: 'var(--text-gray)', marginTop: 'var(--spacing-sm)' }}>
-            Unlock the best African films and series with instant access on Randa Plus.
+            {t('footer.aboutText')}
           </p>
           <div className={styles.socialLinks}>
             {socialLinks.map((social) => (
@@ -59,38 +55,37 @@ const Footer: React.FC = () => {
         </div>
 
         <div className={styles.footerSection}>
-          <h3>Quick Links</h3>
+          <h3>{t('footer.quickLinks')}</h3>
           <div className={styles.footerLinks}>
-            <Link to="/browse">Browse</Link>
-            <Link to="/browse?type=Movie">Movies</Link>
-            <Link to="/browse?type=Series">TV Series</Link>
-            <Link to="/my-library">My Library</Link>
+            <Link to="/browse">{t('footer.links.browse')}</Link>
+            <Link to="/browse?type=Movie">{t('footer.links.movies')}</Link>
+            <Link to="/browse?type=Series">{t('footer.links.series')}</Link>
+            <Link to="/my-library">{t('footer.links.myLibrary')}</Link>
           </div>
         </div>
 
         <div className={styles.footerSection}>
-          <h3>Support</h3>
+          <h3>{t('footer.support')}</h3>
           <div className={styles.footerLinks}>
-            {supportLinks.map((link) => (
-              <Link key={link.to} to={link.to}>
-                {link.label}
-              </Link>
-            ))}
+            <Link to="/help">{t('footer.links.help')}</Link>
+            <Link to="/faq">{t('footer.links.faq')}</Link>
+            <Link to="/contact">{t('footer.links.contact')}</Link>
+            <Link to="/terms">{t('footer.links.terms')}</Link>
           </div>
         </div>
 
         <div className={styles.footerSection}>
-          <h3>Account</h3>
+          <h3>{t('footer.account')}</h3>
           <div className={styles.footerLinks}>
-            <Link to="/profile">My Profile</Link>
-            <Link to="/my-library">My Library</Link>
-            <Link to="/profile">Settings</Link>
+            <Link to="/profile">{t('footer.links.profile')}</Link>
+            <Link to="/my-library">{t('footer.links.myLibrary')}</Link>
+            <Link to="/profile">{t('footer.links.settings')}</Link>
           </div>
         </div>
       </div>
 
       <div className={styles.footerBottom}>
-        <p>&copy; {new Date().getFullYear()} Randa Plus. All rights reserved.</p>
+        <p>&copy; {t('footer.copyright', { year: new Date().getFullYear() })}</p>
       </div>
     </footer>
   )

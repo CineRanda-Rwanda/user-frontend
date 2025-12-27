@@ -2,11 +2,21 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { contentAPI } from '../api/content'
 import { initiateContentPurchase } from '../api/payment'
 import { Content, Episode } from '../types/content'
 import Loader from '../components/common/Loader'
 import { formatCurrency } from '../utils/formatters'
+import {
+  getLocalizedContentDescription,
+  getLocalizedContentTitle,
+  getLocalizedEpisodeDescription,
+  getLocalizedEpisodeTitle,
+  hasLocalizedText,
+} from '../utils/localizeContent'
+import { useAutoTranslate } from '../hooks/useAutoTranslate'
+import { normalizeSupportedLanguage } from '../utils/translate'
 import styles from './Watch.module.css'
 
 const resolveContentIdentifier = (item?: Partial<Content> | null) =>
@@ -24,6 +34,7 @@ const detectMimeType = (url?: string) => {
 }
 
 const Watch: React.FC = () => {
+  const { i18n } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -56,6 +67,40 @@ const Watch: React.FC = () => {
   } | null>(null)
 
   const [videoRefreshKey, setVideoRefreshKey] = useState(0)
+
+  // Machine-translation fallback for dynamic backend content.
+  // Hooks must run even during loading states, so we compute safe defaults.
+  const targetLanguage = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
+  const baseContentTitle = getLocalizedContentTitle(content, targetLanguage)
+  const baseContentDescription = getLocalizedContentDescription(content, targetLanguage)
+  const baseEpisodeTitle = activeEpisode ? getLocalizedEpisodeTitle(activeEpisode, targetLanguage) : ''
+  const baseEpisodeDescription = activeEpisode ? getLocalizedEpisodeDescription(activeEpisode, targetLanguage) : ''
+
+  const shouldTranslateContentTitle =
+    targetLanguage !== 'en' && !hasLocalizedText(content, 'title', targetLanguage)
+  const shouldTranslateContentDescription =
+    targetLanguage !== 'en' && !hasLocalizedText(content, 'description', targetLanguage)
+  const shouldTranslateEpisodeTitle =
+    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'title', targetLanguage)
+  const shouldTranslateEpisodeDescription =
+    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'description', targetLanguage)
+
+  const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
+    enabled: shouldTranslateContentTitle,
+    source: 'en',
+  })
+  const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
+    enabled: shouldTranslateContentDescription,
+    source: 'en',
+  })
+  const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
+    enabled: shouldTranslateEpisodeTitle,
+    source: 'en',
+  })
+  const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
+    enabled: shouldTranslateEpisodeDescription,
+    source: 'en',
+  })
 
   const orderedSeasons = useMemo(() => {
     if (!content?.seasons) return []
@@ -443,7 +488,9 @@ const Watch: React.FC = () => {
 
     try {
       setPurchasing(true)
-      await startDirectCheckout(identifier, content.title || 'this title')
+      const language = i18n.resolvedLanguage || i18n.language || 'en'
+      const label = getLocalizedContentTitle(content, language) || 'this title'
+      await startDirectCheckout(identifier, label)
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Purchase failed. Please try again.'
       toast.error(message)
@@ -462,13 +509,19 @@ const Watch: React.FC = () => {
 
   if (!content) return null
 
+  const language = targetLanguage
+  const localizedContentTitle = translatedContentTitle.text || baseContentTitle
+  const localizedContentDescription = translatedContentDescription.text || baseContentDescription
+  const localizedEpisodeTitle = activeEpisode ? translatedEpisodeTitle.text || baseEpisodeTitle : ''
+  const localizedEpisodeDescription = activeEpisode ? translatedEpisodeDescription.text || baseEpisodeDescription : ''
+
   const pageTitle =
     isSeries && activeEpisode
-      ? `${content.title} • S${activeSeason}E${activeEpisode.episodeNumber} ${activeEpisode.title ? '– ' + activeEpisode.title : ''}`
-      : content.title
+      ? `${localizedContentTitle} • S${activeSeason}E${activeEpisode.episodeNumber} ${localizedEpisodeTitle ? '– ' + localizedEpisodeTitle : ''}`
+      : localizedContentTitle
 
   const description =
-    isSeries && activeEpisode ? activeEpisode.description : content.description
+    isSeries && activeEpisode ? localizedEpisodeDescription : localizedContentDescription
 
   const shortTransactionRef = pendingTransactionRef ? pendingTransactionRef.slice(-8).toUpperCase() : null
 
@@ -572,7 +625,8 @@ const Watch: React.FC = () => {
                 Next episode in <strong>{autoNextCountdown}s</strong>
               </p>
               <p style={{ color: 'var(--text-gray)' }}>
-                S{pendingNextEpisode.seasonNumber}E{pendingNextEpisode.episode.episodeNumber}: {pendingNextEpisode.episode.title}
+                S{pendingNextEpisode.seasonNumber}E{pendingNextEpisode.episode.episodeNumber}:{' '}
+                {getLocalizedEpisodeTitle(pendingNextEpisode.episode, language) || pendingNextEpisode.episode.title}
               </p>
               <div className={styles.autoNextActions}>
                 <button className={`${styles.ctaButton} ${styles.primaryCta}`} onClick={playPendingEpisode}>
@@ -652,8 +706,12 @@ const Watch: React.FC = () => {
                     >
                       <div className={styles.episodeNumber}>{episode.episodeNumber}</div>
                       <div className={styles.episodeInfo}>
-                        <div className={styles.episodeTitle}>{episode.title}</div>
-                        <p className={styles.episodeDescription}>{episode.description}</p>
+                        <div className={styles.episodeTitle}>
+                          {getLocalizedEpisodeTitle(episode, language) || episode.title}
+                        </div>
+                        <p className={styles.episodeDescription}>
+                          {getLocalizedEpisodeDescription(episode, language) || episode.description}
+                        </p>
                         <div className={styles.episodeMeta}>
                           <span>{episode.duration} min</span>
                           {!unlocked && (

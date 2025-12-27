@@ -1,5 +1,6 @@
 import React from 'react'
 import { FiSearch, FiFilm, FiAlertCircle } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './EmptyState.module.css'
 
 interface EmptyStateProps {
@@ -18,6 +19,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   action
 }) => {
+  const { t } = useTranslation()
+
   const getIcon = () => {
     switch (type) {
       case 'search':
@@ -34,24 +37,24 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   const getDefaultTitle = () => {
     switch (type) {
       case 'search':
-        return 'No results found'
+        return t('emptyState.search.title')
       case 'content':
-        return 'No content available'
+        return t('emptyState.content.title')
       case 'error':
-        return 'Something went wrong'
+        return t('emptyState.error.title')
       default:
-        return 'Nothing to show'
+        return t('errors.generic')
     }
   }
 
   const getDefaultMessage = () => {
     switch (type) {
       case 'search':
-        return 'Try adjusting your search or filters to find what you\'re looking for.'
+        return t('emptyState.search.message')
       case 'content':
-        return 'Check back later for new content.'
+        return t('emptyState.content.message')
       case 'error':
-        return 'Please try again or contact support if the problem persists.'
+        return t('emptyState.error.message')
       default:
         return ''
     }

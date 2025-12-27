@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { contentAPI } from '../api/content';
 import { Content, Episode, Season } from '../types/content';
 import { FiPlay, FiPlus, FiArrowLeft, FiInfo, FiUnlock, FiLock } from 'react-icons/fi';
@@ -11,12 +12,23 @@ import { toast } from 'react-toastify';
 import { initiateContentPurchase } from '../api/payment';
 import { InitiateContentPurchaseRequest } from '../types/payment';
 import { formatCurrency } from '../utils/formatters';
+import {
+  getLocalizedContentDescription,
+  getLocalizedContentTitle,
+  getLocalizedEpisodeDescription,
+  getLocalizedEpisodeTitle,
+  getLocalizedText,
+  hasLocalizedText,
+} from '../utils/localizeContent';
+import { useAutoTranslate } from '../hooks/useAutoTranslate';
+import { normalizeSupportedLanguage } from '../utils/translate';
 import styles from './ContentDetails.module.css';
 
 const ContentDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { i18n } = useTranslation();
 
   const [content, setContent] = useState<Content | null>(null);
   const [relatedContent, setRelatedContent] = useState<Content[]>([]);
@@ -30,6 +42,40 @@ const ContentDetails: React.FC = () => {
   const [episodeUnlockingId, setEpisodeUnlockingId] = useState<string | null>(null);
   const [seasonUnlockingId, setSeasonUnlockingId] = useState<string | null>(null);
   const lastCheckoutRef = useRef<{ url: string; openedAt: number } | null>(null);
+
+  // Machine-translation fallback for dynamic backend content.
+  // Hooks must run on every render (including loading states), so we compute safe defaults.
+  const targetLanguage = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language);
+  const baseContentTitle = getLocalizedContentTitle(content, targetLanguage);
+  const baseContentDescription = getLocalizedContentDescription(content, targetLanguage);
+  const baseEpisodeTitle = activeEpisode ? getLocalizedEpisodeTitle(activeEpisode, targetLanguage) : '';
+  const baseEpisodeDescription = activeEpisode ? getLocalizedEpisodeDescription(activeEpisode, targetLanguage) : '';
+
+  const shouldTranslateContentTitle =
+    targetLanguage !== 'en' && !hasLocalizedText(content, 'title', targetLanguage);
+  const shouldTranslateContentDescription =
+    targetLanguage !== 'en' && !hasLocalizedText(content, 'description', targetLanguage);
+  const shouldTranslateEpisodeTitle =
+    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'title', targetLanguage);
+  const shouldTranslateEpisodeDescription =
+    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'description', targetLanguage);
+
+  const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
+    enabled: shouldTranslateContentTitle,
+    source: 'en',
+  });
+  const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
+    enabled: shouldTranslateContentDescription,
+    source: 'en',
+  });
+  const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
+    enabled: shouldTranslateEpisodeTitle,
+    source: 'en',
+  });
+  const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
+    enabled: shouldTranslateEpisodeDescription,
+    source: 'en',
+  });
 
   const resolveEpisodeId = (episode?: Episode | null) => {
     if (!episode) return '';
@@ -739,6 +785,10 @@ const ContentDetails: React.FC = () => {
 
   if (!content) return null;
 
+  const language = targetLanguage;
+  const localizedContentTitle = translatedContentTitle.text || baseContentTitle;
+  const localizedContentDescription = translatedContentDescription.text || baseContentDescription;
+
   const isSeries = content.contentType === 'Series';
   const activeSeasonObj = isSeries
     ? content.seasons?.find((season) => season.seasonNumber === activeSeason) || null
@@ -762,15 +812,21 @@ const ContentDetails: React.FC = () => {
     : formatCurrency(content.priceInRwf || 0);
 
   const shortTransactionRef = pendingTransactionRef ? pendingTransactionRef.slice(-8).toUpperCase() : null;
+  const localizedEpisodeTitle =
+    isSeries && activeEpisode ? translatedEpisodeTitle.text || baseEpisodeTitle : '';
+  const localizedEpisodeDescription =
+    isSeries && activeEpisode ? translatedEpisodeDescription.text || baseEpisodeDescription : '';
   const heroTitle =
     isSeries && activeEpisode
-      ? `${content.title} - S${activeSeason}:E${activeEpisode.episodeNumber} - ${activeEpisode.title}`
-      : content.title;
-  const heroDescription = isSeries && activeEpisode ? activeEpisode.description : content.description;
+      ? `${localizedContentTitle} - S${activeSeason}:E${activeEpisode.episodeNumber} - ${localizedEpisodeTitle}`
+      : localizedContentTitle;
+  const heroDescription = isSeries && activeEpisode ? localizedEpisodeDescription : localizedContentDescription;
   const heroDuration = isSeries && activeEpisode ? `${activeEpisode.duration} min` : `${content.duration ?? 0} min`;
   const totalSeasons = content.seasons?.length || 0;
   const totalEpisodes = content.seasons?.reduce((acc, season) => acc + (season.episodes?.length || 0), 0) || 0;
-  const genreNames = Array.isArray(content.genres) ? content.genres.map((g) => g.name) : [];
+  const genreNames = Array.isArray(content.genres)
+    ? content.genres.map((g) => getLocalizedText(g, 'name', language) || g.name)
+    : [];
   const primaryGenres = genreNames.slice(0, 3).join(' • ') || 'Drama';
   const primaryCreator = content.director || content.cast?.[0] || 'Randa Plus Studio';
   const primaryLanguage = content.language || content.countryOfOrigin || 'Kinyarwanda';
@@ -814,7 +870,7 @@ const ContentDetails: React.FC = () => {
       <div className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroBackground}>
-            <img src={content.posterImageUrl} alt={content.title} className={styles.heroImage} />
+            <img src={content.posterImageUrl} alt={localizedContentTitle} className={styles.heroImage} />
             <div className={styles.heroOverlay} />
           </div>
 
@@ -826,7 +882,7 @@ const ContentDetails: React.FC = () => {
             <div className={styles.heroGrid}>
               <div className={styles.heroVisual}>
                 <div className={styles.heroPoster}>
-                  <img src={content.posterImageUrl} alt={`${content.title} poster`} />
+                  <img src={content.posterImageUrl} alt={`${localizedContentTitle} poster`} />
                   {isLocked && (
                     <>
                       <div className={styles.posterOverlay}>
