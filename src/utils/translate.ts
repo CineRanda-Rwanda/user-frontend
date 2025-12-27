@@ -54,6 +54,32 @@ export type TranslateOptions = {
   signal?: AbortSignal
 }
 
+export const getCachedTranslation = (
+  text: string,
+  target: SupportedLanguage,
+  options: Pick<TranslateOptions, 'source'> = {}
+): string | null => {
+  const trimmed = String(text || '').trim()
+  if (!trimmed) return ''
+
+  const source = options.source || 'en'
+  if (target === source) return trimmed
+  if (!isTranslationEnabled()) return trimmed
+
+  const key = cacheKey(source, target, trimmed)
+  const fromMemory = memoryCache.get(key)
+  if (fromMemory) return fromMemory
+
+  const storage = safeLocalStorage()
+  const fromStorage = storage?.getItem(key)
+  if (fromStorage) {
+    memoryCache.set(key, fromStorage)
+    return fromStorage
+  }
+
+  return null
+}
+
 const translateViaLibreTranslate = async (
   text: string,
   source: SupportedLanguage,

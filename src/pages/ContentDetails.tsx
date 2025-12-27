@@ -28,7 +28,7 @@ const ContentDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const [content, setContent] = useState<Content | null>(null);
   const [relatedContent, setRelatedContent] = useState<Content[]>([]);
@@ -63,19 +63,29 @@ const ContentDetails: React.FC = () => {
   const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
     enabled: shouldTranslateContentTitle,
     source: 'en',
+    hideUntilTranslated: true,
   });
   const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
     enabled: shouldTranslateContentDescription,
     source: 'en',
+    hideUntilTranslated: true,
   });
   const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
     enabled: shouldTranslateEpisodeTitle,
     source: 'en',
+    hideUntilTranslated: true,
   });
   const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
     enabled: shouldTranslateEpisodeDescription,
     source: 'en',
+    hideUntilTranslated: true,
   });
+
+  const translationsReady =
+    translatedContentTitle.ready &&
+    translatedContentDescription.ready &&
+    translatedEpisodeTitle.ready &&
+    translatedEpisodeDescription.ready;
 
   const resolveEpisodeId = (episode?: Episode | null) => {
     if (!episode) return '';
@@ -775,10 +785,10 @@ const ContentDetails: React.FC = () => {
     return season.episodes?.reduce((sum, episode) => sum + (episode.priceInRwf || 0), 0) || 0;
   };
 
-  if (loading) {
+  if (loading || !translationsReady) {
     return (
       <div className={styles.loading}>
-        <Loader fullScreen={false} text="Loading title..." />
+        <Loader fullScreen={false} text={t('common.loading')} />
       </div>
     );
   }

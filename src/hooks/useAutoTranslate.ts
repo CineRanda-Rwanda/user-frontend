@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { SupportedLanguage } from '@/i18n'
-import { translateTextCached } from '@/utils/translate'
+import { getCachedTranslation, translateTextCached } from '@/utils/translate'
 
 type UseAutoTranslateOptions = {
   enabled?: boolean
   source?: SupportedLanguage
+  /** If true, returns empty string until translation is available (or cached). */
+  hideUntilTranslated?: boolean
 }
 
 export const useAutoTranslate = (
@@ -14,17 +16,42 @@ export const useAutoTranslate = (
 ) => {
   const enabled = options.enabled ?? true
   const source = options.source ?? 'en'
+  const hideUntilTranslated = options.hideUntilTranslated ?? false
 
   const input = useMemo(() => String(text || ''), [text])
 
-  const [translated, setTranslated] = useState(input)
+  const [translated, setTranslated] = useState(() => {
+    const trimmed = String(text || '').trim()
+    if (!trimmed) return ''
+    if (!enabled || target === source) return trimmed
+    const cached = getCachedTranslation(trimmed, target, { source })
+    if (cached !== null) return cached
+    return hideUntilTranslated ? '' : trimmed
+  })
   const [loading, setLoading] = useState(false)
 
   const lastKeyRef = useRef<string>('')
 
   useEffect(() => {
-    setTranslated(input)
-  }, [input])
+    const trimmed = input.trim()
+    if (!trimmed) {
+      setTranslated('')
+      return
+    }
+
+    if (!enabled || target === source) {
+      setTranslated(trimmed)
+      return
+    }
+
+    const cached = getCachedTranslation(trimmed, target, { source })
+    if (cached !== null) {
+      setTranslated(cached)
+      return
+    }
+
+    setTranslated(hideUntilTranslated ? '' : trimmed)
+  }, [enabled, hideUntilTranslated, input, source, target])
 
   useEffect(() => {
     const trimmed = input.trim()
@@ -36,6 +63,13 @@ export const useAutoTranslate = (
 
     if (!enabled || target === source) {
       setTranslated(trimmed)
+      setLoading(false)
+      return
+    }
+
+    const cached = getCachedTranslation(trimmed, target, { source })
+    if (cached !== null) {
+      setTranslated(cached)
       setLoading(false)
       return
     }
@@ -74,5 +108,6 @@ export const useAutoTranslate = (
     }
   }, [enabled, input, source, target])
 
-  return { text: translated, loading }
+  const ready = !enabled || target === source || !input.trim() || (!!translated && !loading)
+  return { text: translated, loading, ready }
 }

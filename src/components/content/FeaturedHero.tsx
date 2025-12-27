@@ -52,16 +52,18 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
   const translatedTitle = useAutoTranslate(baseTitle, language, {
     enabled: language !== 'en',
     source: 'en',
+    hideUntilTranslated: true,
   })
   const translatedDescription = useAutoTranslate(baseDescription, language, {
     enabled: language !== 'en',
     source: 'en',
+    hideUntilTranslated: true,
   })
 
   if (!content.length || !current) return null
 
-  const title = translatedTitle.text || baseTitle
-  const description = translatedDescription.text || baseDescription
+  const title = translatedTitle.text || ''
+  const description = translatedDescription.text || ''
 
   const handleCenterPlay = () => {
     // The hero center play should always play the trailer.
@@ -130,7 +132,7 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
       <div className={styles.background}>
         <img
           src={current.posterImageUrl}
-          alt={title}
+          alt={title || baseTitle}
           className={styles.backgroundImage}
           key={current._id}
         />

@@ -23,8 +23,9 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
   const translatedTitle = useAutoTranslate(baseTitle, language, {
     enabled: language !== 'en',
     source: 'en',
+    hideUntilTranslated: true,
   })
-  const title = translatedTitle.text || baseTitle
+  const title = translatedTitle.text || ''
   const isPremium = (content.priceInRwf || 0) > 0
   const isUnlockedPremium = isPremium && (content.isPurchased || content.userAccess?.isPurchased)
   const isLocked = isPremium && !isUnlockedPremium && !content.isFree

@@ -34,7 +34,7 @@ const detectMimeType = (url?: string) => {
 }
 
 const Watch: React.FC = () => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -88,19 +88,29 @@ const Watch: React.FC = () => {
   const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
     enabled: shouldTranslateContentTitle,
     source: 'en',
+    hideUntilTranslated: true,
   })
   const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
     enabled: shouldTranslateContentDescription,
     source: 'en',
+    hideUntilTranslated: true,
   })
   const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
     enabled: shouldTranslateEpisodeTitle,
     source: 'en',
+    hideUntilTranslated: true,
   })
   const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
     enabled: shouldTranslateEpisodeDescription,
     source: 'en',
+    hideUntilTranslated: true,
   })
+
+  const translationsReady =
+    translatedContentTitle.ready &&
+    translatedContentDescription.ready &&
+    translatedEpisodeTitle.ready &&
+    translatedEpisodeDescription.ready
 
   const orderedSeasons = useMemo(() => {
     if (!content?.seasons) return []
@@ -499,10 +509,10 @@ const Watch: React.FC = () => {
     }
   }
 
-  if (loadingContent) {
+  if (loadingContent || !translationsReady) {
     return (
       <div className={styles.loadingState}>
-        <Loader fullScreen={false} text="Loading stream..." />
+        <Loader fullScreen={false} text={t('common.loading')} />
       </div>
     )
   }
