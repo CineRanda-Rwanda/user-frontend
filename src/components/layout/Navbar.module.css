@@ -679,6 +679,64 @@
   .authButtons {
     display: none;
   }
+
+  .languageSelect {
+    height: 30px;
+    padding: 0 calc(var(--spacing-xs) + 14px) 0 var(--spacing-xs);
+  }
+
+  .languageSelect::after {
+    right: var(--spacing-xs);
+  }
+
+  .actionButton {
+    padding: var(--spacing-xs);
+    font-size: var(--fs-md);
+    min-width: 44px;
+    min-height: 44px;
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .actionButton::before {
+    content: '';
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    transition: all var(--transition-base);
+  }
+
+  .actionButton:hover::before {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+
+  .actionButton > svg {
+    position: relative;
+    z-index: 1;
+  }
+
+  .badge {
+    top: 4px;
+    right: 4px;
+    padding: 1px 5px;
+    min-width: 16px;
+  }
+
+  .profileButton {
+    padding: 0;
+    border-radius: 999px;
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .avatar {
+    width: 26px;
+    height: 26px;
+    font-size: var(--fs-xs);
+  }
 }
 
 @media (max-width: 640px) {
