@@ -95,7 +95,9 @@ const translateViaLibreTranslate = async (
     throw new Error('LibreTranslate URL not configured (VITE_LIBRETRANSLATE_URL)')
   }
 
-  const response = await fetch(`${baseUrl}/translate`, {
+  const endpoint = baseUrl.toLowerCase().endsWith('/translate') ? baseUrl : `${baseUrl}/translate`
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ q: text, source, target, format: 'text' }),

@@ -248,6 +248,10 @@ npx tsc --noEmit      # strict type checking without emitting JS
 2. **Build:** `npm run build` – outputs to `dist/`.
 3. **Preview:** `npm run preview` – sanity-check bundle locally.
 4. **Hosting:** Upload `dist/` to Netlify, Vercel, CloudFront/S3, or any static host. Ensure SPA fallback rewrites `/* -> /index.html`.
+4a. **LibreTranslate (recommended for Vercel):** Use the included Vercel Serverless Function proxy at `/api/translate`.
+   - Set `VITE_LIBRETRANSLATE_URL` to your app origin endpoint: `https://<your-vercel-domain>/api/translate`.
+   - Set a server-side env var on Vercel (NOT prefixed with `VITE_`): `LIBRETRANSLATE_URL=https://<your-libretranslate-host>`.
+   - This avoids browser CORS issues and keeps your LibreTranslate host URL out of the client bundle.
 5. **Security:**
     - Serve over HTTPS.
     - Configure CSP headers (see `USER_FRONTEND_REQUIREMENTS.md` §16).
