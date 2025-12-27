@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { FiFilter, FiX, FiRefreshCw } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './FilterPanel.module.css'
 
 export interface SearchFilters {
@@ -24,6 +25,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   isOpen,
   onToggle
 }) => {
+  const { t } = useTranslation()
   const handleGenreToggle = (genreId: string) => {
     const newGenres = filters.genres.includes(genreId)
       ? filters.genres.filter(id => id !== genreId)
@@ -70,8 +72,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <FiFilter />
         </div>
         <div className={styles.toggleCopy}>
-          <span className={styles.toggleLabel}>Refine</span>
-          <span className={styles.toggleTitle}>Filter results</span>
+          <span className={styles.toggleLabel}>{t('filterPanel.toggle.label')}</span>
+          <span className={styles.toggleTitle}>{t('filterPanel.toggle.title')}</span>
         </div>
         {activeFilterCount > 0 && (
           <span className={styles.badge}>{activeFilterCount}</span>
@@ -80,12 +82,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
       <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
         <div className={styles.header}>
-          <h3>Filters</h3>
+          <h3>{t('filterPanel.header.title')}</h3>
           <div className={styles.headerActions}>
             {activeFilterCount > 0 && (
               <button className={styles.resetButton} onClick={resetFilters}>
                 <FiRefreshCw />
-                Reset
+                {t('filterPanel.actions.reset')}
               </button>
             )}
             <button className={styles.closeButton} onClick={onToggle}>
@@ -97,7 +99,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         <div className={styles.summaryBox}>
           {activeFilterCount > 0 ? (
             <>
-              <p className={styles.summaryTitle}>{activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}</p>
+              <p className={styles.summaryTitle}>{t('filterPanel.summary.activeFilters', { count: activeFilterCount })}</p>
               <div className={styles.summaryChips}>
                 {[...selectedGenreLabels, ...selectedCategoryLabels].map((label) => (
                   <span key={label} className={styles.summaryChip}>
@@ -108,8 +110,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             </>
           ) : (
             <>
-              <p className={styles.summaryTitle}>No filters applied</p>
-              <p className={styles.summaryHint}>Pick a genre or category to tailor the lineup.</p>
+              <p className={styles.summaryTitle}>{t('filterPanel.summary.noneTitle')}</p>
+              <p className={styles.summaryHint}>{t('filterPanel.summary.noneHint')}</p>
             </>
           )}
         </div>
@@ -120,8 +122,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             <div className={styles.filterSection}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <p className={styles.filterEyebrow}>Genres</p>
-                  <h4>Choose the mood</h4>
+                  <p className={styles.filterEyebrow}>{t('filterPanel.sections.genres.eyebrow')}</p>
+                  <h4>{t('filterPanel.sections.genres.title')}</h4>
                 </div>
                 <span className={styles.sectionCount}>{filters.genres.length}/{genres.length}</span>
               </div>
@@ -146,8 +148,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             <div className={styles.filterSection}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <p className={styles.filterEyebrow}>Categories</p>
-                  <h4>Refine by collection</h4>
+                  <p className={styles.filterEyebrow}>{t('filterPanel.sections.categories.eyebrow')}</p>
+                  <h4>{t('filterPanel.sections.categories.title')}</h4>
                 </div>
                 <span className={styles.sectionCount}>{filters.categories.length}/{categories.length}</span>
               </div>

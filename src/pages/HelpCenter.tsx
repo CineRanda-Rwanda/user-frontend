@@ -1,10 +1,12 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiChevronRight, FiHelpCircle, FiLock, FiPlayCircle, FiShield, FiSmartphone } from 'react-icons/fi'
+import { Trans, useTranslation } from 'react-i18next'
 import Button from '@/components/common/Button'
 import styles from './SupportPages.module.css'
 
 const HelpCenter: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const handleBack = () => navigate(-1)
   const tutorialVideoUrl = (import.meta as any).env?.VITE_TUTORIAL_VIDEO_URL as string | undefined
@@ -14,36 +16,34 @@ const HelpCenter: React.FC = () => {
       <header className={styles.hero}>
         <div className={styles.heroTopRow}>
           <button type="button" className={styles.backButton} onClick={handleBack}>
-            ← Back
+            {t('support.common.back')}
           </button>
           <nav className={styles.inlineNav} aria-label="Support links">
             <Link to="/" className={styles.inlineNavLink}>
-              Home <FiChevronRight aria-hidden="true" />
+              {t('support.common.home')} <FiChevronRight aria-hidden="true" />
             </Link>
             <Link to="/faq" className={styles.inlineNavLink}>
-              FAQ <FiChevronRight aria-hidden="true" />
+              {t('support.common.faq')} <FiChevronRight aria-hidden="true" />
             </Link>
             <Link to="/contact" className={styles.inlineNavLink}>
-              Contact <FiChevronRight aria-hidden="true" />
+              {t('support.common.contact')} <FiChevronRight aria-hidden="true" />
             </Link>
             <Link to="/terms" className={styles.inlineNavLink}>
-              Terms <FiChevronRight aria-hidden="true" />
+              {t('support.common.terms')} <FiChevronRight aria-hidden="true" />
             </Link>
           </nav>
         </div>
 
-        <p className={styles.sectionLabel}>Support</p>
-        <h1>Help Center</h1>
-        <p>
-          Find quick answers, step-by-step guides, and the fastest way to reach support.
-        </p>
+        <p className={styles.sectionLabel}>{t('support.helpCenter.hero.label')}</p>
+        <h1>{t('support.helpCenter.hero.title')}</h1>
+        <p>{t('support.helpCenter.hero.subtitle')}</p>
 
         <div className={styles.heroActions}>
           <Button variant="primary" onClick={() => navigate('/faq')}>
-            Browse FAQ
+            {t('support.helpCenter.hero.actions.browseFaq')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/contact')}>
-            Contact support
+            {t('support.helpCenter.hero.actions.contactSupport')}
           </Button>
         </div>
       </header>
@@ -51,21 +51,21 @@ const HelpCenter: React.FC = () => {
       <div className={styles.twoColumn}>
         <aside className={styles.sideNav} aria-label="Help Center navigation">
           <div className={styles.sideNavCard}>
-            <p className={styles.sideNavTitle}>On this page</p>
+            <p className={styles.sideNavTitle}>{t('support.common.onThisPage')}</p>
             <a className={styles.sideNavLink} href="#getting-started">
-              Getting started
+              {t('support.helpCenter.nav.gettingStarted')}
             </a>
             <a className={styles.sideNavLink} href="#account-security">
-              Account & security
+              {t('support.helpCenter.nav.accountSecurity')}
             </a>
             <a className={styles.sideNavLink} href="#billing">
-              Billing & purchases
+              {t('support.helpCenter.nav.billing')}
             </a>
             <a className={styles.sideNavLink} href="#playback">
-              Playback & quality
+              {t('support.helpCenter.nav.playback')}
             </a>
             <a className={styles.sideNavLink} href="#devices">
-              Devices & access
+              {t('support.helpCenter.nav.devices')}
             </a>
           </div>
         </aside>
@@ -73,33 +73,25 @@ const HelpCenter: React.FC = () => {
         <main className={styles.main}>
           <section id="getting-started" className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span>Getting started</span>
-              <h2>Start streaming in minutes</h2>
-              <p>Simple steps that work on every device.</p>
+              <span>{t('support.helpCenter.sections.gettingStarted.eyebrow')}</span>
+              <h2>{t('support.helpCenter.sections.gettingStarted.title')}</h2>
+              <p>{t('support.helpCenter.sections.gettingStarted.subtitle')}</p>
             </div>
 
             <div className={styles.tutorialWrap}>
               <div>
                 <ol className={styles.stepList}>
-                  <li>
-                    Create an account (email or phone), then confirm any required verification.
-                  </li>
-                  <li>
-                    Use Search to find a title, or browse Movies and Series.
-                  </li>
-                  <li>
-                    Open a title and press Watch. If a purchase is required, you’ll see the price before confirming.
-                  </li>
-                  <li>
-                    Rate what you watch to improve recommendations and notifications.
-                  </li>
+                  <li>{t('support.helpCenter.sections.gettingStarted.steps.1')}</li>
+                  <li>{t('support.helpCenter.sections.gettingStarted.steps.2')}</li>
+                  <li>{t('support.helpCenter.sections.gettingStarted.steps.3')}</li>
+                  <li>{t('support.helpCenter.sections.gettingStarted.steps.4')}</li>
                 </ol>
               </div>
 
               <div>
-                <h3>How to use Randa Plus</h3>
+                <h3>{t('support.helpCenter.sections.gettingStarted.tutorialTitle')}</h3>
                 <p className={styles.richText}>
-                  Watch the quick walkthrough to learn how to search, unlock, and start watching.
+                  {t('support.helpCenter.sections.gettingStarted.tutorialSubtitle')}
                 </p>
 
                 {tutorialVideoUrl ? (
@@ -116,7 +108,7 @@ const HelpCenter: React.FC = () => {
                 ) : (
                   <div className={styles.callout}>
                     <p>
-                      Tutorial video is not configured. Set <strong>VITE_TUTORIAL_VIDEO_URL</strong> in your environment.
+                      <Trans i18nKey="support.helpCenter.sections.gettingStarted.tutorialMissing" components={[<strong key="strong" />]} />
                     </p>
                   </div>
                 )}
@@ -126,38 +118,31 @@ const HelpCenter: React.FC = () => {
 
           <section id="account-security" className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span>Account & security</span>
-              <h2>Keep your account protected</h2>
-              <p>Tips for safer sign-in and account recovery.</p>
+              <span>{t('support.helpCenter.sections.accountSecurity.eyebrow')}</span>
+              <h2>{t('support.helpCenter.sections.accountSecurity.title')}</h2>
+              <p>{t('support.helpCenter.sections.accountSecurity.subtitle')}</p>
             </div>
 
             <div className={styles.featureList}>
               <article className={styles.featureItem}>
                 <FiLock aria-hidden="true" />
                 <div>
-                  <h3>Passwords & PINs</h3>
-                  <p>
-                    Email accounts use a password. Phone accounts use a PIN for quick access.
-                    Manage security from your Profile settings.
-                  </p>
+                  <h3>{t('support.helpCenter.sections.accountSecurity.cards.passwords.title')}</h3>
+                  <p>{t('support.helpCenter.sections.accountSecurity.cards.passwords.body')}</p>
                 </div>
               </article>
               <article className={styles.featureItem}>
                 <FiShield aria-hidden="true" />
                 <div>
-                  <h3>Sign in with Google</h3>
-                  <p>
-                    Google accounts don’t have an app password by default. Use Google to manage your sign-in security.
-                  </p>
+                  <h3>{t('support.helpCenter.sections.accountSecurity.cards.google.title')}</h3>
+                  <p>{t('support.helpCenter.sections.accountSecurity.cards.google.body')}</p>
                 </div>
               </article>
               <article className={styles.featureItem}>
                 <FiHelpCircle aria-hidden="true" />
                 <div>
-                  <h3>Can’t sign in?</h3>
-                  <p>
-                    Try reset options first (password or PIN), then contact support with the email/phone you used.
-                  </p>
+                  <h3>{t('support.helpCenter.sections.accountSecurity.cards.cantSignIn.title')}</h3>
+                  <p>{t('support.helpCenter.sections.accountSecurity.cards.cantSignIn.body')}</p>
                 </div>
               </article>
             </div>
@@ -165,36 +150,36 @@ const HelpCenter: React.FC = () => {
 
           <section id="billing" className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span>Billing & purchases</span>
-              <h2>Payments, receipts, and refunds</h2>
-              <p>What you’ll see at checkout and where to get help if something fails.</p>
+              <span>{t('support.helpCenter.sections.billing.eyebrow')}</span>
+              <h2>{t('support.helpCenter.sections.billing.title')}</h2>
+              <p>{t('support.helpCenter.sections.billing.subtitle')}</p>
             </div>
             <ul className={styles.bulletList}>
-              <li>Before confirming, we show the price and what you’re unlocking.</li>
-              <li>If a transaction completes but access doesn’t unlock, contact support with the payment reference.</li>
-              <li>Refund eligibility depends on the issue and timing. Use Contact support for a review.</li>
+              <li>{t('support.helpCenter.sections.billing.bullets.1')}</li>
+              <li>{t('support.helpCenter.sections.billing.bullets.2')}</li>
+              <li>{t('support.helpCenter.sections.billing.bullets.3')}</li>
             </ul>
           </section>
 
           <section id="playback" className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span>Playback</span>
-              <h2>Smoother streaming</h2>
-              <p>Fix buffering, audio sync, and quality drops quickly.</p>
+              <span>{t('support.helpCenter.sections.playback.eyebrow')}</span>
+              <h2>{t('support.helpCenter.sections.playback.title')}</h2>
+              <p>{t('support.helpCenter.sections.playback.subtitle')}</p>
             </div>
             <div className={styles.featureList}>
               <article className={styles.featureItem}>
                 <FiPlayCircle aria-hidden="true" />
                 <div>
-                  <h3>Buffering or freezes</h3>
-                  <p>Restart the player, switch to Wi‑Fi, then reduce quality if bandwidth is limited.</p>
+                  <h3>{t('support.helpCenter.sections.playback.cards.buffering.title')}</h3>
+                  <p>{t('support.helpCenter.sections.playback.cards.buffering.body')}</p>
                 </div>
               </article>
               <article className={styles.featureItem}>
                 <FiPlayCircle aria-hidden="true" />
                 <div>
-                  <h3>No audio / wrong language</h3>
-                  <p>Check device volume, then re-open the title. If available, pick audio/subtitles inside the player.</p>
+                  <h3>{t('support.helpCenter.sections.playback.cards.audio.title')}</h3>
+                  <p>{t('support.helpCenter.sections.playback.cards.audio.body')}</p>
                 </div>
               </article>
             </div>
@@ -202,24 +187,27 @@ const HelpCenter: React.FC = () => {
 
           <section id="devices" className={styles.section}>
             <div className={styles.sectionHeader}>
-              <span>Devices</span>
-              <h2>Watch on the go</h2>
-              <p>Use your membership across supported devices.</p>
+              <span>{t('support.helpCenter.sections.devices.eyebrow')}</span>
+              <h2>{t('support.helpCenter.sections.devices.title')}</h2>
+              <p>{t('support.helpCenter.sections.devices.subtitle')}</p>
             </div>
             <div className={styles.featureList}>
               <article className={styles.featureItem}>
                 <FiSmartphone aria-hidden="true" />
                 <div>
-                  <h3>Mobile & desktop</h3>
-                  <p>Use the same account to sign in across devices. If you hit limits, sign out from old sessions.</p>
+                  <h3>{t('support.helpCenter.sections.devices.cards.mobile.title')}</h3>
+                  <p>{t('support.helpCenter.sections.devices.cards.mobile.body')}</p>
                 </div>
               </article>
               <article className={styles.featureItem}>
                 <FiSmartphone aria-hidden="true" />
                 <div>
-                  <h3>Still stuck?</h3>
+                  <h3>{t('support.helpCenter.sections.devices.cards.stuck.title')}</h3>
                   <p>
-                    Visit <Link to="/contact">Contact</Link> and include device model, browser/app version, and a short description.
+                    <Trans
+                      i18nKey="support.helpCenter.sections.devices.cards.stuck.body"
+                      components={[<Link key="contact" to="/contact" />]}
+                    />
                   </p>
                 </div>
               </article>
@@ -227,14 +215,14 @@ const HelpCenter: React.FC = () => {
           </section>
 
           <section className={styles.callout} aria-label="Need more help">
-            <h2>Need help right now?</h2>
-            <p>Start with the FAQ for quick fixes, or message support with your account email/phone.</p>
+            <h2>{t('support.helpCenter.callout.title')}</h2>
+            <p>{t('support.helpCenter.callout.body')}</p>
             <div className={styles.calloutActions}>
               <Button variant="secondary" onClick={() => navigate('/faq')}>
-                Open FAQ
+                {t('support.helpCenter.callout.actions.openFaq')}
               </Button>
               <Button variant="primary" onClick={() => navigate('/contact')}>
-                Contact support
+                {t('support.helpCenter.callout.actions.contactSupport')}
               </Button>
             </div>
           </section>

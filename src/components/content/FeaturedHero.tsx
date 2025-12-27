@@ -45,19 +45,19 @@ const FeaturedHero: React.FC<FeaturedHeroProps> = ({ content, selectedId = null 
     return content[Math.min(autoIndex, content.length - 1)]
   }, [content, autoIndex, selectedId])
 
-  const language = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
+  const language = normalizeSupportedLanguage(i18n.language)
   const baseTitle = current ? getLocalizedContentTitle(current, language) : ''
   const baseDescription = current ? getLocalizedContentDescription(current, language) : ''
 
   const translatedTitle = useAutoTranslate(baseTitle, language, {
-    enabled: language !== 'en',
-    source: 'en',
-    hideUntilTranslated: true,
+    enabled: language !== 'rw' && !!baseTitle.trim(),
+    source: 'auto',
+    hideUntilTranslated: false,
   })
   const translatedDescription = useAutoTranslate(baseDescription, language, {
-    enabled: language !== 'en',
-    source: 'en',
-    hideUntilTranslated: true,
+    enabled: language !== 'rw' && !!baseDescription.trim(),
+    source: 'auto',
+    hideUntilTranslated: false,
   })
 
   if (!content.length || !current) return null

@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import Loader from '../components/common/Loader';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import {
   getWalletBalance,
   getWalletTransactions,
@@ -17,6 +18,7 @@ import styles from './Wallet.module.css';
 const quickAmounts = [2000, 5000, 10000, 20000];
 
 const Wallet = () => {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ const Wallet = () => {
         setBalance(walletBalance);
         setTransactions(walletTransactions);
       } catch (error) {
-        toast.error('Unable to load wallet details. Please retry.');
+        toast.error(t('wallet.errors.loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -72,17 +74,17 @@ const Wallet = () => {
   const handleTopUp = async () => {
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount < 1000) {
-      toast.error('Enter at least FRW 1,000 to top up.');
+      toast.error(t('wallet.errors.minTopUp'));
       return;
     }
 
     try {
       setIsTopUpLoading(true);
       const { paymentLink } = await topUpWallet(numericAmount);
-      toast.success('Redirecting you to Flutterwave...');
+      toast.success(t('wallet.toasts.redirectingFlutterwave'));
       window.location.replace(paymentLink);
     } catch (error) {
-      toast.error('Top-up failed. Please try again.');
+      toast.error(t('wallet.errors.topUpFailed'));
     } finally {
       setIsTopUpLoading(false);
     }
@@ -102,26 +104,26 @@ const Wallet = () => {
         <div className={styles.pageToolbar}>
           <button type="button" className={styles.backButton} onClick={handleGoBack}>
             <FiArrowLeft />
-            <span>Back</span>
+            <span>{t('common.back')}</span>
           </button>
         </div>
         <div className={styles.hero}>
           <div className={styles.balanceCard}>
-            <p className={styles.balanceLabel}>Available Balance</p>
+            <p className={styles.balanceLabel}>{t('wallet.balance.available')}</p>
             <p className={styles.balanceAmount}>{formatCurrency(balance?.balance ?? 0)}</p>
-            <p className={styles.balanceSub}>Bonus {formatCurrency(balance?.bonusBalance ?? 0)}</p>
+            <p className={styles.balanceSub}>{t('wallet.balance.bonusLabel', { amount: formatCurrency(balance?.bonusBalance ?? 0) })}</p>
             <div className={styles.glow} />
           </div>
           <div className={styles.statsGrid}>
             <article className={styles.statCard}>
-              <p className={styles.statLabel}>Bonus Vault</p>
+              <p className={styles.statLabel}>{t('wallet.stats.bonusVault')}</p>
               <p className={styles.statValue}>{formatCurrency(balance?.bonusBalance ?? 0)}</p>
-              <p className={styles.statHint}>Auto-applied on eligible rentals.</p>
+              <p className={styles.statHint}>{t('wallet.stats.bonusHint')}</p>
             </article>
             <article className={styles.statCard}>
-              <p className={styles.statLabel}>Total Assets</p>
+              <p className={styles.statLabel}>{t('wallet.stats.totalAssets')}</p>
               <p className={styles.statValue}>{formatCurrency(balance?.totalBalance ?? 0)}</p>
-              <p className={styles.statHint}>Cash + promo credits.</p>
+              <p className={styles.statHint}>{t('wallet.stats.totalHint')}</p>
             </article>
           </div>
         </div>
@@ -129,15 +131,15 @@ const Wallet = () => {
         <div className={styles.topUpCard}>
           <div className={styles.topUpHeader}>
             <div>
-              <h2 className={styles.topUpTitle}>Instant Top-Up</h2>
-              <p className={styles.topUpSubtitle}>Fund your wallet via Flutterwave in seconds.</p>
+              <h2 className={styles.topUpTitle}>{t('wallet.topUp.title')}</h2>
+              <p className={styles.topUpSubtitle}>{t('wallet.topUp.subtitle')}</p>
             </div>
           </div>
           <div className={styles.amountRow}>
             <input
               type="number"
               className={styles.amountInput}
-              placeholder="Enter amount"
+              placeholder={t('wallet.topUp.placeholder')}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               min={1000}
@@ -162,10 +164,10 @@ const Wallet = () => {
               onClick={handleTopUp}
               disabled={isTopUpLoading}
             >
-              {isTopUpLoading ? 'Connecting to Flutterwave…' : 'Top Up Wallet'}
+              {isTopUpLoading ? t('wallet.topUp.connecting') : t('wallet.topUp.cta')}
             </button>
-            <button type="button" className={styles.secondaryButton} onClick={() => toast.success('Coming soon!')}>
-              Redeem Voucher
+            <button type="button" className={styles.secondaryButton} onClick={() => toast.success(t('common.comingSoon'))}>
+              {t('wallet.voucher.cta')}
             </button>
           </div>
         </div>
@@ -173,21 +175,21 @@ const Wallet = () => {
         <div>
           <div className={styles.sectionHeader}>
             <div>
-              <h2>Recent Transactions</h2>
-              <p className={styles.topUpSubtitle}>A live feed of your rentals, subscriptions, and bonuses.</p>
+              <h2>{t('wallet.transactions.title')}</h2>
+              <p className={styles.topUpSubtitle}>{t('wallet.transactions.subtitle')}</p>
             </div>
           </div>
           <div className={styles.transactions}>
             {formattedTransactions.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>No transactions yet. Fund your wallet to get started.</p>
+                <p>{t('wallet.transactions.empty')}</p>
               </div>
             ) : (
               <div className={styles.transactionList}>
                 {formattedTransactions.map((transaction) => (
                   <div key={transaction._id} className={styles.transactionItem}>
                     <div>
-                      <p className={styles.transactionDescription}>{transaction.description || 'Wallet activity'}</p>
+                      <p className={styles.transactionDescription}>{transaction.description || t('wallet.transactions.fallbackDescription')}</p>
                       <p className={styles.transactionDate}>{transaction.displayDate}</p>
                     </div>
                     <span className={

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FcGoogle } from 'react-icons/fc'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { authAPI } from '@/api/auth'
 import { LoginRequest } from '@/types/auth'
@@ -13,6 +14,7 @@ import styles from './Auth.module.css'
 type LoginMethod = 'phone' | 'email'
 
 const Login: React.FC = () => {
+  const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
   const [method, setMethod] = useState<LoginMethod>('phone')
@@ -69,11 +71,11 @@ const Login: React.FC = () => {
 
     if (method === 'phone') {
       if (!phoneForm.phoneNumber.trim()) {
-        setErrors({ phoneNumber: 'Phone number is required' })
+        setErrors({ phoneNumber: t('auth.validation.phoneRequired') })
         return
       }
       if (!phoneForm.pin || phoneForm.pin.trim().length < 4) {
-        setErrors({ pin: 'PIN must be at least 4 digits' })
+        setErrors({ pin: t('auth.validation.pinMin') })
         return
       }
       payload = {
@@ -83,11 +85,11 @@ const Login: React.FC = () => {
       }
     } else {
       if (!emailForm.email.trim() || !/^[\w.+-]+@[\w-]+\.[\w.-]+$/i.test(emailForm.email.trim())) {
-        setErrors({ email: 'Enter a valid email address' })
+        setErrors({ email: t('auth.validation.emailInvalid') })
         return
       }
       if (!emailForm.password || emailForm.password.length < 6) {
-        setErrors({ password: 'Password must be at least 6 characters' })
+        setErrors({ password: t('auth.validation.passwordMin6') })
         return
       }
       payload = {
@@ -103,7 +105,7 @@ const Login: React.FC = () => {
         await login(payload)
       }
     } catch (error: any) {
-      setGeneralError(error.response?.data?.message || 'Login failed. Please try again.')
+      setGeneralError(error.response?.data?.message || t('errors.loginFailed'))
     } finally {
       setLoading(false)
     }
@@ -114,7 +116,7 @@ const Login: React.FC = () => {
     setPinStep('request')
     setPinForm({ phoneNumber: '', code: '', newPin: '', confirmPin: '' })
     setPinError('')
-    setPinInfo('Enter the phone number linked to your account to receive a PIN reset code via SMS.')
+    setPinInfo(t('auth.forgotPin.infoRequest'))
   }
 
   const closePinModal = () => {
@@ -137,18 +139,18 @@ const Login: React.FC = () => {
 
     if (pinStep === 'request') {
       if (!pinForm.phoneNumber.trim()) {
-        setPinError('Phone number is required to send a reset code.')
+        setPinError(t('auth.forgotPin.errors.phoneRequired'))
         return
       }
 
       setPinLoading(true)
       try {
         await authAPI.forgotPin(pinForm.phoneNumber.trim())
-        toast.success('Reset code sent via SMS')
+        toast.success(t('auth.forgotPin.toasts.codeSent'))
         setPinStep('reset')
-        setPinInfo('Enter the code you received and choose a new 4-digit PIN.')
+        setPinInfo(t('auth.forgotPin.infoReset'))
       } catch (error: any) {
-        const message = error?.response?.data?.message || 'Could not send reset code right now.'
+        const message = error?.response?.data?.message || t('auth.forgotPin.errors.sendFailed')
         setPinError(message)
       } finally {
         setPinLoading(false)
@@ -157,25 +159,25 @@ const Login: React.FC = () => {
     }
 
     if (!pinForm.code.trim()) {
-      setPinError('Enter the verification code that was sent to you.')
+      setPinError(t('auth.forgotPin.errors.codeRequired'))
       return
     }
     if (!pinForm.newPin || pinForm.newPin.length < 4) {
-      setPinError('New PIN must be at least 4 digits.')
+      setPinError(t('auth.forgotPin.errors.newPinMin'))
       return
     }
     if (pinForm.newPin !== pinForm.confirmPin) {
-      setPinError('PIN confirmation does not match.')
+      setPinError(t('auth.forgotPin.errors.pinMismatch'))
       return
     }
 
     setPinLoading(true)
     try {
       await authAPI.resetPin(pinForm.code.trim(), pinForm.newPin)
-      toast.success('PIN reset successfully. Please sign in with your new PIN.')
+      toast.success(t('auth.forgotPin.toasts.resetSuccess'))
       closePinModal()
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Could not reset PIN right now.'
+      const message = error?.response?.data?.message || t('auth.forgotPin.errors.resetFailed')
       setPinError(message)
     } finally {
       setPinLoading(false)
@@ -208,17 +210,17 @@ const Login: React.FC = () => {
 
     if (passwordStep === 'request') {
       if (!passwordForm.email.trim() || !/^[\w.+-]+@[\w-]+\.[\w.-]+$/i.test(passwordForm.email.trim())) {
-        setPasswordError('Enter a valid email address to continue.')
+        setPasswordError(t('auth.validation.emailInvalid'))
         return
       }
 
       setPasswordLoading(true)
       try {
         await authAPI.requestPasswordReset({ email: passwordForm.email.trim() })
-        toast.success('Password reset link sent to your email')
+        toast.success(t('auth.forgotPassword.toasts.linkSent'))
         setPasswordStep('reset')
       } catch (error: any) {
-        const message = error?.response?.data?.message || 'Could not send reset link right now.'
+        const message = error?.response?.data?.message || t('auth.forgotPassword.errors.sendFailed')
         setPasswordError(message)
       } finally {
         setPasswordLoading(false)
@@ -227,15 +229,15 @@ const Login: React.FC = () => {
     }
 
     if (!passwordForm.token.trim()) {
-      setPasswordError('Enter the reset token from your email.')
+      setPasswordError(t('auth.forgotPassword.errors.tokenRequired'))
       return
     }
     if (!passwordForm.password || passwordForm.password.length < 8) {
-      setPasswordError('Password must be at least 8 characters.')
+      setPasswordError(t('auth.validation.passwordMin8'))
       return
     }
     if (passwordForm.password !== passwordForm.confirmPassword) {
-      setPasswordError('Password confirmation does not match.')
+      setPasswordError(t('auth.validation.passwordMismatch'))
       return
     }
 
@@ -245,10 +247,10 @@ const Login: React.FC = () => {
         token: passwordForm.token.trim(),
         newPassword: passwordForm.password
       })
-      toast.success('Password updated successfully. You can now log in.')
+      toast.success(t('auth.forgotPassword.toasts.updatedSuccess'))
       closePasswordModal()
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Could not reset password right now.'
+      const message = error?.response?.data?.message || t('auth.forgotPassword.errors.resetFailed')
       setPasswordError(message)
     } finally {
       setPasswordLoading(false)
@@ -267,7 +269,7 @@ const Login: React.FC = () => {
           <img src={randaPlusLogo} alt="Randa Plus" className={styles['logo-image']} />
         </div>
 
-        <h2 className={styles.title}>Sign in to Randa Plus</h2>
+        <h2 className={styles.title}>{t('auth.login.title')}</h2>
 
         {generalError && (
           <div className={styles['error-box']}>{generalError}</div>
@@ -281,7 +283,7 @@ const Login: React.FC = () => {
               className={`${styles['method-tab']} ${method === option ? styles['method-tab-active'] : ''}`}
               onClick={() => handleMethodChange(option as LoginMethod)}
             >
-              {option === 'phone' ? 'Phone number' : 'Email address'}
+              {option === 'phone' ? t('auth.login.methodPhone') : t('auth.login.methodEmail')}
             </button>
           ))}
         </div>
@@ -292,25 +294,25 @@ const Login: React.FC = () => {
               <Input
                 type="tel"
                 name="phoneNumber"
-                placeholder="e.g. +250783000111"
+                placeholder={t('auth.register.phonePlaceholder')}
                 value={phoneForm.phoneNumber}
                 onChange={handlePhoneChange}
                 error={errors.phoneNumber}
                 required
                 autoComplete="tel"
-                helperText="Use the number linked to your Randa Plus account"
+                helperText={t('auth.login.phoneHelper')}
               />
 
               <Input
                 type="password"
                 name="pin"
-                placeholder="4-digit PIN"
+                placeholder={t('auth.login.pinPlaceholder')}
                 value={phoneForm.pin}
                 onChange={handlePhoneChange}
                 error={errors.pin}
                 required
                 autoComplete="current-password"
-                helperText="PIN is required for phone login"
+                helperText={t('auth.login.pinHelper')}
                 togglePasswordVisibility
               />
             </>
@@ -319,7 +321,7 @@ const Login: React.FC = () => {
               <Input
                 type="email"
                 name="email"
-                placeholder="you@example.com"
+                placeholder={t('auth.register.emailPlaceholder')}
                 value={emailForm.email}
                 onChange={handleEmailChange}
                 error={errors.email}
@@ -330,13 +332,13 @@ const Login: React.FC = () => {
               <Input
                 type="password"
                 name="password"
-                placeholder="Password"
+                placeholder={t('auth.login.passwordPlaceholder')}
                 value={emailForm.password}
                 onChange={handleEmailChange}
                 error={errors.password}
                 required
                 autoComplete="current-password"
-                helperText="Minimum 6 characters"
+                helperText={t('auth.login.passwordHelperMin6')}
                 togglePasswordVisibility
               />
             </>
@@ -345,11 +347,11 @@ const Login: React.FC = () => {
           <div className={styles['form-link-row']}>
             {method === 'phone' ? (
               <button type="button" className={styles['inline-link']} onClick={openPinModal}>
-                Forgot PIN?
+                {t('auth.login.forgotPin')}
               </button>
             ) : (
               <button type="button" className={styles['inline-link']} onClick={openPasswordModal}>
-                Forgot password?
+                {t('auth.login.forgotPassword')}
               </button>
             )}
           </div>
@@ -360,16 +362,16 @@ const Login: React.FC = () => {
             fullWidth
             loading={loading}
           >
-            {method === 'phone' ? 'Sign in with phone' : 'Sign in with email'}
+            {method === 'phone' ? t('auth.login.submitPhone') : t('auth.login.submitEmail')}
           </Button>
 
-          <div className={styles['section-divider']}>or continue with</div>
+          <div className={styles['section-divider']}>{t('auth.register.orContinueWith')}</div>
 
           <button type="button" className={styles['google-button']} onClick={handleGoogleSignIn}>
             <span className={styles['oauth-icon']}>
               <FcGoogle />
             </span>
-            Continue with Google
+            {t('auth.login.google')}
           </button>
 
           <button
@@ -377,14 +379,14 @@ const Login: React.FC = () => {
             className={styles['ghost-button']}
             onClick={() => navigate('/')}
           >
-            ← Back to Home
+            {t('auth.register.backToHome')}
           </button>
         </form>
 
         <p className={styles['link-text']}>
-          Don't have an account?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link to="/register" className={styles.link}>
-            Sign Up
+            {t('auth.login.createAccount')}
           </Link>
         </p>
       </div>
@@ -394,12 +396,17 @@ const Login: React.FC = () => {
           <div className={styles['modal-card']}>
             <div className={styles['modal-header']}>
               <div>
-                <h3 className={styles['modal-title']}>Reset Randa PIN</h3>
+                <h3 className={styles['modal-title']}>{t('auth.forgotPin.title')}</h3>
                 <p className={styles['modal-subtitle']}>
-                  {pinStep === 'request' ? 'Verify your phone to receive a code.' : 'Enter the code and a new PIN.'}
+                  {pinStep === 'request' ? t('auth.forgotPin.subtitleRequest') : t('auth.forgotPin.subtitleReset')}
                 </p>
               </div>
-              <button type="button" className={styles['modal-close']} onClick={closePinModal} aria-label="Close reset PIN dialog">
+              <button
+                type="button"
+                className={styles['modal-close']}
+                onClick={closePinModal}
+                aria-label={t('auth.forgotPin.closeAria')}
+              >
                 x
               </button>
             </div>
@@ -412,40 +419,40 @@ const Login: React.FC = () => {
                 <Input
                   type="tel"
                   name="phoneNumber"
-                  placeholder="Phone number"
+                  placeholder={t('auth.forgotPin.form.phonePlaceholder')}
                   value={pinForm.phoneNumber}
                   onChange={handlePinInputChange}
                   required
                   autoComplete="tel"
-                  helperText="Use the number you registered with."
+                  helperText={t('auth.forgotPin.form.phoneHelper')}
                 />
               ) : (
                 <>
                   <Input
                     type="text"
                     name="code"
-                    placeholder="Verification code"
+                    placeholder={t('auth.forgotPin.form.codePlaceholder')}
                     value={pinForm.code}
                     onChange={handlePinInputChange}
                     required
                     autoComplete="one-time-code"
-                    helperText="6-digit code sent to your phone."
+                    helperText={t('auth.forgotPin.form.codeHelper')}
                   />
                   <Input
                     type="password"
                     name="newPin"
-                    placeholder="New PIN"
+                    placeholder={t('auth.forgotPin.form.newPinPlaceholder')}
                     value={pinForm.newPin}
                     onChange={handlePinInputChange}
                     required
                     autoComplete="new-password"
-                    helperText="Minimum 4 digits"
+                    helperText={t('auth.forgotPin.form.newPinHelper')}
                     togglePasswordVisibility
                   />
                   <Input
                     type="password"
                     name="confirmPin"
-                    placeholder="Confirm PIN"
+                    placeholder={t('auth.forgotPin.form.confirmPinPlaceholder')}
                     value={pinForm.confirmPin}
                     onChange={handlePinInputChange}
                     required
@@ -456,10 +463,10 @@ const Login: React.FC = () => {
               )}
 
               <Button type="submit" variant="primary" fullWidth loading={pinLoading}>
-                {pinStep === 'request' ? 'Send reset code' : 'Save new PIN'}
+                {pinStep === 'request' ? t('auth.forgotPin.actions.sendCode') : t('auth.forgotPin.actions.savePin')}
               </Button>
               <button type="button" className={styles['ghost-button']} onClick={closePinModal} disabled={pinLoading}>
-                Cancel
+                {t('auth.forgotPin.actions.cancel')}
               </button>
             </form>
           </div>
@@ -471,14 +478,19 @@ const Login: React.FC = () => {
           <div className={styles['modal-card']}>
             <div className={styles['modal-header']}>
               <div>
-                <h3 className={styles['modal-title']}>Reset Password</h3>
+                <h3 className={styles['modal-title']}>{t('auth.forgotPassword.title')}</h3>
                 <p className={styles['modal-subtitle']}>
                   {passwordStep === 'request'
-                    ? 'We will email you a reset link.'
-                    : 'Enter the token from your email and set a new password.'}
+                    ? t('auth.forgotPassword.subtitleRequest')
+                    : t('auth.forgotPassword.subtitleReset')}
                 </p>
               </div>
-              <button type="button" className={styles['modal-close']} onClick={closePasswordModal} aria-label="Close reset password dialog">
+              <button
+                type="button"
+                className={styles['modal-close']}
+                onClick={closePasswordModal}
+                aria-label={t('auth.forgotPassword.closeAria')}
+              >
                 x
               </button>
             </div>
@@ -490,7 +502,7 @@ const Login: React.FC = () => {
                 <Input
                   type="email"
                   name="email"
-                  placeholder="Email address"
+                  placeholder={t('auth.forgotPassword.form.emailPlaceholder')}
                   value={passwordForm.email}
                   onChange={handlePasswordInputChange}
                   required
@@ -501,7 +513,7 @@ const Login: React.FC = () => {
                   <Input
                     type="text"
                     name="token"
-                    placeholder="Reset token"
+                    placeholder={t('auth.forgotPassword.form.tokenPlaceholder')}
                     value={passwordForm.token}
                     onChange={handlePasswordInputChange}
                     required
@@ -509,18 +521,18 @@ const Login: React.FC = () => {
                   <Input
                     type="password"
                     name="password"
-                    placeholder="New password"
+                    placeholder={t('auth.forgotPassword.form.passwordPlaceholder')}
                     value={passwordForm.password}
                     onChange={handlePasswordInputChange}
                     required
                     autoComplete="new-password"
-                    helperText="Minimum 8 characters"
+                    helperText={t('auth.forgotPassword.form.passwordHelper')}
                     togglePasswordVisibility
                   />
                   <Input
                     type="password"
                     name="confirmPassword"
-                    placeholder="Confirm password"
+                    placeholder={t('auth.forgotPassword.form.confirmPasswordPlaceholder')}
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordInputChange}
                     required
@@ -531,10 +543,12 @@ const Login: React.FC = () => {
               )}
 
               <Button type="submit" variant="primary" fullWidth loading={passwordLoading}>
-                {passwordStep === 'request' ? 'Send reset link' : 'Update password'}
+                {passwordStep === 'request'
+                  ? t('auth.forgotPassword.actions.sendLink')
+                  : t('auth.forgotPassword.actions.updatePassword')}
               </Button>
               <button type="button" className={styles['ghost-button']} onClick={closePasswordModal} disabled={passwordLoading}>
-                Cancel
+                {t('auth.forgotPassword.actions.cancel')}
               </button>
             </form>
           </div>

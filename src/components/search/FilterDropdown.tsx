@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FiChevronDown } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './FilterDropdown.module.css'
 
 export interface FilterOption {
@@ -20,10 +21,11 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   label,
   options,
   value = null,
-  placeholder = 'All',
+  placeholder,
   onChange,
   disabled = false
 }) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -56,7 +58,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       >
         <div className={styles.inlineLabel}>
           <span className={styles.labelText}>{label}:</span>
-          <span className={styles.valueText}>{selected?.label || placeholder}</span>
+          <span className={styles.valueText}>{selected?.label || placeholder || t('filters.all')}</span>
         </div>
         <FiChevronDown className={`${styles.icon} ${isOpen ? styles.open : ''}`} />
       </button>
@@ -68,7 +70,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
             className={`${styles.option} ${!value ? styles.active : ''}`}
             onClick={() => handleSelect(null)}
           >
-            All {label}
+            {t('filters.allWithLabel', { label })}
           </button>
           {options.map(option => (
             <button

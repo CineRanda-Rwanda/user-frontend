@@ -18,7 +18,7 @@ interface ContentCardProps {
 const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, hidePrice = false }) => {
   const { i18n, t } = useTranslation()
   const navigate = useNavigate()
-  const language = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
+  const language = normalizeSupportedLanguage(i18n.language)
   const baseTitle = getLocalizedContentTitle(content, language)
   const translatedTitle = useAutoTranslate(baseTitle, language, {
     enabled: language !== 'en',

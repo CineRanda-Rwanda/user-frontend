@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationsProvider } from './contexts/NotificationsContext'
 import Loader from './components/common/Loader'
@@ -31,9 +32,10 @@ const PaymentFailed = lazy(() => import('./pages/PaymentFailed'))
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth()
+  const { t } = useTranslation()
 
   if (loading) {
-    return <Loader fullScreen text="Loading..." />
+    return <Loader fullScreen text={t('common.loading')} />
   }
 
   if (!isAuthenticated) {
@@ -50,10 +52,11 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // AppRoutes component that uses the auth context
 const AppRoutes = () => {
+  const { t } = useTranslation()
   return (
     <div className="app">
       <ScrollToTop />
-      <Suspense fallback={<Loader fullScreen text="Loading..." />}>
+      <Suspense fallback={<Loader fullScreen text={t('common.loading')} />}>
         <Routes>
             {/* Public Routes */}
             <Route

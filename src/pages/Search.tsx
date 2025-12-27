@@ -11,6 +11,8 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { contentAPI } from '@/api/content'
 import { Content } from '@/types/content'
 import { extractCollection } from '@/utils/collection'
+import { useTranslation } from 'react-i18next'
+import { normalizeSupportedLanguage, translateTextCached } from '@/utils/translate'
 import styles from './Search.module.css'
 
 const parseCommaParam = (value: string | null) =>
@@ -26,6 +28,7 @@ const arraysEqual = (a: string[], b: string[]) =>
 
 const Search: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t, i18n } = useTranslation()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [results, setResults] = useState<Content[]>([])
   const [loading, setLoading] = useState(false)
@@ -57,8 +60,30 @@ const Search: React.FC = () => {
         const genresData = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
         const categoriesData = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
         
-        setGenres(genresData)
-        setCategories(categoriesData)
+        const targetLanguage = normalizeSupportedLanguage(i18n.language)
+        if (targetLanguage === 'fr') {
+          const [translatedGenres, translatedCategories] = await Promise.all([
+            Promise.all(
+              genresData.map(async (genre) => ({
+                ...genre,
+                name: (await translateTextCached(genre.name, 'fr', { source: 'en' }).catch(() => genre.name)) || genre.name,
+              }))
+            ),
+            Promise.all(
+              categoriesData.map(async (category) => ({
+                ...category,
+                name:
+                  (await translateTextCached(category.name, 'fr', { source: 'en' }).catch(() => category.name)) ||
+                  category.name,
+              }))
+            ),
+          ])
+          setGenres(translatedGenres)
+          setCategories(translatedCategories)
+        } else {
+          setGenres(genresData)
+          setCategories(categoriesData)
+        }
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
         // Set empty arrays on error
@@ -68,7 +93,7 @@ const Search: React.FC = () => {
     }
     
     loadFilters()
-  }, [])
+  }, [i18n.language])
 
   useEffect(() => {
     const nextQuery = searchParams.get('q') || ''
@@ -185,8 +210,9 @@ const Search: React.FC = () => {
       setHasMore(currentPage < totalPages)
     } catch (err: any) {
       console.error('Search failed:', err)
-      setError(err.response?.data?.message || 'Failed to search content')
-      toast.error('Failed to search content')
+      const fallbackMessage = t('search.errors.searchFailed')
+      setError(err.response?.data?.message || fallbackMessage)
+      toast.error(fallbackMessage)
     } finally {
       setLoading(false)
     }
@@ -259,40 +285,40 @@ const Search: React.FC = () => {
     <div className={styles.searchPage}>
       <div className={styles.header}>
         <div className={styles.searchSection}>
-          <h1 className={styles.searchTitle}>Search</h1>
+          <h1 className={styles.searchTitle}>{t('search.title')}</h1>
           <p className={styles.searchHint}>
             {searchQuery
-              ? `Showing results for "${searchQuery}"`
-              : 'Use the global search in the navigation bar to discover something new.'}
+              ? t('search.hint.showingResultsFor', { query: searchQuery })
+              : t('search.hint.useNavSearch')}
           </p>
         </div>
 
         <div className={styles.controls}>
           <SortDropdown value={sortBy} onChange={handleSortChange} />
           <FilterDropdown
-            label="Genre"
+            label={t('search.filters.genre')}
             options={genres.map((genre) => ({ value: genre._id, label: genre.name }))}
             value={filters.genres[0] || null}
-            placeholder="All genres"
+            placeholder={t('search.filters.allGenres')}
             onChange={(value) => handleFilterSelect('genres', value)}
           />
           <FilterDropdown
-            label="Category"
+            label={t('search.filters.category')}
             options={categories.map((category) => ({ value: category._id, label: category.name }))}
             value={filters.categories[0] || null}
-            placeholder="All categories"
+            placeholder={t('search.filters.allCategories')}
             onChange={(value) => handleFilterSelect('categories', value)}
           />
           {(filters.genres.length > 0 || filters.categories.length > 0) && (
             <button type="button" className={styles.clearAllButton} onClick={clearAllFilters}>
-              Reset filters
+              {t('search.filters.reset')}
             </button>
           )}
         </div>
 
         {totalResults > 0 && (
           <div className={styles.resultsCount}>
-            Found {totalResults} {totalResults === 1 ? 'result' : 'results'}
+            {t('search.resultsCount', { count: totalResults })}
           </div>
         )}
       </div>
@@ -307,20 +333,20 @@ const Search: React.FC = () => {
         ) : showEmptyState ? (
           <EmptyState
             type="search"
-            title="No results found"
-            message="Try adjusting your search query or filters to find what you're looking for."
+            title={t('search.empty.noResultsTitle')}
+            message={t('search.empty.noResultsMessage')}
             action={{
-              label: 'Reset Search',
+              label: t('search.actions.resetSearch'),
               onClick: handleResetSearch
             }}
           />
         ) : error ? (
           <EmptyState
             type="error"
-            title="Something went wrong"
+            title={t('search.empty.errorTitle')}
             message={error}
             action={{
-              label: 'Try Again',
+              label: t('search.actions.tryAgain'),
               onClick: () => performSearch(searchQuery, filters, sortBy, 1)
             }}
           />
@@ -339,7 +365,7 @@ const Search: React.FC = () => {
                   disabled={loading}
                   className={styles.loadMoreButton}
                 >
-                  {loading ? 'Loading...' : 'Load More'}
+                  {loading ? t('common.loading') : t('search.actions.loadMore')}
                 </button>
               </div>
             )}
@@ -347,8 +373,8 @@ const Search: React.FC = () => {
         ) : (
           <EmptyState
             type="content"
-            title="Start searching"
-            message="Enter a search query or use filters to discover movies and series."
+            title={t('search.empty.startTitle')}
+            message={t('search.empty.startMessage')}
           />
         )}
       </div>

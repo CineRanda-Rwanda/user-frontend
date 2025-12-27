@@ -28,10 +28,12 @@ const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [hasMovies, setHasMovies] = useState(true)
   const [hasSeries, setHasSeries] = useState(true)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
+  const languageRef = useRef<HTMLDivElement>(null)
 
   const closeNotifications = useCallback(() => {
     setIsNotificationsOpen(false)
@@ -99,6 +101,28 @@ const Navbar: React.FC = () => {
     }
   }, [closeNotifications, isNotificationsOpen])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isLanguageOpen) return
+      if (languageRef.current && !languageRef.current.contains(event.target as Node)) {
+        setIsLanguageOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (!isLanguageOpen) return
+      setIsLanguageOpen(false)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isLanguageOpen])
+
   
 
   const handleLogout = () => {
@@ -112,10 +136,12 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }
 
-  const currentLanguage = (i18n.resolvedLanguage || i18n.language || 'en') as SupportedLanguage
+  const currentLanguage = (i18n.language || 'en') as SupportedLanguage
   const changeLanguage = (lng: SupportedLanguage) => {
     void i18n.changeLanguage(lng)
   }
+
+  const selectedLanguage = supportedLanguages.includes(currentLanguage) ? currentLanguage : 'en'
 
   const primaryLinks = [
     { path: '/', label: t('nav.home') },
@@ -181,16 +207,60 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className={styles.actions}>
-        <select
-          className={styles.languageSelect}
-          aria-label={t('language.label')}
-          value={supportedLanguages.includes(currentLanguage) ? currentLanguage : 'en'}
-          onChange={(e) => changeLanguage(e.target.value as SupportedLanguage)}
-        >
-          <option value="en">{t('language.english')}</option>
-          <option value="rw">{t('language.kinyarwanda')}</option>
-          <option value="fr">{t('language.french')}</option>
-        </select>
+        <div style={{ position: 'relative' }} ref={languageRef}>
+          <button
+            type="button"
+            className={styles.languageSelect}
+            aria-label={t('language.label')}
+            aria-haspopup="menu"
+            aria-expanded={isLanguageOpen}
+            onClick={() => {
+              setIsLanguageOpen((prev) => !prev)
+              setIsProfileOpen(false)
+              setIsNotificationsOpen(false)
+            }}
+          >
+            {selectedLanguage}
+          </button>
+
+          {isLanguageOpen && (
+            <div className={`${styles.dropdown} ${styles.simpleDropdown}`} role="menu" aria-label={t('language.label')}>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.dropdownItem}
+                onClick={() => {
+                  changeLanguage('en')
+                  setIsLanguageOpen(false)
+                }}
+              >
+                <span>{t('language.english')}</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.dropdownItem}
+                onClick={() => {
+                  changeLanguage('rw')
+                  setIsLanguageOpen(false)
+                }}
+              >
+                <span>{t('language.kinyarwanda')}</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.dropdownItem}
+                onClick={() => {
+                  changeLanguage('fr')
+                  setIsLanguageOpen(false)
+                }}
+              >
+                <span>{t('language.french')}</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {isAuthenticated ? (
           <>

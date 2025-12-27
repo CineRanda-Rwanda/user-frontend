@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { authAPI } from '@/api/auth'
 import { userAPI } from '@/api/user'
 import { UpdateUserProfile, User } from '@/types/user'
@@ -55,6 +56,7 @@ const normalizeAuthPayload = (raw: AuthResponse): NormalizedAuthPayload => {
 }
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { t } = useTranslation()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -65,11 +67,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
     setUser(null)
       if (!options?.silent) {
-        toast.info('Logged out successfully')
+        toast.info(t('auth.toasts.loggedOut'))
       }
       navigate('/', { replace: true })
     },
-    [navigate]
+    [navigate, t]
   )
 
   const persistTokens = useCallback((token?: string, refreshToken?: string) => {
@@ -114,16 +116,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(userData as any)
         }
 
-        toast.success(message || 'Signed in with Google!')
+        toast.success(message || t('auth.oauth.toasts.signedIn'))
         navigate('/browse', { replace: true })
       } catch (error) {
         console.error('Failed to finalize OAuth login:', error)
         logout({ silent: true })
-        toast.error('Could not finish Google login. Please try again.')
+        toast.error(t('auth.oauth.errors.couldNotComplete'))
         throw error
       }
     },
-    [logout, navigate, persistTokens]
+    [logout, navigate, persistTokens, t]
   )
 
 
@@ -154,10 +156,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const normalized = normalizeAuthPayload(data)
       persistSession(normalized)
 
-      toast.success(normalized.message || 'Welcome back!')
+      toast.success(normalized.message || t('auth.toasts.welcomeBack'))
       navigate('/browse')
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed'
+      const message = error.response?.data?.message || t('errors.loginFailed')
       toast.error(message)
       throw error
     }
@@ -167,7 +169,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (credentials.method === 'phone') {
         const { data } = await authAPI.registerPhone(credentials)
-        toast.success(data.message || 'We sent you a verification code via SMS.')
+        toast.success(data.message || t('auth.register.toasts.smsSent'))
         return data
       }
 
@@ -175,14 +177,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const normalized = normalizeAuthPayload(data)
       if (normalized.user && normalized.token) {
         persistSession(normalized)
-        toast.success(normalized.message || 'Account ready! Welcome to Randa Plus.')
+        toast.success(normalized.message || t('auth.register.toasts.accountReady'))
         navigate('/browse')
       } else {
-        toast.success(data.message || 'Check your email to verify your account.')
+        toast.success(data.message || t('auth.register.toasts.checkEmail'))
       }
       return data
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed'
+      const message = error.response?.data?.message || t('errors.registrationFailed')
       toast.error(message)
       throw error
     }
@@ -195,13 +197,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       persistSession(normalized)
 
       const bonusMessage = normalized.welcomeBonus
-        ? `Registration complete! ${formatCurrency(normalized.welcomeBonus)} welcome bonus added to your wallet.`
+        ? t('auth.register.toasts.welcomeBonusAdded', { amount: formatCurrency(normalized.welcomeBonus) })
         : undefined
 
-      toast.success(normalized.message || bonusMessage || 'Registration completed successfully!')
+      toast.success(normalized.message || bonusMessage || t('auth.register.toasts.completed'))
       navigate('/browse')
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Verification failed'
+      const message = error.response?.data?.message || t('errors.verificationFailed')
       toast.error(message)
       throw error
     }
@@ -213,10 +215,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const normalized = normalizeAuthPayload(data)
       persistSession(normalized)
 
-      toast.success(normalized.message || 'Email verified! Welcome to Randa Plus.')
+      toast.success(normalized.message || t('auth.register.toasts.emailVerified'))
       navigate('/browse')
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Verification failed'
+      const message = error.response?.data?.message || t('errors.verificationFailed')
       toast.error(message)
       throw error
     }

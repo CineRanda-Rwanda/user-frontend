@@ -109,16 +109,41 @@
 }
 
 .languageSelect {
-  height: 44px;
-  padding: 0 var(--spacing-md);
-  border-radius: 999px;
+  height: 34px;
+  padding: 0 calc(var(--spacing-sm) + 14px) 0 var(--spacing-sm);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   background: var(--bg-card);
   color: var(--text-white);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
   cursor: pointer;
-  transition: border-color var(--transition-base), color var(--transition-base);
+  transition: border-color var(--transition-base), color var(--transition-base), background var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  position: relative;
+}
+
+.languageSelect::after {
+  content: '';
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transform: translateY(-35%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.languageSelect[aria-expanded='true']::after {
+  transform: translateY(-35%) rotate(180deg);
 }
 
 .languageSelect:hover {

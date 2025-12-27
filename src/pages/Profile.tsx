@@ -2,12 +2,14 @@ import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FiCalendar, FiMail, FiPhone, FiShield, FiUser, FiX } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import Loader from '../components/common/Loader'
 import { useAuth } from '../contexts/AuthContext'
 import { authAPI } from '../api/auth'
 import styles from './Profile.module.css'
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation()
   const { user, loading, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [pinForm, setPinForm] = useState({ oldPin: '', newPin: '', confirmPin: '' })
@@ -19,26 +21,30 @@ const Profile: React.FC = () => {
   if (loading || !user) {
     return (
       <div className={styles.loadingShell}>
-        <Loader fullScreen text="Loading profile" />
+        <Loader fullScreen text={t('profilePage.loading')} />
       </div>
     )
   }
 
   const initials = user.username?.slice(0, 2).toUpperCase() || 'ME'
-  const displayName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username || 'Member'
-  const planLabel = user.location === 'international' ? 'Global plan' : 'Rwanda plan'
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username || t('profilePage.fallbacks.member')
+  const planLabel =
+    user.location === 'international' ? t('profilePage.plan.global') : t('profilePage.plan.rwanda')
   const canChangePin = user.authProvider === 'phone' || (!user.authProvider && !user.email && Boolean(user.phoneNumber))
   const canChangePassword = user.authProvider === 'email'
 
   const infoRows = useMemo(
     () => [
-      { label: 'Username', value: user.username || '--', icon: FiUser },
-      { label: 'Email', value: user.email || 'Not linked', icon: FiMail },
-      { label: 'Phone', value: user.phoneNumber || 'Not added', icon: FiPhone },
-      { label: 'Plan', value: planLabel, icon: FiShield },
-      { label: 'Joined', value: formatDate(user.createdAt), icon: FiCalendar }
+      { label: t('profilePage.info.username'), value: user.username || t('profilePage.fallbacks.emptyValue'), icon: FiUser },
+      { label: t('profilePage.info.email'), value: user.email || t('profilePage.fallbacks.notLinked'), icon: FiMail },
+      { label: t('profilePage.info.phone'), value: user.phoneNumber || t('profilePage.fallbacks.notAdded'), icon: FiPhone },
+      { label: t('profilePage.info.plan'), value: planLabel, icon: FiShield },
+      { label: t('profilePage.info.joined'), value: formatDate(user.createdAt, t('profilePage.fallbacks.notSet')), icon: FiCalendar }
     ],
-    [planLabel, user]
+    [planLabel, t, user]
   )
 
   const handleClose = () => {
@@ -54,33 +60,33 @@ const Profile: React.FC = () => {
     setPinError(null)
 
     if (!canChangePin) {
-      toast.error('PIN is only available for phone-based accounts.')
+      toast.error(t('profilePage.pin.errors.unavailable'))
       return
     }
 
     if (!pinForm.oldPin || pinForm.oldPin.length < 4) {
-      setPinError('Enter your current 4-digit PIN')
+      setPinError(t('profilePage.pin.validation.currentRequired'))
       return
     }
 
     if (!pinForm.newPin || pinForm.newPin.length < 4) {
-      setPinError('Choose a new PIN with at least 4 digits')
+      setPinError(t('profilePage.pin.validation.newMin'))
       return
     }
 
     if (pinForm.newPin !== pinForm.confirmPin) {
-      setPinError('PIN confirmation does not match')
+      setPinError(t('profilePage.pin.validation.mismatch'))
       return
     }
 
     try {
       setIsSubmitting(true)
       await authAPI.changePin(pinForm.oldPin, pinForm.newPin)
-      toast.success('PIN updated successfully')
+      toast.success(t('profilePage.pin.toasts.updated'))
       setPinForm({ oldPin: '', newPin: '', confirmPin: '' })
       refreshUser()
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to update PIN right now'
+      const message = error?.response?.data?.message || t('profilePage.pin.errors.updateFailed')
       toast.error(message)
     } finally {
       setIsSubmitting(false)
@@ -92,22 +98,22 @@ const Profile: React.FC = () => {
     setPasswordError(null)
 
     if (!canChangePassword) {
-      toast.info('Your password is managed by your sign-in provider.')
+      toast.info(t('profilePage.password.errors.managedByProvider'))
       return
     }
 
     if (!passwordForm.currentPassword || passwordForm.currentPassword.length < 6) {
-      setPasswordError('Enter your current password')
+      setPasswordError(t('profilePage.password.validation.currentRequired'))
       return
     }
 
     if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
-      setPasswordError('Choose a new password with at least 8 characters')
+      setPasswordError(t('profilePage.password.validation.newMin'))
       return
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError('Password confirmation does not match')
+      setPasswordError(t('profilePage.password.validation.mismatch'))
       return
     }
 
@@ -117,11 +123,11 @@ const Profile: React.FC = () => {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword
       })
-      toast.success('Password updated successfully')
+      toast.success(t('profilePage.password.toasts.updated'))
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
       refreshUser()
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to update password right now'
+      const message = error?.response?.data?.message || t('profilePage.password.errors.updateFailed')
       toast.error(message)
     } finally {
       setIsSubmitting(false)
@@ -131,7 +137,12 @@ const Profile: React.FC = () => {
   return (
     <div className={styles.overlay}>
       <section className={styles.panel}>
-        <button type="button" className={styles.closeButton} onClick={handleClose} aria-label="Close profile overlay">
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={handleClose}
+          aria-label={t('profilePage.closeAria')}
+        >
           <FiX size={18} />
         </button>
 
@@ -140,12 +151,12 @@ const Profile: React.FC = () => {
           <div>
             <p className={styles.overline}>{planLabel}</p>
             <h1 className={styles.title}>{displayName}</h1>
-            <p className={styles.subtitle}>@{user.username || 'member'}</p>
+            <p className={styles.subtitle}>@{user.username || t('profilePage.fallbacks.username')}</p>
           </div>
         </header>
 
         <section className={styles.card}>
-          <h2 className={styles.cardTitle}>Profile info</h2>
+          <h2 className={styles.cardTitle}>{t('profilePage.sections.profileInfo')}</h2>
           <div className={styles.infoList}>
             {infoRows.map(({ label, value, icon: Icon }) => (
               <div className={styles.infoRow} key={label}>
@@ -163,13 +174,13 @@ const Profile: React.FC = () => {
           <section className={`${styles.card} ${styles.pinCard}`}>
             <div className={styles.pinHeader}>
               <div>
-                <h2 className={styles.cardTitle}>Change PIN</h2>
-                <p className={styles.cardSubtitle}>Secure instant-checkout purchases with your streaming PIN.</p>
+                <h2 className={styles.cardTitle}>{t('profilePage.sections.changePin.title')}</h2>
+                <p className={styles.cardSubtitle}>{t('profilePage.sections.changePin.subtitle')}</p>
               </div>
             </div>
             <form className={styles.form} onSubmit={handlePinSubmit}>
               <label className={styles.field}>
-                <span>Current PIN</span>
+                <span>{t('profilePage.pin.fields.current')}</span>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -180,7 +191,7 @@ const Profile: React.FC = () => {
                 />
               </label>
               <label className={styles.field}>
-                <span>New PIN</span>
+                <span>{t('profilePage.pin.fields.new')}</span>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -191,7 +202,7 @@ const Profile: React.FC = () => {
                 />
               </label>
               <label className={styles.field}>
-                <span>Confirm PIN</span>
+                <span>{t('profilePage.pin.fields.confirm')}</span>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -203,7 +214,7 @@ const Profile: React.FC = () => {
               </label>
               {pinError && <p className={styles.errorText}>{pinError}</p>}
               <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Save new PIN'}
+                {isSubmitting ? t('common.updating') : t('profilePage.pin.actions.save')}
               </button>
             </form>
           </section>
@@ -213,13 +224,13 @@ const Profile: React.FC = () => {
           <section className={`${styles.card} ${styles.pinCard}`}>
             <div className={styles.pinHeader}>
               <div>
-                <h2 className={styles.cardTitle}>Change password</h2>
-                <p className={styles.cardSubtitle}>Update your email account password.</p>
+                <h2 className={styles.cardTitle}>{t('profilePage.sections.changePassword.title')}</h2>
+                <p className={styles.cardSubtitle}>{t('profilePage.sections.changePassword.subtitle')}</p>
               </div>
             </div>
             <form className={styles.form} onSubmit={handlePasswordSubmit}>
               <label className={styles.field}>
-                <span>Current password</span>
+                <span>{t('profilePage.password.fields.current')}</span>
                 <input
                   type="password"
                   autoComplete="current-password"
@@ -230,7 +241,7 @@ const Profile: React.FC = () => {
                 />
               </label>
               <label className={styles.field}>
-                <span>New password</span>
+                <span>{t('profilePage.password.fields.new')}</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -239,7 +250,7 @@ const Profile: React.FC = () => {
                 />
               </label>
               <label className={styles.field}>
-                <span>Confirm new password</span>
+                <span>{t('profilePage.password.fields.confirm')}</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -251,7 +262,7 @@ const Profile: React.FC = () => {
               </label>
               {passwordError && <p className={styles.errorText}>{passwordError}</p>}
               <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Save new password'}
+                {isSubmitting ? t('common.updating') : t('profilePage.password.actions.save')}
               </button>
             </form>
           </section>
@@ -261,8 +272,8 @@ const Profile: React.FC = () => {
   )
 }
 
-const formatDate = (input?: string) => {
-  if (!input) return 'Not yet set'
+const formatDate = (input?: string, fallback = 'Not yet set') => {
+  if (!input) return fallback
   try {
     return new Date(input).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -270,7 +281,7 @@ const formatDate = (input?: string) => {
       day: 'numeric'
     })
   } catch (error) {
-    return 'Not yet set'
+    return fallback
   }
 }
 

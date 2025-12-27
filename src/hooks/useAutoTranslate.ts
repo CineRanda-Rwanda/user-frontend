@@ -4,7 +4,7 @@ import { getCachedTranslation, translateTextCached } from '@/utils/translate'
 
 type UseAutoTranslateOptions = {
   enabled?: boolean
-  source?: SupportedLanguage
+  source?: SupportedLanguage | 'auto'
   /** If true, returns empty string until translation is available (or cached). */
   hideUntilTranslated?: boolean
 }
@@ -108,6 +108,10 @@ export const useAutoTranslate = (
     }
   }, [enabled, input, source, target])
 
-  const ready = !enabled || target === source || !input.trim() || (!!translated && !loading)
+  const ready =
+    !enabled ||
+    target === source ||
+    !input.trim() ||
+    (!hideUntilTranslated ? true : !!translated && !loading)
   return { text: translated, loading, ready }
 }

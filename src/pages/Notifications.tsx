@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FiBell, FiCheckCircle, FiInbox, FiRefreshCcw, FiTrash } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Layout from '@/components/layout/Layout'
 import Loader from '@/components/common/Loader'
 import Button from '@/components/common/Button'
@@ -30,6 +31,7 @@ const resolveTypeClass = (type?: string) => {
 }
 
 const NotificationsPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const {
     notifications,
@@ -242,35 +244,37 @@ const NotificationsPage: React.FC = () => {
 
   const emptyStateTitle =
     filter === 'archived'
-      ? 'Trash is empty'
+      ? t('notifications.page.empty.archived.title')
       : filter === 'unread'
-        ? 'No unread notifications'
-        : 'No notifications yet'
+        ? t('notifications.page.empty.unread.title')
+        : t('notifications.page.empty.all.title')
   const emptyStateCopy =
     filter === 'archived'
-      ? 'Items you move to trash will show up here.'
+      ? t('notifications.page.empty.archived.message')
       : filter === 'unread'
-        ? 'Take a breather—you are fully caught up.'
-        : 'We will ping you when you earn bonuses, unlock titles, or need to take action.'
+        ? t('notifications.page.empty.unread.message')
+        : t('notifications.page.empty.all.message')
 
   return (
     <Layout>
       <section className={styles.page}>
         <header className={styles.header}>
           <div>
-            <p className={styles.kicker}>Inbox</p>
-            <h1>Notifications</h1>
+            <p className={styles.kicker}>{t('notifications.page.kicker')}</p>
+            <h1>{t('notifications.page.title')}</h1>
             <p className={styles.subtext}>
-              {unreadCount > 0 ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : 'All caught up'}
+              {unreadCount > 0
+                ? t('notifications.page.subtext.unreadCount', { count: unreadCount })
+                : t('notifications.page.subtext.caughtUp')}
             </p>
           </div>
           <div className={styles.headerActions}>
             <Button variant="ghost" size="small" onClick={handleRefresh} icon={<FiRefreshCcw />}>
-              Refresh
+              {t('notifications.actions.refresh')}
             </Button>
             {unreadCount > 0 && (
               <Button variant="secondary" size="small" onClick={handleMarkAll} icon={<FiCheckCircle />}>
-                Mark all read
+                {t('notifications.actions.markAllRead')}
               </Button>
             )}
           </div>
@@ -283,14 +287,14 @@ const NotificationsPage: React.FC = () => {
               className={`${styles.filterButton} ${filter === 'all' ? styles.filterButtonActive : ''}`}
               onClick={() => setFilter('all')}
             >
-              All
+              {t('notifications.filters.all')}
             </button>
             <button
               type="button"
               className={`${styles.filterButton} ${filter === 'unread' ? styles.filterButtonActive : ''}`}
               onClick={() => setFilter('unread')}
             >
-              Unread
+              {t('notifications.filters.unread')}
               {unreadCount > 0 && <span className={styles.filterCount}>{unreadCount}</span>}
             </button>
             <button
@@ -298,7 +302,7 @@ const NotificationsPage: React.FC = () => {
               className={`${styles.filterButton} ${filter === 'archived' ? styles.filterButtonActive : ''}`}
               onClick={() => setFilter('archived')}
             >
-              Trash
+              {t('notifications.filters.trash')}
               {trashCount > 0 && <span className={styles.filterCount}>{trashCount}</span>}
             </button>
           </div>
@@ -311,7 +315,7 @@ const NotificationsPage: React.FC = () => {
                 disabled={selectedIds.size === 0}
                 onClick={handleMarkSelectedUnread}
               >
-                Mark selected unread
+                {t('notifications.actions.markSelectedUnread')}
               </button>
               {selectedIds.size > 0 && (
                 <button
@@ -319,7 +323,7 @@ const NotificationsPage: React.FC = () => {
                   className={styles.clearSelection}
                   onClick={() => setSelectedIds(new Set())}
                 >
-                  Clear
+                  {t('notifications.actions.clearSelection')}
                 </button>
               )}
             </div>
@@ -330,7 +334,7 @@ const NotificationsPage: React.FC = () => {
 
         {loading ? (
           <div className={styles.loaderWrap}>
-            <Loader text="Loading your notifications" />
+            <Loader text={t('notifications.loading')} />
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className={styles.emptyState}>
@@ -338,7 +342,7 @@ const NotificationsPage: React.FC = () => {
             <h2>{emptyStateTitle}</h2>
             <p>{emptyStateCopy}</p>
             <Button variant="primary" size="small" onClick={handleRefresh} icon={<FiBell />}>
-              Check again
+              {t('notifications.actions.checkAgain')}
             </Button>
           </div>
         ) : (
@@ -392,14 +396,16 @@ const NotificationsPage: React.FC = () => {
                   <div className={styles.cardContent}>
                     <div className={styles.cardHeader}>
                       <span className={resolveTypeClass(notification.type)}>
-                        {notification.type?.replace(/[-_]/g, ' ') || 'System'}
+                        {notification.type?.replace(/[-_]/g, ' ') || t('notifications.labels.system')}
                       </span>
                       <span className={styles.timestamp}>{formatRelativeTime(notification.createdAt)}</span>
                     </div>
                     <h3>{notification.title}</h3>
                     <p className={styles.message}>{notification.message}</p>
                     {typeof notification.metadata?.amount === 'number' && (
-                      <p className={styles.highlight}>Amount: {formatCurrency(notification.metadata.amount)}</p>
+                      <p className={styles.highlight}>
+                        {t('notifications.labels.amount')}: {formatCurrency(notification.metadata.amount)}
+                      </p>
                     )}
                     <div className={styles.cardActions}>
                       {notification.actionUrl && (
@@ -408,7 +414,7 @@ const NotificationsPage: React.FC = () => {
                           className={styles.actionLink}
                           onClick={() => handleOpenNotification(notification)}
                         >
-                          {notification.actionLabel || 'View details'}
+                          {notification.actionLabel || t('notifications.actions.viewDetails')}
                         </button>
                       )}
 
@@ -420,7 +426,7 @@ const NotificationsPage: React.FC = () => {
                             onClick={() => startExit(notification._id, () => handleRestore(notification._id))}
                             disabled={exitingIds.has(notification._id)}
                           >
-                            Restore
+                            {t('notifications.actions.restore')}
                           </button>
                           <button
                             type="button"
@@ -428,7 +434,7 @@ const NotificationsPage: React.FC = () => {
                             onClick={() => startExit(notification._id, () => handleDelete(notification._id))}
                             disabled={exitingIds.has(notification._id)}
                           >
-                            Delete permanently
+                            {t('notifications.actions.deletePermanently')}
                           </button>
                         </>
                       ) : (
@@ -438,7 +444,7 @@ const NotificationsPage: React.FC = () => {
                             className={styles.trashButton}
                             onClick={() => startExit(notification._id, () => handleArchive(notification._id))}
                             disabled={exitingIds.has(notification._id)}
-                            title="Move to trash"
+                            title={t('notifications.actions.moveToTrash')}
                           >
                             <FiTrash />
                           </button>
@@ -449,7 +455,7 @@ const NotificationsPage: React.FC = () => {
                               onClick={() => handleMarkSingle(notification._id)}
                               disabled={exitingIds.has(notification._id)}
                             >
-                              Mark as read
+                              {t('notifications.actions.markAsRead')}
                             </button>
                           ) : (
                             <button
@@ -458,7 +464,7 @@ const NotificationsPage: React.FC = () => {
                               onClick={() => handleMarkUnread(notification._id)}
                               disabled={exitingIds.has(notification._id)}
                             >
-                              Mark unread
+                              {t('notifications.actions.markAsUnread')}
                             </button>
                           )}
                         </>

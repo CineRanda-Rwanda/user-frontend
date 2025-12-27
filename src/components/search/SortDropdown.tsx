@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FiChevronDown } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './SortDropdown.module.css'
 
 export type SortOption = 
@@ -15,16 +16,17 @@ interface SortDropdownProps {
   onChange: (option: SortOption) => void
 }
 
-const sortOptions: Array<{ value: SortOption; label: string }> = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'title-asc', label: 'Title: A-Z' },
-  { value: 'title-desc', label: 'Title: Z-A' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
+const sortOptions: Array<{ value: SortOption; labelKey: string }> = [
+  { value: 'newest', labelKey: 'sort.options.newestFirst' },
+  { value: 'oldest', labelKey: 'sort.options.oldestFirst' },
+  { value: 'title-asc', labelKey: 'sort.options.titleAsc' },
+  { value: 'title-desc', labelKey: 'sort.options.titleDesc' },
+  { value: 'price-low', labelKey: 'sort.options.priceLow' },
+  { value: 'price-high', labelKey: 'sort.options.priceHigh' },
 ]
 
 const SortDropdown: React.FC<SortDropdownProps> = ({ value, onChange }) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -54,8 +56,8 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ value, onChange }) => {
         aria-expanded={isOpen}
       >
         <div className={styles.inlineLabel}>
-          <span className={styles.labelText}>Sort:</span>
-          <span className={styles.valueText}>{selectedOption?.label}</span>
+          <span className={styles.labelText}>{t('sort.label')}:</span>
+          <span className={styles.valueText}>{selectedOption ? t(selectedOption.labelKey) : ''}</span>
         </div>
         <FiChevronDown className={`${styles.icon} ${isOpen ? styles.open : ''}`} />
       </button>
@@ -68,7 +70,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ value, onChange }) => {
               className={`${styles.option} ${value === option.value ? styles.active : ''}`}
               onClick={() => handleSelect(option.value)}
             >
-              {option.label}
+              {t(option.labelKey)}
             </button>
           ))}
         </div>

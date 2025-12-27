@@ -9,7 +9,7 @@
     "home": "Accueil",
     "movies": "Films",
     "series": "Séries",
-    "myLibrary": "Ma bibliothèque",
+    "myLibrary": "Bibliothèque",
     "help": "Aide",
     "notifications": "Notifications",
     "toggleNavigation": "Basculer le menu de navigation",
@@ -31,7 +31,229 @@
     "close": "Fermer",
     "goToBrowse": "Aller à Parcourir",
     "loading": "Chargement...",
+    "updating": "Mise à jour...",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "cancel": "Annuler",
     "comingSoon": "Bientôt disponible !"
+  },
+  "browse": {
+    "loading": "Chargement du contenu...",
+    "errors": {
+      "loadFailed": "Échec du chargement du contenu"
+    },
+    "smallCatalog": {
+      "exploreSeries": "Explorer les séries",
+      "exploreMovies": "Explorer les films",
+      "exploreTitles": "Explorer les titres"
+    },
+    "rows": {
+      "trendingNow": "Tendances du moment",
+      "popularMovies": "Films populaires",
+      "topSeries": "Séries à la une"
+    },
+    "empty": {
+      "title": "Le catalogue se prépare",
+      "message": "Nous préparons de nouvelles sorties. Revenez bientôt ou actualisez pour voir les derniers titres.",
+      "reload": "Recharger le contenu"
+    }
+  },
+  "movies": {
+    "loading": "Chargement des films...",
+    "empty": "Aucun film trouvé",
+    "errors": {
+      "loadFailed": "Échec du chargement des films"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Tous les genres",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "reset": "Réinitialiser les filtres"
+    },
+    "pagination": {
+      "pageOf": "Page {{current}} sur {{total}}"
+    }
+  },
+  "series": {
+    "loading": "Chargement des séries...",
+    "empty": "Aucune série trouvée",
+    "errors": {
+      "loadFailed": "Échec du chargement des séries"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Tous les genres",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "reset": "Réinitialiser les filtres"
+    },
+    "pagination": {
+      "pageOf": "Page {{current}} sur {{total}}"
+    }
+  },
+  "search": {
+    "title": "Rechercher",
+    "hint": {
+      "showingResultsFor": "Résultats pour \"{{query}}\"",
+      "useNavSearch": "Utilisez la recherche dans la barre de navigation pour découvrir quelque chose de nouveau."
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Tous les genres",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "reset": "Réinitialiser les filtres"
+    },
+    "resultsCount": "{{count}} résultat trouvé",
+    "resultsCount_plural": "{{count}} résultats trouvés",
+    "actions": {
+      "resetSearch": "Réinitialiser la recherche",
+      "tryAgain": "Réessayer",
+      "loadMore": "Charger plus"
+    },
+    "errors": {
+      "searchFailed": "Échec de la recherche"
+    },
+    "empty": {
+      "noResultsTitle": "Aucun résultat",
+      "noResultsMessage": "Essayez d'ajuster votre recherche ou vos filtres.",
+      "errorTitle": "Une erreur est survenue",
+      "startTitle": "Commencez à rechercher",
+      "startMessage": "Saisissez une recherche ou utilisez des filtres pour découvrir des films et des séries."
+    }
+  },
+  "watch": {
+    "backToBrowse": "Retour à Parcourir",
+    "errors": {
+      "loadFailed": "Impossible de charger le contenu. Veuillez réessayer."
+    },
+    "payment": {
+      "confirmedStream": "Paiement confirmé ! Bon visionnage.",
+      "stillWaiting": "En attente de confirmation du paiement. Actualisez une fois le paiement terminé."
+    },
+    "purchase": {
+      "redirectingToCheckout": "Redirection vers le paiement. Terminez le paiement pour déverrouiller {{scope}}.",
+      "unlockFromDetails": "Déverrouillez les épisodes depuis la page de détails pour éviter les erreurs d'achat.",
+      "thisTitle": "ce titre",
+      "failed": "Achat échoué. Veuillez réessayer."
+    },
+    "stream": {
+      "fetching": "Récupération du flux sécurisé...",
+      "locked": "Cet épisode est encore verrouillé. Déverrouillez-le pour continuer.",
+      "unavailable": "Impossible de charger la vidéo pour le moment. Veuillez réessayer plus tard."
+    },
+    "overlay": {
+      "unlockTitle": "Déverrouillez pour regarder ce titre",
+      "purchase": "Acheter",
+      "toWatchEpisode": "pour regarder S{{season}}E{{episode}}",
+      "toStartStreaming": "pour commencer à regarder en HD.",
+      "openingCheckout": "Ouverture du paiement...",
+      "confirming": "Confirmation...",
+      "payAndUnlock": "Payer et déverrouiller",
+      "viewDetails": "Voir les détails",
+      "checkoutNote": "Paiement sécurisé via Flutterwave. Gardez cette page ouverte pendant la confirmation.",
+      "waitingForConfirmation": "En attente de confirmation{{refSuffix}}."
+    },
+    "autoNext": {
+      "nextIn": "Prochain épisode dans",
+      "playNow": "Lire maintenant"
+    },
+    "meta": {
+      "releaseYear": "Année de sortie",
+      "rating": "Note",
+      "duration": "Durée",
+      "language": "Langue",
+      "languageFallback": "Kinyarwanda"
+    },
+    "episodes": {
+      "title": "Épisodes",
+      "hideList": "Masquer la liste",
+      "showList": "Afficher la liste",
+      "season": "Saison {{number}}",
+      "minutes": "{{minutes}} min",
+      "locked": "Verrouillé",
+      "nowPlaying": "En cours"
+    }
+  },
+  "wallet": {
+    "errors": {
+      "loadFailed": "Impossible de charger le portefeuille. Veuillez réessayer.",
+      "minTopUp": "Saisissez au moins 1 000 FRW pour recharger.",
+      "topUpFailed": "La recharge a échoué. Veuillez réessayer."
+    },
+    "toasts": {
+      "redirectingFlutterwave": "Redirection vers Flutterwave..."
+    },
+    "balance": {
+      "available": "Solde disponible",
+      "bonusLabel": "Bonus {{amount}}"
+    },
+    "stats": {
+      "bonusVault": "Coffre bonus",
+      "bonusHint": "Appliqué automatiquement aux locations éligibles.",
+      "totalAssets": "Total des avoirs",
+      "totalHint": "Cash + crédits promo."
+    },
+    "topUp": {
+      "title": "Recharge instantanée",
+      "subtitle": "Rechargez votre portefeuille via Flutterwave en quelques secondes.",
+      "placeholder": "Saisir un montant",
+      "connecting": "Connexion à Flutterwave…",
+      "cta": "Recharger le portefeuille"
+    },
+    "voucher": {
+      "cta": "Utiliser un bon"
+    },
+    "transactions": {
+      "title": "Transactions récentes",
+      "subtitle": "Historique de vos locations, abonnements et бонус.",
+      "empty": "Aucune transaction pour le moment. Rechargez votre portefeuille pour commencer.",
+      "fallbackDescription": "Activité du portefeuille"
+    }
+  },
+  "sort": {
+    "label": "Trier",
+    "options": {
+      "newestFirst": "Les plus récents",
+      "oldestFirst": "Les plus anciens",
+      "titleAsc": "Titre : A-Z",
+      "titleDesc": "Titre : Z-A",
+      "priceLow": "Prix : croissant",
+      "priceHigh": "Prix : décroissant"
+    }
+  },
+  "filters": {
+    "all": "Tous",
+    "allWithLabel": "Tous {{label}}"
+  },
+  "filterPanel": {
+    "toggle": {
+      "label": "Affiner",
+      "title": "Filtrer les résultats"
+    },
+    "header": {
+      "title": "Filtres"
+    },
+    "actions": {
+      "reset": "Réinitialiser"
+    },
+    "summary": {
+      "activeFilters": "{{count}} filtre actif",
+      "activeFilters_plural": "{{count}} filtres actifs",
+      "noneTitle": "Aucun filtre appliqué",
+      "noneHint": "Choisissez un genre ou une catégorie pour affiner la sélection."
+    },
+    "sections": {
+      "genres": {
+        "eyebrow": "Genres",
+        "title": "Choisissez l'ambiance"
+      },
+      "categories": {
+        "eyebrow": "Catégories",
+        "title": "Affiner par collection"
+      }
+    }
   },
   "emptyState": {
     "search": {
@@ -54,6 +276,10 @@
     "verificationFailed": "Échec de la vérification. Veuillez réessayer."
   },
   "auth": {
+    "toasts": {
+      "loggedOut": "Déconnexion réussie",
+      "welcomeBack": "Bon retour !"
+    },
     "login": {
       "title": "Bon retour",
       "subtitle": "Connectez-vous pour continuer",
@@ -64,11 +290,116 @@
       "emailPlaceholder": "Adresse e-mail",
       "passwordPlaceholder": "Mot de passe",
       "submit": "Se connecter",
+      "submitPhone": "Connexion par téléphone",
+      "submitEmail": "Connexion par e-mail",
+      "phoneHelper": "Utilisez le numéro lié à votre compte Randa Plus",
+      "pinHelper": "Le PIN est requis pour la connexion par téléphone",
+      "passwordHelperMin6": "Minimum 6 caractères",
       "google": "Continuer avec Google",
       "noAccount": "Vous n'avez pas de compte ?",
       "createAccount": "Créer un compte",
       "forgotPin": "PIN oublié ?",
       "forgotPassword": "Mot de passe oublié ?"
+    },
+    "forgotPin": {
+      "title": "Réinitialiser le PIN Randa",
+      "subtitleRequest": "Vérifiez votre téléphone pour recevoir un code.",
+      "subtitleReset": "Entrez le code et un nouveau PIN.",
+      "closeAria": "Fermer la boîte de réinitialisation du PIN",
+      "infoRequest": "Saisissez le numéro lié à votre compte pour recevoir un code de réinitialisation par SMS.",
+      "infoReset": "Entrez le code reçu et choisissez un nouveau PIN à 4 chiffres.",
+      "form": {
+        "phonePlaceholder": "Numéro de téléphone",
+        "phoneHelper": "Utilisez le numéro avec lequel vous vous êtes inscrit.",
+        "codePlaceholder": "Code de vérification",
+        "codeHelper": "Code à 6 chiffres envoyé sur votre téléphone.",
+        "newPinPlaceholder": "Nouveau PIN",
+        "newPinHelper": "Minimum 4 chiffres",
+        "confirmPinPlaceholder": "Confirmer le PIN"
+      },
+      "actions": {
+        "sendCode": "Envoyer le code",
+        "savePin": "Enregistrer le PIN",
+        "cancel": "Annuler"
+      },
+      "errors": {
+        "phoneRequired": "Le numéro de téléphone est requis pour envoyer un code.",
+        "codeRequired": "Entrez le code de vérification qui vous a été envoyé.",
+        "newPinMin": "Le nouveau PIN doit contenir au moins 4 chiffres.",
+        "pinMismatch": "La confirmation du PIN ne correspond pas.",
+        "sendFailed": "Impossible d'envoyer le code pour le moment.",
+        "resetFailed": "Impossible de réinitialiser le PIN pour le moment."
+      },
+      "toasts": {
+        "codeSent": "Code envoyé par SMS",
+        "resetSuccess": "PIN réinitialisé. Connectez-vous avec votre nouveau PIN."
+      }
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitleRequest": "Nous vous enverrons un lien de réinitialisation.",
+      "subtitleReset": "Entrez le jeton de l'e-mail et choisissez un nouveau mot de passe.",
+      "closeAria": "Fermer la boîte de réinitialisation du mot de passe",
+      "form": {
+        "emailPlaceholder": "Adresse e-mail",
+        "tokenPlaceholder": "Jeton de réinitialisation",
+        "passwordPlaceholder": "Nouveau mot de passe",
+        "passwordHelper": "Minimum 8 caractères",
+        "confirmPasswordPlaceholder": "Confirmer le mot de passe"
+      },
+      "actions": {
+        "sendLink": "Envoyer le lien",
+        "updatePassword": "Mettre à jour",
+        "cancel": "Annuler"
+      },
+      "errors": {
+        "tokenRequired": "Entrez le jeton de réinitialisation reçu par e-mail.",
+        "sendFailed": "Impossible d'envoyer le lien pour le moment.",
+        "resetFailed": "Impossible de réinitialiser le mot de passe pour le moment."
+      },
+      "toasts": {
+        "linkSent": "Lien de réinitialisation envoyé par e-mail",
+        "updatedSuccess": "Mot de passe mis à jour. Vous pouvez vous connecter."
+      }
+    },
+    "resetPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "subtitle": "Collez le jeton envoyé par e-mail, définissez un nouveau mot de passe et vous êtes de retour.",
+      "toastSuccess": "Mot de passe mis à jour !",
+      "form": {
+        "passwordPlaceholder": "Nouveau mot de passe",
+        "confirmPasswordPlaceholder": "Confirmer le mot de passe"
+      },
+      "actions": {
+        "update": "Mettre à jour le mot de passe"
+      },
+      "helper": {
+        "notRequested": "Vous n'avez pas demandé ce changement ?",
+        "returnToSignIn": "Retour à la connexion"
+      },
+      "completed": {
+        "title": "Votre mot de passe a été mis à jour.",
+        "message": "Connectez-vous avec votre nouveau mot de passe pour continuer à regarder.",
+        "goToLogin": "Aller à la connexion"
+      },
+      "errors": {
+        "tokenMissing": "Le lien est manquant ou expiré. Veuillez demander un nouvel e-mail.",
+        "resetFailed": "Impossible de réinitialiser le mot de passe pour le moment."
+      }
+    },
+    "oauth": {
+      "finishing": "Finalisation de la connexion Google...",
+      "failedTitle": "Connexion Google échouée",
+      "backToLogin": "Retour à la connexion",
+      "toasts": {
+        "signedIn": "Connecté avec Google !"
+      },
+      "errors": {
+        "googleFailed": "Connexion Google échouée.",
+        "exchangeMissingToken": "Échange Google réussi mais aucun jeton n'a été renvoyé.",
+        "missingSessionToken": "Jeton de session manquant dans la réponse Google.",
+        "couldNotComplete": "Impossible de finaliser la connexion Google."
+      }
     },
     "register": {
       "title": "Créer votre compte",
@@ -102,7 +433,15 @@
       "emailReenterPrompt": "Veuillez saisir à nouveau votre e-mail et votre mot de passe pour continuer.",
       "verify": "Vérifier",
       "haveAccount": "Vous avez déjà un compte ?",
-      "signIn": "Se connecter"
+      "signIn": "Se connecter",
+      "toasts": {
+        "smsSent": "Nous vous avons envoyé un code de vérification par SMS.",
+        "accountReady": "Compte prêt ! Bienvenue sur Randa Plus.",
+        "checkEmail": "Vérifiez votre e-mail pour confirmer votre compte.",
+        "welcomeBonusAdded": "Inscription terminée ! Un bonus de bienvenue de {{amount}} a été ajouté à votre portefeuille.",
+        "completed": "Inscription terminée avec succès !",
+        "emailVerified": "E-mail vérifié ! Bienvenue sur Randa Plus."
+      }
     },
     "validation": {
       "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",
@@ -114,6 +453,258 @@
       "passwordMin6": "Le mot de passe doit contenir au moins 6 caractères",
       "passwordMismatch": "Les mots de passe ne correspondent pas",
       "verificationCodeRequired": "Le code de vérification est requis"
+    }
+  },
+  "profilePage": {
+    "loading": "Chargement du profil...",
+    "closeAria": "Fermer le profil",
+    "plan": {
+      "global": "Forfait international",
+      "rwanda": "Forfait Rwanda"
+    },
+    "sections": {
+      "profileInfo": "Infos du profil",
+      "changePin": {
+        "title": "Changer le PIN",
+        "subtitle": "Mettez à jour votre PIN à 4 chiffres."
+      },
+      "changePassword": {
+        "title": "Changer le mot de passe",
+        "subtitle": "Définissez un nouveau mot de passe pour votre compte."
+      }
+    },
+    "info": {
+      "username": "Nom d’utilisateur",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "plan": "Forfait",
+      "joined": "Inscrit le"
+    },
+    "fallbacks": {
+      "member": "Membre",
+      "username": "nom d’utilisateur",
+      "emptyValue": "—",
+      "notLinked": "Non lié",
+      "notAdded": "Non ajouté",
+      "notSet": "Non défini"
+    },
+    "pin": {
+      "fields": {
+        "current": "PIN actuel",
+        "new": "Nouveau PIN",
+        "confirm": "Confirmer le PIN"
+      },
+      "actions": {
+        "save": "Enregistrer le PIN"
+      },
+      "validation": {
+        "currentRequired": "Saisissez votre PIN actuel.",
+        "newMin": "Le nouveau PIN doit comporter au moins 4 chiffres.",
+        "mismatch": "La confirmation du PIN ne correspond pas."
+      },
+      "errors": {
+        "unavailable": "La modification du PIN n’est pas disponible pour votre compte.",
+        "updateFailed": "Impossible de mettre à jour le PIN."
+      },
+      "toasts": {
+        "updated": "PIN mis à jour avec succès."
+      }
+    },
+    "password": {
+      "fields": {
+        "current": "Mot de passe actuel",
+        "new": "Nouveau mot de passe",
+        "confirm": "Confirmer le mot de passe"
+      },
+      "actions": {
+        "save": "Enregistrer le mot de passe"
+      },
+      "validation": {
+        "currentRequired": "Saisissez votre mot de passe actuel.",
+        "newMin": "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+        "mismatch": "La confirmation du mot de passe ne correspond pas."
+      },
+      "errors": {
+        "managedByProvider": "Le mot de passe est géré par votre fournisseur de connexion.",
+        "updateFailed": "Impossible de mettre à jour le mot de passe."
+      },
+      "toasts": {
+        "updated": "Mot de passe mis à jour avec succès."
+      }
+    }
+  },
+  "notifications": {
+    "loading": "Chargement de vos notifications...",
+    "page": {
+      "kicker": "Boîte de réception",
+      "title": "Notifications",
+      "subtext": {
+        "unreadCount": "Vous avez {{count}} notifications non lues.",
+        "caughtUp": "Vous êtes à jour."
+      },
+      "empty": {
+        "all": {
+          "title": "Aucune notification pour l’instant",
+          "message": "Nous vous informerons lorsqu’il se passera quelque chose."
+        },
+        "unread": {
+          "title": "Aucune notification non lue",
+          "message": "Vous êtes à jour."
+        },
+        "archived": {
+          "title": "La corbeille est vide",
+          "message": "Les notifications supprimées apparaîtront ici."
+        }
+      }
+    },
+    "overlay": {
+      "label": "Fil en direct",
+      "tooltips": {
+        "refresh": "Actualiser les notifications",
+        "close": "Fermer le panneau"
+      },
+      "actions": {
+        "markAll": "Tout marquer"
+      },
+      "empty": {
+        "unread": "Aucun message non lu",
+        "default": "Rien de nouveau pour le moment."
+      }
+    },
+    "filters": {
+      "all": "Toutes",
+      "unread": "Non lues",
+      "trash": "Corbeille"
+    },
+    "labels": {
+      "system": "Système",
+      "amount": "Montant"
+    },
+    "actions": {
+      "refresh": "Actualiser",
+      "markAllRead": "Tout marquer comme lu",
+      "markSelectedUnread": "Marquer la sélection comme non lue",
+      "clearSelection": "Effacer la sélection",
+      "checkAgain": "Vérifier à nouveau",
+      "viewDetails": "Voir les détails",
+      "restore": "Restaurer",
+      "deletePermanently": "Supprimer définitivement",
+      "moveToTrash": "Déplacer vers la corbeille",
+      "markAsRead": "Marquer comme lu",
+      "markAsUnread": "Marquer comme non lu"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les notifications.",
+      "updateNotification": "Impossible de mettre à jour la notification.",
+      "updateNotifications": "Impossible de mettre à jour les notifications.",
+      "archiveFailed": "Impossible de déplacer la notification vers la corbeille.",
+      "restoreFailed": "Impossible de restaurer la notification.",
+      "deleteFailed": "Impossible de supprimer la notification.",
+      "syncFailed": "Impossible de synchroniser les notifications. Veuillez actualiser."
+    }
+  },
+  "contentDetails": {
+    "auth": {
+      "signInToContinue": "Veuillez vous connecter pour continuer."
+    },
+    "ui": {
+      "pricing": {
+        "free": "Gratuit",
+        "paid": "Payant"
+      },
+      "states": {
+        "unlocking": "Déverrouillage...",
+        "confirming": "Confirmation...",
+        "seasonUnlocked": "Saison déverrouillée"
+      },
+      "actions": {
+        "watchEpisode": "Regarder l'épisode",
+        "watchNow": "Regarder maintenant",
+        "trailer": "Bande-annonce",
+        "unlockEpisode": "Déverrouiller l'épisode",
+        "unlockSeason": "Déverrouiller la saison",
+        "unlockEpisodeWithPrice": "Déverrouiller l'épisode • {{price}}",
+        "unlockWithPrice": "Déverrouiller • {{price}}"
+      },
+      "hints": {
+        "signInToUnlock": "Connectez-vous pour déverrouiller ce titre.",
+        "waitingForConfirmation": "En attente de confirmation du paiement...",
+        "waitingForConfirmationWithRef": "En attente de confirmation du paiement{{refSuffix}}.",
+        "completeCheckoutEpisode": "Terminez le paiement pour déverrouiller cet épisode instantanément.",
+        "completeCheckoutTitle": "Terminez le paiement sécurisé pour déverrouiller instantanément.",
+        "unlockEpisodeToStart": "Déverrouillez l'épisode pour commencer à regarder.",
+        "unlockOnceFullHd": "Déverrouillez une fois et regardez en HD intégrale pour toujours.",
+        "checkoutNote": "Paiement sécurisé via Flutterwave. Aucun solde de portefeuille requis."
+      },
+      "badges": {
+        "series": "Série"
+      },
+      "seasons": {
+        "quickSeason": "Saison rapide",
+        "seasonChip": "Saison {{number}}",
+        "seasonOption": "Saison {{number}}",
+        "seasonOptionWithTitle": "Saison {{number}} · {{title}}",
+        "episodesCount": "{{count}} épisodes"
+      },
+      "episode": {
+        "short": "EP {{number}}",
+        "label": "Épisode {{number}}",
+        "minutesShort": "{{minutes}}m",
+        "nowPlaying": "Lecture en cours"
+      },
+      "stats": {
+        "creator": "Créateur",
+        "cast": "Distribution",
+        "language": "Langue",
+        "rating": "Note",
+        "episodes": "Épisodes"
+      },
+      "upNext": {
+        "label": "À suivre",
+        "fallbackDescription": "Plongez dans le prochain chapitre de cette série exclusive.",
+        "durationLabel": "Durée",
+        "minutes": "{{minutes}} min",
+        "continue": "Continuer l'épisode"
+      },
+      "sections": {
+        "originalsBadge": "Originaux Randa Plus",
+        "seasonsEpisodesTitle": "Saisons et épisodes",
+        "seasonsEpisodesSubtitle": "{{seasons}} saisons • {{episodes}} épisodes",
+        "moreToLoveBadge": "Plus à aimer",
+        "recommendedTitle": "Recommandé pour vous",
+        "recommendedSubtitle": "Sélectionné dans le coffre Randa Plus"
+      }
+    },
+    "play": {
+      "episodeLocked": "Cet épisode est verrouillé. Déverrouillez-le pour regarder."
+    },
+    "payment": {
+      "confirmedShow": "Paiement confirmé ! Bon visionnage.",
+      "stillWaiting": "En attente de confirmation du paiement. Vérifiez à nouveau après avoir terminé le paiement.",
+      "seasonUnlocked": "Saison déverrouillée ! Bon visionnage.",
+      "episodeUnlocked": "Épisode déverrouillé ! Bon visionnage."
+    },
+    "purchase": {
+      "errors": {
+        "paymentLinkUnavailable": "Lien de paiement indisponible. Veuillez réessayer."
+      },
+      "redirecting": {
+        "withAmountDiscount": "Redirection vers le paiement ({{amount}} avec réduction) pour déverrouiller {{scope}}...",
+        "withAmount": "Redirection vers le paiement ({{amount}}) pour déverrouiller {{scope}}...",
+        "default": "Redirection vers le paiement pour déverrouiller {{scope}}..."
+      },
+      "selectSeasonOrEpisode": "Sélectionnez une saison ou un épisode à déverrouiller.",
+      "selectEpisodeToUnlock": "Sélectionnez un épisode à déverrouiller.",
+      "thisTitle": "ce titre"
+    },
+    "errors": {
+      "missingContentId": "Identifiant du contenu manquant.",
+      "missingSeasonForEpisode": "Sélectionnez une saison avant de déverrouiller un épisode."
+    },
+    "trailer": {
+      "fallbackTitle": "Bande-annonce",
+      "notAvailable": "Bande-annonce indisponible.",
+      "loadFailed": "Impossible de charger la bande-annonce."
     }
   },
   "payment": {
@@ -163,6 +754,419 @@
     "trailer": {
       "notAvailableForTitle": "Bande-annonce indisponible pour ce titre",
       "notAvailable": "Bande-annonce indisponible"
+    }
+  },
+  "myLibrary": {
+    "episodeFallback": "Épisode",
+    "loading": "Chargement de votre bibliothèque...",
+    "errors": {
+      "loadFailed": "Impossible de charger votre bibliothèque"
+    },
+    "hero": {
+      "eyebrow": "Ma bibliothèque",
+      "title": "Votre collection",
+      "subtitle": "Tous vos films, séries et épisodes débloqués au même endroit."
+    },
+    "summary": {
+      "librarySize": "Taille de la bibliothèque",
+      "ownedTitles": "{{count}} titre débloqué",
+      "ownedTitles_plural": "{{count}} titres débloqués",
+      "breakdown": "{{movies}} films • {{series}} séries",
+      "inProgress": "En cours",
+      "waiting": "{{count}} titre commencé",
+      "waiting_plural": "{{count}} titres commencés",
+      "avgCompletion": "Progression moyenne : {{percent}}%",
+      "hoursWatched": "Heures regardées",
+      "hoursShort": "h",
+      "hoursHint": "Selon votre historique de visionnage"
+    },
+    "resume": {
+      "eyebrow": "Reprendre",
+      "title": "Continuer à regarder",
+      "hint": "Reprenez là où vous vous êtes arrêté sur {{count}} titre",
+      "hint_plural": "Reprenez là où vous vous êtes arrêté sur {{count}} titres",
+      "watched": "{{percent}}% regardé",
+      "left": "{{duration}} restant"
+    },
+    "filters": {
+      "all": "Tout ({{count}})",
+      "movies": "Films ({{count}})",
+      "series": "Séries ({{count}})"
+    },
+    "collection": {
+      "eyebrow": "Votre bibliothèque",
+      "allTitles": "Tous les titres",
+      "movies": "Films",
+      "series": "Séries",
+      "hint": "Affichage de {{count}} titre",
+      "hint_plural": "Affichage de {{count}} titres"
+    },
+    "empty": {
+      "title": "Rien pour le moment",
+      "message": "Débloquez un film ou une série pour le voir dans votre bibliothèque.",
+      "cta": "Aller à Parcourir"
+    },
+    "badge": {
+      "owned": "DÉBLOQUÉ",
+      "partialUnlocked": "DÉBLOQUÉ {{count}} ÉPISODE",
+      "partialUnlocked_plural": "DÉBLOQUÉ {{count}} ÉPISODES"
+    },
+    "rating": {
+      "na": "N/D"
+    },
+    "actions": {
+      "watch": "Regarder",
+      "details": "Détails"
+    },
+    "contentType": {
+      "movie": "Film",
+      "series": "Série"
+    },
+    "duration": {
+      "minutes": "{{minutes}} min"
+    },
+    "episodes": {
+      "eyebrow": "Épisodes débloqués",
+      "title": "Vos épisodes",
+      "totalUnlocked": "{{count}} épisode débloqué",
+      "totalUnlocked_plural": "{{count}} épisodes débloqués",
+      "unlockedCount": "{{count}} épisode débloqué",
+      "unlockedCount_plural": "{{count}} épisodes débloqués",
+      "viewSeries": "Voir la série"
+    },
+    "fallbacks": {
+      "series": "Série"
+    }
+  },
+  "support": {
+    "common": {
+      "back": "← Retour",
+      "home": "Accueil",
+      "helpCenter": "Centre d'aide",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "terms": "Conditions",
+      "onThisPage": "Sur cette page"
+    },
+    "helpCenter": {
+      "hero": {
+        "label": "Support",
+        "title": "Centre d'aide",
+        "subtitle": "Réponses rapides et guides pour les questions courantes.",
+        "actions": {
+          "browseFaq": "Parcourir la FAQ",
+          "contactSupport": "Contacter le support"
+        }
+      },
+      "nav": {
+        "gettingStarted": "Bien démarrer",
+        "accountSecurity": "Compte et sécurité",
+        "billing": "Facturation",
+        "playback": "Lecture",
+        "devices": "Appareils"
+      },
+      "sections": {
+        "gettingStarted": {
+          "eyebrow": "Bienvenue",
+          "title": "Bien démarrer",
+          "subtitle": "Les bases pour parcourir, débloquer et regarder.",
+          "steps": {
+            "1": "Parcourez les films et séries dans Parcourir, Films ou Séries.",
+            "2": "Ouvrez un titre pour voir les détails, la bande-annonce et les options d'achat.",
+            "3": "Débloquez un film, une saison ou un épisode via votre moyen de paiement.",
+            "4": "Regardez instantanément depuis votre bibliothèque ou la page du titre."
+          },
+          "tutorialTitle": "Tutoriel",
+          "tutorialSubtitle": "Regardez une courte présentation de l'application.",
+          "tutorialMissing": "La vidéo de tutoriel n'est pas encore configurée. <0>Revenez bientôt.</0>"
+        },
+        "accountSecurity": {
+          "eyebrow": "Protégez votre compte",
+          "title": "Compte et sécurité",
+          "subtitle": "Conseils pour sécuriser votre compte et récupérer l'accès.",
+          "cards": {
+            "passwords": {
+              "title": "Utilisez des mots de passe forts",
+              "body": "Choisissez un mot de passe unique et gardez-le privé."
+            },
+            "google": {
+              "title": "Connexion Google",
+              "body": "Si vous vous êtes inscrit avec Google, utilisez le même compte Google pour vous connecter."
+            },
+            "cantSignIn": {
+              "title": "Impossible de vous connecter ?",
+              "body": "Essayez de réinitialiser votre mot de passe ou contactez le support si vous êtes bloqué."
+            }
+          }
+        },
+        "billing": {
+          "eyebrow": "Paiements",
+          "title": "Facturation et achats",
+          "subtitle": "Aide pour les paiements, déblocages et reçus.",
+          "bullets": {
+            "1": "Les achats débloquent l'accès à des titres, saisons ou épisodes spécifiques.",
+            "2": "Si le paiement a réussi mais que l'accès n'a pas changé, attendez un instant puis actualisez.",
+            "3": "Conservez la référence de paiement si vous avez besoin d'aide."
+          }
+        },
+        "playback": {
+          "eyebrow": "Streaming",
+          "title": "Lecture",
+          "subtitle": "Résolvez rapidement les problèmes courants.",
+          "cards": {
+            "buffering": {
+              "title": "Mise en mémoire tampon",
+              "body": "Essayez une connexion plus rapide, réduisez l'usage du réseau ou redémarrez l'application."
+            },
+            "audio": {
+              "title": "Audio désynchronisé",
+              "body": "Mettez en pause et reprenez, ou relancez la lecture pour resynchroniser."
+            }
+          }
+        },
+        "devices": {
+          "eyebrow": "Compatibilité",
+          "title": "Appareils",
+          "subtitle": "Regardez sur des appareils pris en charge et gardez tout à jour.",
+          "cards": {
+            "mobile": {
+              "title": "Support mobile",
+              "body": "Gardez l'application à jour pour les meilleures performances."
+            },
+            "stuck": {
+              "title": "Application bloquée ou qui plante",
+              "body": "Essayez de redémarrer l'application ou votre appareil. Si le problème persiste, <0>contactez le support</0>."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Besoin de plus d'aide ?",
+        "body": "Si vous ne trouvez pas la réponse, notre équipe peut vous aider.",
+        "actions": {
+          "openFaq": "Ouvrir la FAQ",
+          "contactSupport": "Contacter le support"
+        }
+      }
+    },
+    "faq": {
+      "hero": {
+        "label": "Support",
+        "title": "Questions fréquentes",
+        "subtitle": "Réponses aux questions courantes sur le compte, la lecture et la facturation.",
+        "actions": {
+          "visitHelpCenter": "Voir le Centre d'aide",
+          "contactSupport": "Contacter le support"
+        }
+      },
+      "section": {
+        "eyebrow": "FAQ",
+        "title": "Parcourir les réponses",
+        "subtitle": "Choisissez un sujet pour voir des réponses rapides."
+      },
+      "groups": {
+        "account": {
+          "title": "Compte",
+          "description": "Connexion, PIN, mot de passe et accès.",
+          "items": {
+            "methods": {
+              "q": "Comment me connecter ?",
+              "a": "Utilisez votre numéro de téléphone ou votre compte Google si vous vous êtes inscrit avec Google."
+            },
+            "googlePassword": {
+              "q": "J'utilise Google. Ai-je un mot de passe ?",
+              "a": "Si vous vous êtes inscrit avec Google, vous vous connectez généralement via Google."
+            },
+            "forgot": {
+              "q": "J'ai oublié mon PIN ou mon mot de passe. Que faire ?",
+              "a": "Contactez-nous via <0>Contact</0> et nous vous aiderons à récupérer l'accès."
+            }
+          }
+        },
+        "playback": {
+          "title": "Lecture",
+          "description": "Performances de streaming et problèmes d'appareil.",
+          "items": {
+            "buffering": {
+              "q": "Pourquoi la vidéo charge-t-elle ?",
+              "a": "Cela vient souvent du réseau. Essayez une connexion plus stable ou réduisez les téléchargements."
+            },
+            "audio": {
+              "q": "Le son n'est pas synchronisé.",
+              "a": "Mettez en pause et reprenez, ou relancez la lecture."
+            },
+            "downloads": {
+              "q": "Puis-je télécharger des vidéos hors ligne ?",
+              "a": "Le téléchargement hors ligne peut ne pas être disponible pour tous les titres ou appareils."
+            }
+          }
+        },
+        "billing": {
+          "title": "Facturation",
+          "description": "Paiements, déblocages et remboursements.",
+          "items": {
+            "paymentMethods": {
+              "q": "Quels moyens de paiement acceptez-vous ?",
+              "a": "Les moyens disponibles dépendent de votre région et du fournisseur de paiement."
+            },
+            "notUnlocked": {
+              "q": "J'ai payé mais le contenu est toujours verrouillé.",
+              "a": "Attendez un instant puis actualisez. Si c'est toujours verrouillé, <0>contactez-nous</0> avec la référence de paiement."
+            },
+            "refunds": {
+              "q": "Proposez-vous des remboursements ?",
+              "a": "Les demandes sont traitées au cas par cas lorsque la loi le permet. Voir <0>Conditions</0> pour les détails."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Besoin de plus d'aide ?",
+        "body": "Si votre question n'est pas listée, notre équipe peut vous aider.",
+        "actions": {
+          "helpCenter": "Centre d'aide",
+          "contactSupport": "Contacter le support"
+        }
+      }
+    },
+    "contact": {
+      "hero": {
+        "label": "Support",
+        "title": "Nous contacter",
+        "subtitle": "Obtenez de l'aide pour la facturation, l'accès, la lecture ou le compte.",
+        "actions": {
+          "checkFaq": "Voir la FAQ",
+          "writeMessage": "Écrire un message"
+        }
+      },
+      "channels": {
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "whatsapp": "WhatsApp"
+      },
+      "direct": {
+        "eyebrow": "Direct",
+        "title": "Nous joindre directement",
+        "subtitle": "Utilisez l'un des canaux disponibles ci-dessous.",
+        "notConfigured": "Les coordonnées du support ne sont pas encore configurées."
+      },
+      "availability": {
+        "eyebrow": "Disponibilité",
+        "title": "Quand nous répondons",
+        "response": {
+          "label": "Délai de réponse",
+          "value": "Sous 24–48 heures"
+        },
+        "bestTime": {
+          "label": "Meilleur moment",
+          "value": "En semaine"
+        },
+        "include": {
+          "label": "Inclure",
+          "value": "Votre numéro et la référence de paiement (si applicable)"
+        }
+      },
+      "form": {
+        "eyebrow": "Message",
+        "title": "Envoyer un message",
+        "subtitle": "Nous ouvrirons votre application e-mail avec un brouillon pré-rempli.",
+        "fields": {
+          "name": "Nom",
+          "email": "E-mail",
+          "subject": "Objet",
+          "message": "Message"
+        },
+        "actions": {
+          "openDraft": "Ouvrir le brouillon e-mail"
+        }
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "emailRequired": "L'e-mail est requis",
+        "subjectRequired": "L'objet est requis",
+        "messageMin": "Le message doit contenir au moins 10 caractères"
+      },
+      "toasts": {
+        "openingEmail": "Ouverture de votre application e-mail..."
+      }
+    },
+    "terms": {
+      "hero": {
+        "label": "Légal",
+        "title": "Conditions d'utilisation",
+        "subtitle": "Ces conditions régissent votre accès au service et son utilisation. Dernière mise à jour : {{date}}.",
+        "actions": {
+          "readTerms": "Lire les conditions",
+          "contactLegal": "Contacter le juridique"
+        }
+      },
+      "nav": {
+        "overview": "Vue d'ensemble",
+        "accounts": "Comptes",
+        "payments": "Paiements",
+        "content": "Contenu et licences",
+        "acceptableUse": "Utilisation acceptable",
+        "disclaimers": "Mentions",
+        "changes": "Modifications"
+      },
+      "sections": {
+        "overview": {
+          "eyebrow": "Accord",
+          "title": "Vue d'ensemble",
+          "subtitle": "En utilisant le service, vous acceptez ces Conditions. Si vous n'êtes pas d'accord, n'utilisez pas le service.",
+          "body": "Ces Conditions s'appliquent à tous les visiteurs et utilisateurs. Des règles supplémentaires peuvent s'appliquer à certaines fonctionnalités (par exemple, achats/déblocages ou offres promotionnelles)."
+        },
+        "accounts": {
+          "eyebrow": "Comptes",
+          "title": "Inscription et sécurité",
+          "subtitle": "Gardez vos identifiants sécurisés et exacts.",
+          "bullets": {
+            "1": "Vous êtes responsable des activités effectuées sur votre compte.",
+            "2": "Fournissez des informations exactes et tenez-les à jour.",
+            "3": "Ne partagez pas vos identifiants et n'essayez pas d'accéder à des comptes que vous ne possédez pas."
+          }
+        },
+        "payments": {
+          "eyebrow": "Paiements",
+          "title": "Facturation, achats et remboursements",
+          "subtitle": "Comment fonctionnent les paiements et comment demander de l'aide.",
+          "body1": "Lorsque vous achetez ou débloquez du contenu, vous nous autorisez (ainsi que nos prestataires de paiement) à débiter le moyen de paiement choisi.",
+          "body2": "Les demandes de remboursement sont étudiées au cas par cas lorsque la loi le permet. Pour les problèmes d'achat, contactez-nous via <0>Contact</0> et indiquez la référence de paiement."
+        },
+        "content": {
+          "eyebrow": "Contenu",
+          "title": "Licences et disponibilité",
+          "subtitle": "Les titres peuvent changer au fil du temps.",
+          "bullets": {
+            "1": "La disponibilité peut varier selon la région, les licences et la période.",
+            "2": "Le streaming est réservé à un usage personnel et non commercial sauf autorisation écrite.",
+            "3": "Nous pouvons mettre à jour, retirer ou remplacer des titres et fonctionnalités pour améliorer le service."
+          }
+        },
+        "acceptableUse": {
+          "eyebrow": "Utilisation acceptable",
+          "title": "Ce que vous ne pouvez pas faire",
+          "subtitle": "Des règles pour protéger nos membres, partenaires et notre infrastructure.",
+          "bullets": {
+            "1": "Ne pas rétroconcevoir, extraire, exploiter ou perturber le service.",
+            "2": "Ne pas partager, redistribuer ou projeter publiquement du contenu sans autorisation.",
+            "3": "Ne pas utiliser le service pour des activités illégales, nuisibles ou abusives."
+          }
+        },
+        "disclaimers": {
+          "eyebrow": "Mentions",
+          "title": "Service « tel quel »",
+          "subtitle": "Nous faisons de notre mieux, mais des interruptions peuvent survenir.",
+          "body": "Le service est fourni « tel quel » et « selon disponibilité ». Dans la mesure permise par la loi, nous déclinons toute garantie de qualité marchande, d'adéquation à un usage particulier et de non-contrefaçon."
+        },
+        "changes": {
+          "eyebrow": "Modifications",
+          "title": "Mises à jour de ces conditions",
+          "subtitle": "Nous pouvons mettre à jour ces Conditions pour refléter des changements produit ou légaux.",
+          "body1": "En cas de modifications importantes, nous fournirons un avis dans l'application ou par d'autres moyens raisonnables. Continuer à utiliser le service signifie accepter les Conditions révisées.",
+          "body2": "Des questions ? Visitez <0>Contact</0>."
+        }
+      }
     }
   }
 }

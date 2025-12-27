@@ -70,40 +70,40 @@ const Watch: React.FC = () => {
 
   // Machine-translation fallback for dynamic backend content.
   // Hooks must run even during loading states, so we compute safe defaults.
-  const targetLanguage = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
+  const targetLanguage = normalizeSupportedLanguage(i18n.language)
   const baseContentTitle = getLocalizedContentTitle(content, targetLanguage)
   const baseContentDescription = getLocalizedContentDescription(content, targetLanguage)
   const baseEpisodeTitle = activeEpisode ? getLocalizedEpisodeTitle(activeEpisode, targetLanguage) : ''
   const baseEpisodeDescription = activeEpisode ? getLocalizedEpisodeDescription(activeEpisode, targetLanguage) : ''
 
   const shouldTranslateContentTitle =
-    targetLanguage !== 'en' && !hasLocalizedText(content, 'title', targetLanguage)
+    targetLanguage !== 'rw' && !hasLocalizedText(content, 'title', targetLanguage)
   const shouldTranslateContentDescription =
-    targetLanguage !== 'en' && !hasLocalizedText(content, 'description', targetLanguage)
+    targetLanguage !== 'rw' && !hasLocalizedText(content, 'description', targetLanguage)
   const shouldTranslateEpisodeTitle =
-    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'title', targetLanguage)
+    targetLanguage !== 'rw' && !hasLocalizedText(activeEpisode, 'title', targetLanguage)
   const shouldTranslateEpisodeDescription =
-    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'description', targetLanguage)
+    targetLanguage !== 'rw' && !hasLocalizedText(activeEpisode, 'description', targetLanguage)
 
   const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
     enabled: shouldTranslateContentTitle,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   })
   const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
     enabled: shouldTranslateContentDescription,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   })
   const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
     enabled: shouldTranslateEpisodeTitle,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   })
   const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
     enabled: shouldTranslateEpisodeDescription,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   })
 
   const translationsReady =
@@ -214,12 +214,12 @@ const Watch: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to load content', error)
-      toast.error('Failed to load content. Please try again.')
+      toast.error(t('watch.errors.loadFailed'))
       navigate('/browse')
     } finally {
       setLoadingContent(false)
     }
-  }, [id, navigate, searchParams])
+  }, [id, navigate, searchParams, t])
 
   const loadAccessInfo = useCallback(async () => {
     if (!id) return
@@ -290,7 +290,7 @@ const Watch: React.FC = () => {
               }
               setPaymentPolling(false)
               setPendingTransactionRef(null)
-              toast.success('Payment confirmed! Enjoy your stream.')
+              toast.success(t('watch.payment.confirmedStream'))
               await Promise.all([loadAccessInfo(), loadContent()])
             } else if (Date.now() - startedAt > 5 * 60 * 1000) {
               if (paymentPollRef.current) {
@@ -299,7 +299,7 @@ const Watch: React.FC = () => {
               }
               setPaymentPolling(false)
               setPendingTransactionRef(null)
-              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.')
+              toast.info(t('watch.payment.stillWaiting'))
             }
           } catch (error) {
             console.error('Error polling payment status:', error)
@@ -307,7 +307,7 @@ const Watch: React.FC = () => {
         })()
       }, 5000)
     },
-    [loadAccessInfo, loadContent]
+    [loadAccessInfo, loadContent, t]
   )
 
   const openCheckoutTab = (url: string) => {
@@ -330,11 +330,11 @@ const Watch: React.FC = () => {
         throw new Error('Payment link unavailable.')
       }
       setPendingTransactionRef(response.transactionRef)
-      toast.info(`Redirecting to checkout. Complete payment to unlock ${scopeLabel}.`)
+      toast.info(t('watch.purchase.redirectingToCheckout', { scope: scopeLabel }))
       openCheckoutTab(paymentLink)
       beginPaymentPolling(contentId)
     },
-    [beginPaymentPolling]
+    [beginPaymentPolling, t]
   )
 
 
@@ -372,20 +372,20 @@ const Watch: React.FC = () => {
       const status = (error as any)?.response?.status
       if (status === 401 || status === 403) {
         setStreamSource('')
-        setStreamError('This episode is still locked. Unlock it to keep watching.')
+        setStreamError(t('watch.stream.locked'))
       } else {
         const fallback = isSeries ? activeEpisode?.videoUrl : content?.movieFileUrl
         if (fallback) {
           setStreamSource(fallback)
         } else {
           setStreamSource('')
-          setStreamError('Unable to load video stream right now. Please try again later.')
+          setStreamError(t('watch.stream.unavailable'))
         }
       }
     } finally {
       setStreamLoading(false)
     }
-  }, [content, activeEpisode, activeSeason, isSeries])
+  }, [content, activeEpisode, activeSeason, isSeries, t])
 
   useEffect(() => {
     if (!canPlayCurrent) return
@@ -471,8 +471,8 @@ const Watch: React.FC = () => {
   }, [triggerAutoNext])
 
   const handleVideoError = useCallback(() => {
-    setStreamError('Unable to load video stream right now. Please try again later.')
-  }, [])
+    setStreamError(t('watch.stream.unavailable'))
+  }, [t])
 
   const handleSeasonChange = (seasonNumber: number) => {
     const season = orderedSeasons.find((entry) => entry.seasonNumber === seasonNumber)
@@ -491,7 +491,7 @@ const Watch: React.FC = () => {
     if (!identifier) return
 
     if (content.contentType === 'Series') {
-      toast.info('Unlock episodes from the details page to avoid purchase errors.')
+      toast.info(t('watch.purchase.unlockFromDetails'))
       navigate(`/content/${identifier}`)
       return
     }
@@ -499,10 +499,10 @@ const Watch: React.FC = () => {
     try {
       setPurchasing(true)
       const language = i18n.resolvedLanguage || i18n.language || 'en'
-      const label = getLocalizedContentTitle(content, language) || 'this title'
+      const label = getLocalizedContentTitle(content, language) || t('watch.purchase.thisTitle')
       await startDirectCheckout(identifier, label)
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Purchase failed. Please try again.'
+      const message = error?.response?.data?.message || t('watch.purchase.failed')
       toast.error(message)
     } finally {
       setPurchasing(false)
@@ -551,7 +551,7 @@ const Watch: React.FC = () => {
       <div className={styles.backBar}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <FiArrowLeft size={20} />
-          <span>Back to Browse</span>
+          <span>{t('watch.backToBrowse')}</span>
         </button>
       </div>
 
@@ -579,10 +579,13 @@ const Watch: React.FC = () => {
               <div className={styles.playerOverlay}>
                 <div className={styles.lockedPanel}>
                   <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} />
-                  <h2 className={styles.lockedTitle}>Unlock to watch this title</h2>
+                  <h2 className={styles.lockedTitle}>{t('watch.overlay.unlockTitle')}</h2>
                   <p style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
-                    Purchase <strong>{content.title}</strong>{' '}
-                    {isSeries && activeEpisode ? `to watch S${activeSeason}E${activeEpisode.episodeNumber}` : 'to start streaming in full HD.'}
+                    {t('watch.overlay.purchase')}{' '}
+                    <strong>{content.title}</strong>{' '}
+                    {isSeries && activeEpisode
+                      ? t('watch.overlay.toWatchEpisode', { season: activeSeason, episode: activeEpisode.episodeNumber })
+                      : t('watch.overlay.toStartStreaming')}
                   </p>
                   <div className={styles.lockedPrice}>{formatCurrency(content.priceInRwf || 0)}</div>
                   <div className={styles.lockedActions}>
@@ -593,9 +596,9 @@ const Watch: React.FC = () => {
                         onClick={handlePurchase}
                         disabled={unlockButtonDisabled}
                       >
-                        {purchasing ? 'Opening checkout...' : paymentPolling ? 'Confirming...' : (
+                        {purchasing ? t('watch.overlay.openingCheckout') : paymentPolling ? t('watch.overlay.confirming') : (
                           <>
-                            <FiUnlock size={18} /> Pay & Unlock
+                            <FiUnlock size={18} /> {t('watch.overlay.payAndUnlock')}
                           </>
                         )}
                       </button>
@@ -605,15 +608,17 @@ const Watch: React.FC = () => {
                       className={`${styles.ctaButton} ${styles.secondaryCta}`}
                       onClick={() => navigate(`/content/${resolveContentIdentifier(content)}`)}
                     >
-                      <FiPlay size={16} /> View Details
+                      <FiPlay size={16} /> {t('watch.overlay.viewDetails')}
                     </button>
                   </div>
                   <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
-                    Secure checkout powered by Flutterwave. Keep this page open while we confirm your payment.
+                    {t('watch.overlay.checkoutNote')}
                   </p>
                   {paymentPolling && (
                     <p style={{ marginTop: 4, color: 'var(--text-gray)' }}>
-                      Waiting for confirmation{shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''}.
+                      {t('watch.overlay.waitingForConfirmation', {
+                        refSuffix: shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''
+                      })}
                     </p>
                   )}
                 </div>
@@ -623,7 +628,7 @@ const Watch: React.FC = () => {
 
           {streamLoading && (
             <div className={styles.playerOverlay}>
-              <Loader fullScreen={false} text="Fetching secure stream..." />
+              <Loader fullScreen={false} text={t('watch.stream.fetching')} />
             </div>
           )}
 
@@ -632,7 +637,8 @@ const Watch: React.FC = () => {
           {autoNextCountdown !== null && pendingNextEpisode && (
             <div className={styles.autoNextBanner}>
               <p className={styles.autoNextTitle}>
-                Next episode in <strong>{autoNextCountdown}s</strong>
+                {t('watch.autoNext.nextIn')}{' '}
+                <strong>{autoNextCountdown}s</strong>
               </p>
               <p style={{ color: 'var(--text-gray)' }}>
                 S{pendingNextEpisode.seasonNumber}E{pendingNextEpisode.episode.episodeNumber}:{' '}
@@ -640,10 +646,10 @@ const Watch: React.FC = () => {
               </p>
               <div className={styles.autoNextActions}>
                 <button className={`${styles.ctaButton} ${styles.primaryCta}`} onClick={playPendingEpisode}>
-                  Play Now
+                  {t('watch.autoNext.playNow')}
                 </button>
                 <button className={`${styles.ctaButton} ${styles.secondaryCta}`} onClick={cancelAutoNext}>
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -659,20 +665,20 @@ const Watch: React.FC = () => {
 
         <div className={styles.metaGrid}>
           <div className={styles.metaCard}>
-            <p className={styles.metaLabel}>Release Year</p>
+            <p className={styles.metaLabel}>{t('watch.meta.releaseYear')}</p>
             <p className={styles.metaValue}>{content.releaseYear || '—'}</p>
           </div>
           <div className={styles.metaCard}>
-            <p className={styles.metaLabel}>Rating</p>
+            <p className={styles.metaLabel}>{t('watch.meta.rating')}</p>
             <p className={styles.metaValue}>{content.averageRating?.toFixed(1) || content.ageRating || 'NR'}</p>
           </div>
           <div className={styles.metaCard}>
-            <p className={styles.metaLabel}>Duration</p>
+            <p className={styles.metaLabel}>{t('watch.meta.duration')}</p>
             <p className={styles.metaValue}>{durationLabel}</p>
           </div>
           <div className={styles.metaCard}>
-            <p className={styles.metaLabel}>Language</p>
-            <p className={styles.metaValue}>{content.language || content.countryOfOrigin || 'Kinyarwanda'}</p>
+            <p className={styles.metaLabel}>{t('watch.meta.language')}</p>
+            <p className={styles.metaValue}>{content.language || content.countryOfOrigin || t('watch.meta.languageFallback')}</p>
           </div>
         </div>
       </section>
@@ -680,10 +686,10 @@ const Watch: React.FC = () => {
       {isSeries && orderedSeasons.length > 0 && (
         <section className={styles.episodesSection}>
           <div className={styles.episodesHeader}>
-            <h2 className={styles.metaTitle} style={{ fontSize: 24 }}>Episodes</h2>
+            <h2 className={styles.metaTitle} style={{ fontSize: 24 }}>{t('watch.episodes.title')}</h2>
             <div className={styles.episodesActions}>
               <button className={styles.toggleButton} onClick={() => setEpisodesOpen((prev) => !prev)}>
-                {episodesOpen ? 'Hide List' : 'Show List'}
+                {episodesOpen ? t('watch.episodes.hideList') : t('watch.episodes.showList')}
               </button>
             </div>
           </div>
@@ -698,7 +704,7 @@ const Watch: React.FC = () => {
                     onClick={() => handleSeasonChange(season.seasonNumber)}
                     className={`${styles.seasonTab} ${season.seasonNumber === activeSeason ? styles.seasonTabActive : ''}`}
                   >
-                    Season {season.seasonNumber}
+                    {t('watch.episodes.season', { number: season.seasonNumber })}
                   </button>
                 ))}
               </div>
@@ -723,13 +729,13 @@ const Watch: React.FC = () => {
                           {getLocalizedEpisodeDescription(episode, language) || episode.description}
                         </p>
                         <div className={styles.episodeMeta}>
-                          <span>{episode.duration} min</span>
+                          <span>{t('watch.episodes.minutes', { minutes: episode.duration })}</span>
                           {!unlocked && (
                             <span className={styles.episodeLock}>
-                              <FiLock size={14} /> Locked
+                              <FiLock size={14} /> {t('watch.episodes.locked')}
                             </span>
                           )}
-                          {isActive && <span style={{ color: 'var(--primary-yellow)' }}>Now Playing</span>}
+                          {isActive && <span style={{ color: 'var(--primary-yellow)' }}>{t('watch.episodes.nowPlaying')}</span>}
                         </div>
                       </div>
                       <FiChevronRight size={20} color="var(--text-gray)" />

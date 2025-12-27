@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { authAPI } from '@/api/auth'
 import { Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
@@ -8,6 +9,7 @@ import randaPlusLogo from '@/assets/logo.png'
 import styles from './Auth.module.css'
 
 const ResetPassword: React.FC = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const tokenFromLink = searchParams.get('token') || ''
@@ -37,11 +39,11 @@ const ResetPassword: React.FC = () => {
 
   const validate = () => {
     if (!form.password || form.password.length < 8) {
-      setErrors({ password: 'Password must be at least 8 characters' })
+      setErrors({ password: t('auth.validation.passwordMin8') })
       return false
     }
     if (form.password !== form.confirmPassword) {
-      setErrors({ confirmPassword: 'Password confirmation does not match' })
+      setErrors({ confirmPassword: t('auth.validation.passwordMismatch') })
       return false
     }
     return true
@@ -56,7 +58,7 @@ const ResetPassword: React.FC = () => {
     }
 
     if (!token.trim()) {
-      setGeneralError('Reset link is missing or expired. Please request a fresh password reset email.')
+      setGeneralError(t('auth.resetPassword.errors.tokenMissing'))
       return
     }
 
@@ -66,10 +68,10 @@ const ResetPassword: React.FC = () => {
         token: token.trim(),
         newPassword: form.password
       })
-      toast.success('Password updated successfully!')
+      toast.success(t('auth.resetPassword.toastSuccess'))
       setCompleted(true)
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Could not reset password right now.'
+      const message = error.response?.data?.message || t('auth.resetPassword.errors.resetFailed')
       setGeneralError(message)
     } finally {
       setLoading(false)
@@ -85,24 +87,24 @@ const ResetPassword: React.FC = () => {
           <img src={randaPlusLogo} alt="Randa Plus" className={styles['logo-image']} />
         </div>
 
-        <h2 className={styles.title}>Reset your password</h2>
-        <p className={styles.subtitle}>Paste the token we emailed you, set a new password, and you are back in.</p>
+        <h2 className={styles.title}>{t('auth.resetPassword.title')}</h2>
+        <p className={styles.subtitle}>{t('auth.resetPassword.subtitle')}</p>
 
         {generalError && <div className={styles['error-box']}>{generalError}</div>}
 
         {completed ? (
           <div className={styles.form}>
             <div className={styles['success-box']}>
-              <strong>Your password has been updated.</strong>
-              <p>Sign in with your new password to continue watching.</p>
+              <strong>{t('auth.resetPassword.completed.title')}</strong>
+              <p>{t('auth.resetPassword.completed.message')}</p>
             </div>
 
             <Button type="button" variant="primary" fullWidth onClick={goToLogin}>
-              Go to Sign in
+              {t('auth.resetPassword.completed.goToLogin')}
             </Button>
 
             <button type="button" className={styles['ghost-button']} onClick={() => navigate('/') }>
-              ← Back to Home
+              {t('auth.register.backToHome')}
             </button>
           </div>
         ) : (
@@ -110,20 +112,20 @@ const ResetPassword: React.FC = () => {
             <Input
               type="password"
               name="password"
-              placeholder="New password"
+              placeholder={t('auth.resetPassword.form.passwordPlaceholder')}
               value={form.password}
               onChange={handleChange}
               error={errors.password}
               required
               autoComplete="new-password"
-              helperText="Minimum 8 characters"
+              helperText={t('auth.register.passwordHelper')}
               togglePasswordVisibility
             />
 
             <Input
               type="password"
               name="confirmPassword"
-              placeholder="Confirm password"
+              placeholder={t('auth.resetPassword.form.confirmPasswordPlaceholder')}
               value={form.confirmPassword}
               onChange={handleChange}
               error={errors.confirmPassword}
@@ -133,11 +135,15 @@ const ResetPassword: React.FC = () => {
             />
 
             <Button type="submit" variant="primary" fullWidth loading={loading}>
-              Update password
+              {t('auth.resetPassword.actions.update')}
             </Button>
 
             <p className={styles['helper-note']}>
-              Didn’t request this change? <Link to="/login" className={styles.link}>Return to sign in</Link>.
+              {t('auth.resetPassword.helper.notRequested')}{' '}
+              <Link to="/login" className={styles.link}>
+                {t('auth.resetPassword.helper.returnToSignIn')}
+              </Link>
+              .
             </p>
           </form>
         )}

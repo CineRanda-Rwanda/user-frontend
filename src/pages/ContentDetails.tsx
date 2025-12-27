@@ -45,40 +45,40 @@ const ContentDetails: React.FC = () => {
 
   // Machine-translation fallback for dynamic backend content.
   // Hooks must run on every render (including loading states), so we compute safe defaults.
-  const targetLanguage = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language);
+  const targetLanguage = normalizeSupportedLanguage(i18n.language);
   const baseContentTitle = getLocalizedContentTitle(content, targetLanguage);
   const baseContentDescription = getLocalizedContentDescription(content, targetLanguage);
   const baseEpisodeTitle = activeEpisode ? getLocalizedEpisodeTitle(activeEpisode, targetLanguage) : '';
   const baseEpisodeDescription = activeEpisode ? getLocalizedEpisodeDescription(activeEpisode, targetLanguage) : '';
 
   const shouldTranslateContentTitle =
-    targetLanguage !== 'en' && !hasLocalizedText(content, 'title', targetLanguage);
+    targetLanguage !== 'rw' && !hasLocalizedText(content, 'title', targetLanguage);
   const shouldTranslateContentDescription =
-    targetLanguage !== 'en' && !hasLocalizedText(content, 'description', targetLanguage);
+    targetLanguage !== 'rw' && !hasLocalizedText(content, 'description', targetLanguage);
   const shouldTranslateEpisodeTitle =
-    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'title', targetLanguage);
+    targetLanguage !== 'rw' && !hasLocalizedText(activeEpisode, 'title', targetLanguage);
   const shouldTranslateEpisodeDescription =
-    targetLanguage !== 'en' && !hasLocalizedText(activeEpisode, 'description', targetLanguage);
+    targetLanguage !== 'rw' && !hasLocalizedText(activeEpisode, 'description', targetLanguage);
 
   const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
     enabled: shouldTranslateContentTitle,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   });
   const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
     enabled: shouldTranslateContentDescription,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   });
   const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
     enabled: shouldTranslateEpisodeTitle,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   });
   const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
     enabled: shouldTranslateEpisodeDescription,
-    source: 'en',
-    hideUntilTranslated: true,
+    source: 'auto',
+    hideUntilTranslated: false,
   });
 
   const translationsReady =
@@ -260,7 +260,7 @@ const ContentDetails: React.FC = () => {
 
   const requireAuthentication = (redirectPath: string) => {
     if (isAuthenticated) return true;
-    toast.info('Please sign in to continue.');
+    toast.info(t('contentDetails.auth.signInToContinue'));
     navigate('/login', { state: { from: redirectPath } });
     return false;
   };
@@ -277,7 +277,7 @@ const ContentDetails: React.FC = () => {
     if (content.contentType === 'Series' && activeEpisode) {
       const canPlayEpisode = Boolean(isContentPurchased || isContentFree || isEpisodeUnlocked(activeEpisode));
       if (!canPlayEpisode) {
-        toast.info('This episode is locked. Unlock it to watch.');
+        toast.info(t('contentDetails.play.episodeLocked'));
         return;
       }
     }
@@ -316,7 +316,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.success('Payment confirmed! Enjoy the show.');
+              toast.success(t('contentDetails.payment.confirmedShow'));
               await loadContentDetails();
             } else if (Date.now() - startedAt > 5 * 60 * 1000) {
               if (paymentPollRef.current) {
@@ -325,7 +325,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.');
+              toast.info(t('contentDetails.payment.stillWaiting'));
             }
           } catch (pollError) {
             console.error('Error polling payment status:', pollError);
@@ -369,7 +369,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.success('Season unlocked! Enjoy the episodes.');
+              toast.success(t('contentDetails.payment.seasonUnlocked'));
               await loadContentDetails();
             } else if (Date.now() - startedAt > 5 * 60 * 1000) {
               if (paymentPollRef.current) {
@@ -378,7 +378,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.');
+              toast.info(t('contentDetails.payment.stillWaiting'));
             }
           } catch (pollError) {
             console.error('Error polling season unlock status:', pollError);
@@ -438,7 +438,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.success('Episode unlocked! Enjoy the show.');
+              toast.success(t('contentDetails.payment.episodeUnlocked'));
               await loadContentDetails();
             } else if (Date.now() - startedAt > 5 * 60 * 1000) {
               if (paymentPollRef.current) {
@@ -447,7 +447,7 @@ const ContentDetails: React.FC = () => {
               }
               setPaymentPolling(false);
               setPendingTransactionRef(null);
-              toast.info('Still waiting for payment confirmation. Refresh once checkout completes.');
+              toast.info(t('contentDetails.payment.stillWaiting'));
             }
           } catch (pollError) {
             console.error('Error polling episode unlock status:', pollError);
@@ -483,7 +483,7 @@ const ContentDetails: React.FC = () => {
       const response = await initiateContentPurchase({ contentId, ...payloadOverrides });
       const paymentLink = response?.paymentLink;
       if (!paymentLink) {
-        throw new Error('Payment link unavailable.');
+        throw new Error(t('contentDetails.purchase.errors.paymentLinkUnavailable'));
       }
 
       setPendingTransactionRef(response.transactionRef);
@@ -493,9 +493,9 @@ const ContentDetails: React.FC = () => {
       toast.info(
         amountLabel
           ? discount && discount > 0
-            ? `Redirecting to checkout. Pay ${amountLabel} (discount applied) to unlock ${scopeLabel}.`
-            : `Redirecting to checkout. Pay ${amountLabel} to unlock ${scopeLabel}.`
-          : `Redirecting to checkout. Complete payment to unlock ${scopeLabel}.`
+            ? t('contentDetails.purchase.redirecting.withAmountDiscount', { amount: amountLabel, scope: scopeLabel })
+            : t('contentDetails.purchase.redirecting.withAmount', { amount: amountLabel, scope: scopeLabel })
+          : t('contentDetails.purchase.redirecting.default', { scope: scopeLabel })
       );
       openCheckoutTab(paymentLink);
       if (payloadOverrides?.scope === 'episode' && payloadOverrides.episodeId) {
@@ -512,12 +512,12 @@ const ContentDetails: React.FC = () => {
   const handleUnlockContent = async () => {
     if (!content) return;
     if (content.contentType === 'Series') {
-      toast.info('Select a season or episode to unlock.');
+      toast.info(t('contentDetails.purchase.selectSeasonOrEpisode'));
       return;
     }
     const contentId = resolveContentId();
     if (!contentId) {
-      toast.error('Unable to determine content identifier. Please refresh and try again.');
+      toast.error(t('contentDetails.errors.missingContentId'));
       return;
     }
 
@@ -529,7 +529,7 @@ const ContentDetails: React.FC = () => {
       setContentUnlocking(true);
       await startDirectCheckout({
         contentId,
-        scopeLabel: content.title || 'this title',
+        scopeLabel: content.title || t('contentDetails.purchase.thisTitle'),
         payloadOverrides: {
           scope: 'content',
         },
@@ -546,7 +546,7 @@ const ContentDetails: React.FC = () => {
     if (!content) return;
     const contentId = resolveContentId();
     if (!contentId) {
-      toast.error('Unable to determine content identifier. Please refresh and try again.');
+      toast.error(t('contentDetails.errors.missingContentId'));
       return;
     }
 
@@ -561,7 +561,7 @@ const ContentDetails: React.FC = () => {
       content.seasons?.find((entry) => entry.episodes?.some((item) => resolveEpisodeId(item) === episodeId));
 
     if (!owningSeason) {
-      toast.error('Unable to determine season for this episode. Please refresh and try again.');
+      toast.error(t('contentDetails.errors.missingSeasonForEpisode'));
       return;
     }
 
@@ -590,7 +590,7 @@ const ContentDetails: React.FC = () => {
     if (!content) return;
     const contentId = resolveContentId();
     if (!contentId) {
-      toast.error('Unable to determine content identifier. Please refresh and try again.');
+      toast.error(t('contentDetails.errors.missingContentId'));
       return;
     }
 
@@ -638,13 +638,13 @@ const ContentDetails: React.FC = () => {
         const title =
           content?.contentType === 'Series' && activeEpisode
             ? `${content.title} - S${activeSeason}:E${activeEpisode.episodeNumber}`
-            : content?.title || 'Trailer';
+            : content?.title || t('contentDetails.trailer.fallbackTitle');
         navigate(`/trailer?url=${encodeURIComponent(link)}&title=${encodeURIComponent(title)}`);
       } else {
-        toast.error('Trailer not available');
+        toast.error(t('contentDetails.trailer.notAvailable'));
       }
     } catch (error) {
-      toast.error('Failed to load trailer');
+      toast.error(t('contentDetails.trailer.loadFailed'));
     }
   };
 
@@ -813,12 +813,16 @@ const ContentDetails: React.FC = () => {
   const isLocked = !canStream;
 
   const activeEpisodePrice = isSeries && activeEpisode ? resolveEpisodeEffectivePriceInRwf(activeEpisode, content) : null;
+  const episodePriceKnown = Boolean(isSeries && activeEpisodePrice && activeEpisodePrice > 0);
+  const episodeIsFree = Boolean(isSeries && activeEpisode?.isFree);
+  const episodePaidWithoutPrice = Boolean(isSeries && activeEpisode && !activeEpisode.isFree && !episodePriceKnown);
+
   const heroPriceLabel = isSeries
-    ? activeEpisodePrice && activeEpisodePrice > 0
-      ? formatCurrency(activeEpisodePrice)
-      : activeEpisode?.isFree
-      ? 'Free'
-      : 'Paid'
+    ? episodePriceKnown
+      ? formatCurrency(activeEpisodePrice as number)
+      : episodeIsFree
+        ? t('contentDetails.ui.pricing.free')
+        : t('contentDetails.ui.pricing.paid')
     : formatCurrency(content.priceInRwf || 0);
 
   const shortTransactionRef = pendingTransactionRef ? pendingTransactionRef.slice(-8).toUpperCase() : null;
@@ -857,7 +861,7 @@ const ContentDetails: React.FC = () => {
     }
 
     if (!activeEpisode || !activeSeasonObj) {
-      toast.error('Please select an episode to unlock.');
+      toast.error(t('contentDetails.purchase.selectEpisodeToUnlock'));
       return;
     }
 
@@ -903,26 +907,26 @@ const ContentDetails: React.FC = () => {
                           className={styles.posterUnlockButton}
                         >
                           {unlockInProgress ? (
-                            paymentPolling ? 'Confirming...' : 'Unlocking...'
+                            paymentPolling ? t('contentDetails.ui.states.confirming') : t('contentDetails.ui.states.unlocking')
                           ) : (
                             <>
                               <FiUnlock size={18} />
                               {isSeries
-                                ? heroPriceLabel === 'Paid'
-                                  ? 'Unlock Episode'
-                                  : `Unlock Episode • ${heroPriceLabel}`
-                                : `Unlock • ${heroPriceLabel}`}
+                                ? episodePaidWithoutPrice
+                                  ? t('contentDetails.ui.actions.unlockEpisode')
+                                  : t('contentDetails.ui.actions.unlockEpisodeWithPrice', { price: heroPriceLabel })
+                                : t('contentDetails.ui.actions.unlockWithPrice', { price: heroPriceLabel })}
                             </>
                           )}
                         </button>
                         <p className={styles.posterHint}>
                           {!isAuthenticated
-                            ? 'Sign in to unlock this title.'
+                            ? t('contentDetails.ui.hints.signInToUnlock')
                             : paymentPolling
-                            ? 'Waiting for payment confirmation...'
+                            ? t('contentDetails.ui.hints.waitingForConfirmation')
                             : isSeries
-                            ? 'Complete checkout to unlock this episode instantly.'
-                            : 'Complete the secure checkout to unlock instantly.'}
+                            ? t('contentDetails.ui.hints.completeCheckoutEpisode')
+                            : t('contentDetails.ui.hints.completeCheckoutTitle')}
                         </p>
                         {shortTransactionRef && (
                           <p className={styles.posterHint}>
@@ -947,7 +951,7 @@ const ContentDetails: React.FC = () => {
               <div className={styles.heroDetails}>
                 {isSeries && (
                   <div className={styles.badgeRow}>
-                    <span>Series</span>
+                    <span>{t('contentDetails.ui.badges.series')}</span>
                     {genreNames.slice(0, 2).map((name) => (
                       <span key={name}>{name}</span>
                     ))}
@@ -970,7 +974,7 @@ const ContentDetails: React.FC = () => {
 
                 {isSeries && content.seasons && content.seasons.length > 0 && (
                   <div className={styles.seasonPicker}>
-                    <label htmlFor="seasonSelect">Quick Season</label>
+                    <label htmlFor="seasonSelect">{t('contentDetails.ui.seasons.quickSeason')}</label>
                     <select
                       id="seasonSelect"
                       className={styles.seasonSelect}
@@ -979,7 +983,12 @@ const ContentDetails: React.FC = () => {
                     >
                       {content.seasons.map((season) => (
                         <option key={season._id} value={season.seasonNumber}>
-                          {`Season ${season.seasonNumber}${season.seasonTitle ? ` · ${season.seasonTitle}` : ''}`}
+                          {season.seasonTitle
+                            ? t('contentDetails.ui.seasons.seasonOptionWithTitle', {
+                                number: season.seasonNumber,
+                                title: season.seasonTitle
+                              })
+                            : t('contentDetails.ui.seasons.seasonOption', { number: season.seasonNumber })}
                         </option>
                       ))}
                     </select>
@@ -997,24 +1006,24 @@ const ContentDetails: React.FC = () => {
                     {canStream ? (
                       <>
                         <FiPlay size={22} />
-                        {isSeries ? 'Watch Episode' : 'Watch Now'}
+                        {isSeries ? t('contentDetails.ui.actions.watchEpisode') : t('contentDetails.ui.actions.watchNow')}
                       </>
                     ) : unlockInProgress ? (
-                      paymentPolling ? 'Confirming...' : 'Unlocking...'
+                      paymentPolling ? t('contentDetails.ui.states.confirming') : t('contentDetails.ui.states.unlocking')
                     ) : (
                       <>
                         <FiUnlock size={22} />
                         {isSeries
-                          ? heroPriceLabel === 'Paid'
-                            ? 'Unlock Episode'
-                            : `Unlock Episode • ${heroPriceLabel}`
-                          : `Unlock • ${heroPriceLabel}`}
+                          ? episodePaidWithoutPrice
+                            ? t('contentDetails.ui.actions.unlockEpisode')
+                            : t('contentDetails.ui.actions.unlockEpisodeWithPrice', { price: heroPriceLabel })
+                          : t('contentDetails.ui.actions.unlockWithPrice', { price: heroPriceLabel })}
                       </>
                     )}
                   </button>
                   <button onClick={handleTrailer} className={styles.secondaryCta}>
                     <FiInfo size={22} />
-                    Trailer
+                    {t('contentDetails.ui.actions.trailer')}
                   </button>
                   <button className={styles.circleCta}>
                     <FiPlus size={22} />
@@ -1025,13 +1034,19 @@ const ContentDetails: React.FC = () => {
                   <div className={styles.lockInfo}>
                     <div className={styles.priceTag}>{heroPriceLabel}</div>
                     <div>
-                      <p>{isSeries ? 'Unlock the episode to start watching.' : 'Unlock once and stream in full HD forever.'}</p>
+                      <p>
+                        {isSeries
+                          ? t('contentDetails.ui.hints.unlockEpisodeToStart')
+                          : t('contentDetails.ui.hints.unlockOnceFullHd')}
+                      </p>
                       <p className={styles.walletHint}>
-                        Secure checkout powered by Flutterwave. No wallet balance required.
+                        {t('contentDetails.ui.hints.checkoutNote')}
                       </p>
                       {paymentPolling && (
                         <p className={styles.walletWarning}>
-                          Waiting for payment confirmation{shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''}.
+                          {t('contentDetails.ui.hints.waitingForConfirmationWithRef', {
+                            refSuffix: shortTransactionRef ? ` (Ref: ${shortTransactionRef})` : ''
+                          })}
                         </p>
                       )}
                     </div>
@@ -1040,23 +1055,23 @@ const ContentDetails: React.FC = () => {
 
                 <div className={styles.statGrid}>
                   <div className={styles.statCard}>
-                    <p className={styles.statLabel}>Creator</p>
+                    <p className={styles.statLabel}>{t('contentDetails.ui.stats.creator')}</p>
                     <p className={styles.statValue}>{primaryCreator}</p>
                   </div>
                   <div className={styles.statCard}>
-                    <p className={styles.statLabel}>Cast</p>
+                    <p className={styles.statLabel}>{t('contentDetails.ui.stats.cast')}</p>
                     <p className={styles.statValue}>{castPreview}</p>
                   </div>
                   <div className={styles.statCard}>
-                    <p className={styles.statLabel}>Language</p>
+                    <p className={styles.statLabel}>{t('contentDetails.ui.stats.language')}</p>
                     <p className={styles.statValue}>{primaryLanguage}</p>
                   </div>
                   <div className={styles.statCard}>
-                    <p className={styles.statLabel}>Rating</p>
+                    <p className={styles.statLabel}>{t('contentDetails.ui.stats.rating')}</p>
                     <p className={styles.statValue}>{content.averageRating?.toFixed(1) || content.ageRating || 'PG-13'}</p>
                   </div>
                   <div className={styles.statCard}>
-                    <p className={styles.statLabel}>Episodes</p>
+                    <p className={styles.statLabel}>{t('contentDetails.ui.stats.episodes')}</p>
                     <p className={styles.statValue}>{totalEpisodes}</p>
                   </div>
                 </div>
@@ -1067,17 +1082,17 @@ const ContentDetails: React.FC = () => {
                   <div className={styles.upNextImage}>
                     <img src={getEpisodeArtwork(activeEpisode)} alt={activeEpisode?.title || content.title} />
                   </div>
-                  <p className={styles.upNextMeta}>Up Next</p>
+                  <p className={styles.upNextMeta}>{t('contentDetails.ui.upNext.label')}</p>
                   <p className={styles.upNextTitle}>{activeEpisode?.title || content.title}</p>
                   <p className={styles.upNextDesc}>
-                    {activeEpisode?.description || 'Dive into the next chapter of this exclusive series.'}
+                    {activeEpisode?.description || t('contentDetails.ui.upNext.fallbackDescription')}
                   </p>
                   <div className={styles.upNextStats}>
-                    <span>Duration</span>
-                    <span>{(activeEpisode?.duration || content.duration || 0)} min</span>
+                    <span>{t('contentDetails.ui.upNext.durationLabel')}</span>
+                    <span>{t('contentDetails.ui.upNext.minutes', { minutes: activeEpisode?.duration || content.duration || 0 })}</span>
                   </div>
                   <button onClick={handlePlayFullVideo} className={styles.upNextButton}>
-                    Continue Episode
+                    {t('contentDetails.ui.upNext.continue')}
                   </button>
 
                   <div className={styles.upNextNavRow}>
@@ -1087,7 +1102,7 @@ const ContentDetails: React.FC = () => {
                       onClick={() => goToAdjacentEpisode(-1)}
                       disabled={activeEpisodeIndex <= 0}
                     >
-                      Previous
+                      {t('common.previous')}
                     </button>
                     <button
                       type="button"
@@ -1095,7 +1110,7 @@ const ContentDetails: React.FC = () => {
                       onClick={() => goToAdjacentEpisode(1)}
                       disabled={activeEpisodeIndex < 0 || activeEpisodeIndex >= orderedEpisodeRefs.length - 1}
                     >
-                      Next
+                      {t('common.next')}
                     </button>
                   </div>
                 </aside>
@@ -1109,19 +1124,19 @@ const ContentDetails: React.FC = () => {
             <div className={styles.sectionHeader}>
               <div>
                 <div className={styles.badgeRow}>
-                  <span>Randa Plus Originals</span>
+                  <span>{t('contentDetails.ui.sections.originalsBadge')}</span>
                 </div>
-                <h3 className={styles.sectionTitle}>Seasons & Episodes</h3>
+                <h3 className={styles.sectionTitle}>{t('contentDetails.ui.sections.seasonsEpisodesTitle')}</h3>
               </div>
               <p className={styles.sectionSubtitle}>
-                {totalSeasons} Seasons · {totalEpisodes} Episodes
+                {t('contentDetails.ui.sections.seasonsEpisodesSubtitle', { seasons: totalSeasons, episodes: totalEpisodes })}
               </p>
             </div>
 
             {content.seasons.map((season) => {
               const seasonUnlocked = isSeasonUnlocked(season);
               const seasonPrice = getSeasonPriceInRwf(season);
-              const seasonPriceLabel = seasonPrice > 0 ? formatCurrency(seasonPrice) : 'Free';
+              const seasonPriceLabel = seasonPrice > 0 ? formatCurrency(seasonPrice) : t('contentDetails.ui.pricing.free');
               const showSeasonUnlock = !seasonUnlocked && !isContentPurchased && !season.isFree && seasonPrice > 0;
               const unlockingSeason = seasonUnlockingId === season._id;
 
@@ -1129,11 +1144,15 @@ const ContentDetails: React.FC = () => {
                 <div key={season._id} id={`season-${season.seasonNumber}`} className={styles.seasonPanel}>
                   <div className={styles.seasonHeader}>
                     <div>
-                      <div className={styles.seasonChip}>Season {season.seasonNumber}</div>
+                      <div className={styles.seasonChip}>
+                        {t('contentDetails.ui.seasons.seasonChip', { number: season.seasonNumber })}
+                      </div>
                       {season.seasonTitle && <p className={styles.sectionSubtitle}>{season.seasonTitle}</p>}
                     </div>
                     <div className={styles.seasonActions}>
-                      <p className={styles.sectionSubtitle}>{season.episodes?.length || 0} Episodes</p>
+                      <p className={styles.sectionSubtitle}>
+                        {t('contentDetails.ui.seasons.episodesCount', { count: season.episodes?.length || 0 })}
+                      </p>
                       <span className={styles.seasonPrice}>{seasonPriceLabel}</span>
                       {showSeasonUnlock && (
                         <button
@@ -1142,12 +1161,16 @@ const ContentDetails: React.FC = () => {
                           onClick={() => handleUnlockSeason(season)}
                           disabled={unlockingSeason || paymentPolling}
                         >
-                          {unlockingSeason ? 'Unlocking...' : paymentPolling ? 'Confirming...' : 'Unlock Season'}
+                          {unlockingSeason
+                            ? t('contentDetails.ui.states.unlocking')
+                            : paymentPolling
+                              ? t('contentDetails.ui.states.confirming')
+                              : t('contentDetails.ui.actions.unlockSeason')}
                         </button>
                       )}
                       {seasonUnlocked && (
                         <span className={styles.seasonUnlockedBadge}>
-                          <FiUnlock size={14} /> Season unlocked
+                          <FiUnlock size={14} /> {t('contentDetails.ui.states.seasonUnlocked')}
                         </span>
                       )}
                     </div>
@@ -1180,30 +1203,36 @@ const ContentDetails: React.FC = () => {
                             <img src={getEpisodeArtwork(episode)} alt={episode.title} className={styles.episodeImage} />
                             <div className={styles.episodeGrad} />
                             <div className={styles.episodeBadges}>
-                              <span className={styles.episodeBadge}>EP {episode.episodeNumber}</span>
-                              <span className={styles.episodeBadge}>{episode.duration}m</span>
+                              <span className={styles.episodeBadge}>
+                                {t('contentDetails.ui.episode.short', { number: episode.episodeNumber })}
+                              </span>
+                              <span className={styles.episodeBadge}>
+                                {t('contentDetails.ui.episode.minutesShort', { minutes: episode.duration })}
+                              </span>
                             </div>
                           </div>
 
                           <div className={styles.episodeBody}>
                             <div className={styles.episodeHeading}>
                               <div>
-                                <p className={styles.sectionSubtitle}>Episode {episode.episodeNumber}</p>
+                                <p className={styles.sectionSubtitle}>
+                                  {t('contentDetails.ui.episode.label', { number: episode.episodeNumber })}
+                                </p>
                                 <h5 className={styles.episodeTitle}>{episode.title}</h5>
                               </div>
-                              {isActive && <span className={styles.nowPlaying}>Now Playing</span>}
+                              {isActive && <span className={styles.nowPlaying}>{t('contentDetails.ui.episode.nowPlaying')}</span>}
                             </div>
                             <p>{episode.description}</p>
                             <div className={styles.episodeMeta}>
-                              <span>{episode.duration} min</span>
+                              <span>{t('contentDetails.ui.upNext.minutes', { minutes: episode.duration })}</span>
                               {!episodeUnlocked && !episode.isFree && (
                                 <span className={styles.episodeStatusLocked}>
-                                  <FiLock size={14} /> Locked
+                                  <FiLock size={14} /> {t('content.status.locked')}
                                 </span>
                               )}
                               {episodeUnlocked && !isContentPurchased && (
                                 <span className={styles.episodeStatusUnlocked}>
-                                  <FiUnlock size={14} /> Unlocked
+                                  <FiUnlock size={14} /> {t('content.status.unlocked')}
                                 </span>
                               )}
                             </div>
@@ -1213,10 +1242,10 @@ const ContentDetails: React.FC = () => {
                                   className={episodePrice && episodePrice > 0 ? styles.episodePrice : styles.episodePriceFree}
                                 >
                                   {episode.isFree
-                                    ? 'Free'
+                                    ? t('contentDetails.ui.pricing.free')
                                     : episodePrice && episodePrice > 0
                                     ? formatCurrency(episodePrice)
-                                    : 'Paid'}
+                                    : t('contentDetails.ui.pricing.paid')}
                                 </span>
                               </div>
                               {showEpisodeUnlock && (
@@ -1229,7 +1258,11 @@ const ContentDetails: React.FC = () => {
                                   }}
                                   disabled={unlockingEpisode || paymentPolling}
                                 >
-                                  {unlockingEpisode ? 'Unlocking...' : paymentPolling ? 'Confirming...' : 'Unlock Episode'}
+                                  {unlockingEpisode
+                                    ? t('contentDetails.ui.states.unlocking')
+                                    : paymentPolling
+                                      ? t('contentDetails.ui.states.confirming')
+                                      : t('contentDetails.ui.actions.unlockEpisode')}
                                 </button>
                               )}
                             </div>
@@ -1248,11 +1281,11 @@ const ContentDetails: React.FC = () => {
           <div className={styles.relatedHeader}>
             <div>
               <div className={styles.badgeRow}>
-                <span>More To Love</span>
+                <span>{t('contentDetails.ui.sections.moreToLoveBadge')}</span>
               </div>
-              <h3 className={styles.relatedTitle}>Recommended For You</h3>
+              <h3 className={styles.relatedTitle}>{t('contentDetails.ui.sections.recommendedTitle')}</h3>
             </div>
-            <span className={styles.relatedSubtitle}>Hand-picked from the Randa Plus vault</span>
+            <span className={styles.relatedSubtitle}>{t('contentDetails.ui.sections.recommendedSubtitle')}</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {relatedContent.map((item) => (

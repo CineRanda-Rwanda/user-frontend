@@ -11,10 +11,13 @@ import FilterDropdown from '@/components/search/FilterDropdown'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
 import { extractCollection } from '@/utils/collection'
+import { useTranslation } from 'react-i18next'
+import { normalizeSupportedLanguage, translateTextCached } from '@/utils/translate'
 import styles from './Series.module.css'
 
 const Series: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t, i18n } = useTranslation()
   const [series, setSeries] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'newest')
@@ -78,14 +81,38 @@ const Series: React.FC = () => {
         const extractedGenres = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
         const extractedCategories = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
 
-        setGenres(extractedGenres)
-        setCategories(extractedCategories)
+        const targetLanguage = normalizeSupportedLanguage(i18n.language)
+
+        if (targetLanguage === 'fr') {
+          const [translatedGenres, translatedCategories] = await Promise.all([
+            Promise.all(
+              extractedGenres.map(async (genre) => ({
+                ...genre,
+                name: (await translateTextCached(genre.name, 'fr', { source: 'en' }).catch(() => genre.name)) || genre.name,
+              }))
+            ),
+            Promise.all(
+              extractedCategories.map(async (category) => ({
+                ...category,
+                name:
+                  (await translateTextCached(category.name, 'fr', { source: 'en' }).catch(() => category.name)) ||
+                  category.name,
+              }))
+            ),
+          ])
+
+          setGenres(translatedGenres)
+          setCategories(translatedCategories)
+        } else {
+          setGenres(extractedGenres)
+          setCategories(extractedCategories)
+        }
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
       }
     }
     loadFilters()
-  }, [])
+  }, [i18n.language])
 
   const loadSeries = async () => {
     try {
@@ -118,7 +145,7 @@ const Series: React.FC = () => {
       const pagination = result.data?.data?.pagination || result.data?.pagination || {}
       setTotalPages(pagination.totalPages || pagination.pages || 1)
     } catch (error) {
-      toast.error('Failed to load series')
+      toast.error(t('series.errors.loadFailed'))
       console.error('Error loading series:', error)
     } finally {
       setLoading(false)
@@ -179,22 +206,22 @@ const Series: React.FC = () => {
         <div className={styles.controls}>
           <SortDropdown value={sortBy} onChange={handleSortChange} />
           <FilterDropdown
-            label="Genre"
+            label={t('series.filters.genre')}
             options={genres.map((genre) => ({ value: genre._id, label: genre.name }))}
             value={filters.genres[0] || null}
-            placeholder="All genres"
+            placeholder={t('series.filters.allGenres')}
             onChange={(value) => handleFilterSelect('genres', value)}
           />
           <FilterDropdown
-            label="Category"
+            label={t('series.filters.category')}
             options={categories.map((category) => ({ value: category._id, label: category.name }))}
             value={filters.categories[0] || null}
-            placeholder="All categories"
+            placeholder={t('series.filters.allCategories')}
             onChange={(value) => handleFilterSelect('categories', value)}
           />
           {hasFilters && (
             <button type="button" className={styles.clearAllButton} onClick={clearAllFilters}>
-              Reset filters
+              {t('series.filters.reset')}
             </button>
           )}
         </div>
@@ -202,10 +229,10 @@ const Series: React.FC = () => {
         <div className={styles.content}>
           <main className={styles.main}>
             {loading ? (
-              <Loader text="Loading series..." />
+              <Loader text={t('series.loading')} />
             ) : series.length === 0 ? (
               <div className={styles.empty}>
-                <p>No series found</p>
+                <p>{t('series.empty')}</p>
               </div>
             ) : (
               <>
@@ -222,17 +249,17 @@ const Series: React.FC = () => {
                       onClick={() => setCurrentPage(prev => prev - 1)}
                       className={styles.paginationButton}
                     >
-                      Previous
+                      {t('common.previous')}
                     </button>
                     <span className={styles.pageInfo}>
-                      Page {currentPage} of {totalPages}
+                      {t('series.pagination.pageOf', { current: currentPage, total: totalPages })}
                     </span>
                     <button
                       disabled={currentPage === totalPages}
                       onClick={() => setCurrentPage(prev => prev + 1)}
                       className={styles.paginationButton}
                     >
-                      Next
+                      {t('common.next')}
                     </button>
                   </div>
                 )}

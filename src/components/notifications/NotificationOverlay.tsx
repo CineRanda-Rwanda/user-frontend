@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { FiBell, FiCheckCircle, FiExternalLink, FiRefreshCcw, FiTrash, FiX } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Loader from '@/components/common/Loader'
 import { useNotifications } from '@/contexts/NotificationsContext'
 import { formatRelativeTime, isNotificationUnread, sortNotificationsByDate } from '@/utils/notifications'
@@ -11,6 +12,7 @@ interface NotificationOverlayProps {
 }
 
 const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const {
     notifications,
@@ -197,17 +199,27 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
     <div className={styles.overlay}>
       <header className={styles.overlayHeader}>
         <div>
-          <p className={styles.overlayLabel}>Live feed</p>
+          <p className={styles.overlayLabel}>{t('notifications.overlay.label')}</p>
           <div className={styles.overlayTitleRow}>
-            <h3>Notifications</h3>
+            <h3>{t('notifications.page.title')}</h3>
             {unreadCount > 0 && <span className={styles.overlayCount}>{unreadCount}</span>}
           </div>
         </div>
         <div className={styles.headerActions}>
-          <button type="button" className={styles.iconButton} onClick={handleRefresh} title="Refresh notifications">
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={handleRefresh}
+            title={t('notifications.overlay.tooltips.refresh')}
+          >
             <FiRefreshCcw />
           </button>
-          <button type="button" className={styles.iconButton} onClick={handleClose} title="Close panel">
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={handleClose}
+            title={t('notifications.overlay.tooltips.close')}
+          >
             <FiX />
           </button>
         </div>
@@ -220,21 +232,21 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
             className={`${styles.filterButton} ${filter === 'all' ? styles.filterButtonActive : ''}`}
             onClick={() => setFilter('all')}
           >
-            All
+            {t('notifications.filters.all')}
           </button>
           <button
             type="button"
             className={`${styles.filterButton} ${filter === 'unread' ? styles.filterButtonActive : ''}`}
             onClick={() => setFilter('unread')}
           >
-            Unread
+            {t('notifications.filters.unread')}
           </button>
           <button
             type="button"
             className={`${styles.filterButton} ${filter === 'archived' ? styles.filterButtonActive : ''}`}
             onClick={() => setFilter('archived')}
           >
-            Trash
+            {t('notifications.filters.trash')}
             {trashCount > 0 && <span className={styles.filterCount}>{trashCount}</span>}
           </button>
         </div>
@@ -244,7 +256,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
           disabled={!unreadCount}
           onClick={handleMarkAll}
         >
-          Mark all
+          {t('notifications.overlay.actions.markAll')}
         </button>
       </div>
 
@@ -256,7 +268,11 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
         ) : filteredNotifications.length === 0 ? (
           <div className={styles.emptyState}>
             <FiBell />
-            <p>{filter === 'unread' ? 'No unread messages' : 'Nothing new just yet.'}</p>
+            <p>
+              {filter === 'unread'
+                ? t('notifications.overlay.empty.unread')
+                : t('notifications.overlay.empty.default')}
+            </p>
           </div>
         ) : (
           <ul className={styles.list}>
@@ -303,7 +319,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                         type="button"
                         className={styles.itemLink}
                         onClick={() => handleOpenNotification(notification)}
-                        title={notification.actionLabel || 'Open details'}
+                        title={notification.actionLabel || t('notifications.actions.viewDetails')}
                       >
                         <FiExternalLink />
                       </button>
@@ -316,7 +332,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                           onClick={() => startExit(notification._id, () => handleRestore(notification._id))}
                           disabled={exitingIds.has(notification._id)}
                         >
-                          Restore
+                          {t('notifications.actions.restore')}
                         </button>
                         <button
                           type="button"
@@ -324,7 +340,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                           onClick={() => startExit(notification._id, () => handleDelete(notification._id))}
                           disabled={exitingIds.has(notification._id)}
                         >
-                          Delete
+                          {t('notifications.actions.deletePermanently')}
                         </button>
                       </>
                     ) : (
@@ -334,7 +350,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                           className={styles.itemTrash}
                           onClick={() => startExit(notification._id, () => handleArchive(notification._id))}
                           disabled={exitingIds.has(notification._id)}
-                          title="Move to trash"
+                          title={t('notifications.actions.moveToTrash')}
                         >
                           <FiTrash />
                         </button>
@@ -346,7 +362,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                             disabled={exitingIds.has(notification._id)}
                           >
                             <FiCheckCircle />
-                            Mark read
+                            {t('notifications.actions.markAsRead')}
                           </button>
                         ) : (
                           <button
@@ -355,7 +371,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                             onClick={() => handleMarkUnread(notification._id)}
                             disabled={exitingIds.has(notification._id)}
                           >
-                            Mark unread
+                            {t('notifications.actions.markAsUnread')}
                           </button>
                         )}
                       </>

@@ -1,6 +1,7 @@
 import type { SupportedLanguage } from '@/i18n'
 
 type TranslationProvider = 'libretranslate'
+type TranslationSourceLanguage = SupportedLanguage | 'auto'
 
 const isTranslationEnabled = () => {
   // Vite exposes env vars as strings.
@@ -46,11 +47,11 @@ const hashText = (value: string) => {
   return (hash >>> 0).toString(16)
 }
 
-const cacheKey = (source: SupportedLanguage, target: SupportedLanguage, text: string) =>
+const cacheKey = (source: TranslationSourceLanguage, target: SupportedLanguage, text: string) =>
   `translate:v1:${source}:${target}:${hashText(text)}`
 
 export type TranslateOptions = {
-  source?: SupportedLanguage
+  source?: TranslationSourceLanguage
   signal?: AbortSignal
 }
 
@@ -64,6 +65,9 @@ export const getCachedTranslation = (
 
   const source = options.source || 'en'
   if (target === source) return trimmed
+  // Our current runtime translator does not support Kinyarwanda.
+  // Requirement: when language is rw, keep backend-provided dynamic content in English.
+  if (target === 'rw') return trimmed
   if (!isTranslationEnabled()) return trimmed
 
   const key = cacheKey(source, target, trimmed)
@@ -82,7 +86,7 @@ export const getCachedTranslation = (
 
 const translateViaLibreTranslate = async (
   text: string,
-  source: SupportedLanguage,
+  source: TranslationSourceLanguage,
   target: SupportedLanguage,
   signal?: AbortSignal
 ) => {
@@ -119,6 +123,7 @@ export const translateText = async (
 
   const source = options.source || 'en'
   if (target === source) return trimmed
+  if (target === 'rw') return trimmed
   if (!isTranslationEnabled()) return trimmed
 
   // Guard against huge payloads / accidental HTML blobs.
@@ -143,6 +148,7 @@ export const translateTextCached = async (
 
   const source = options.source || 'en'
   if (target === source) return trimmed
+  if (target === 'rw') return trimmed
   if (!isTranslationEnabled()) return trimmed
 
   const key = cacheKey(source, target, trimmed)

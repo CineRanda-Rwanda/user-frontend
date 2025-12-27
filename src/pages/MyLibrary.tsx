@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiStar, FiPlay, FiFilm, FiTv, FiLayers, FiArrowLeft } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 import { contentAPI } from '../api/content';
 import { userAPI } from '../api/user';
@@ -51,7 +52,7 @@ const extractContentFromResponse = (response: any): Content | null => {
   return normalizeContentEntity(resolved);
 };
 
-const normalizeEpisodeAccess = (entry: any): EpisodeAccessItem | null => {
+const normalizeEpisodeAccess = (entry: any, options?: { episodeFallbackPrefix?: string }): EpisodeAccessItem | null => {
   if (!entry) return null;
   const rawEpisode = entry.episode || entry.episodeDetails || entry;
   const episodeId = entry.episodeId || rawEpisode?._id || entry._id;
@@ -67,7 +68,7 @@ const normalizeEpisodeAccess = (entry: any): EpisodeAccessItem | null => {
     title:
       rawEpisode?.title ||
       entry.title ||
-      `Episode ${rawEpisode?.episodeNumber ?? entry.episodeNumber ?? ''}`,
+      `${options?.episodeFallbackPrefix || 'Episode'} ${rawEpisode?.episodeNumber ?? entry.episodeNumber ?? ''}`,
     seasonNumber,
     episodeNumber: rawEpisode?.episodeNumber ?? entry.episodeNumber,
     duration: rawEpisode?.duration ?? entry.duration,
@@ -82,6 +83,7 @@ const normalizeEpisodeAccess = (entry: any): EpisodeAccessItem | null => {
 };
 
 const MyLibrary: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [purchasedContent, setPurchasedContent] = useState<Content[]>([]);
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
@@ -162,7 +164,7 @@ const MyLibrary: React.FC = () => {
           }
         }
 
-        const normalizedEpisode = normalizeEpisodeAccess(entry);
+        const normalizedEpisode = normalizeEpisodeAccess(entry, { episodeFallbackPrefix: t('myLibrary.episodeFallback') });
         if (normalizedEpisode) {
           group.episodes.push(normalizedEpisode);
         }
@@ -215,7 +217,7 @@ const MyLibrary: React.FC = () => {
       );
       setContinueWatching(Array.isArray(continueWatchingData) ? continueWatchingData : []);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to load library');
+      toast.error(error.response?.data?.message || t('myLibrary.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -278,7 +280,7 @@ const MyLibrary: React.FC = () => {
   if (loading) {
     return (
       <div className={styles.loading}>
-        <Loader fullScreen={false} text="Loading your library..." />
+        <Loader fullScreen={false} text={t('myLibrary.loading')} />
       </div>
     );
   }
@@ -289,34 +291,33 @@ const MyLibrary: React.FC = () => {
         <div className={styles.pageToolbar}>
           <button type="button" className={styles.backButton} onClick={handleGoBack}>
             <FiArrowLeft />
-            <span>Back</span>
+            <span>{t('common.back')}</span>
           </button>
         </div>
         <section className={styles.hero}>
           <div className={styles.heroText}>
-            <p className={styles.heroEyebrow}>Your Collection</p>
-            <h1 className={styles.heroTitle}>All of your stories in one cinematic shelf.</h1>
+            <p className={styles.heroEyebrow}>{t('myLibrary.hero.eyebrow')}</p>
+            <h1 className={styles.heroTitle}>{t('myLibrary.hero.title')}</h1>
             <p className={styles.heroSubtitle}>
-              Revisit what you love, resume where you left off, and explore every title you own with a
-              streamlined, premium experience.
+              {t('myLibrary.hero.subtitle')}
             </p>
           </div>
           <div className={styles.heroSummary}>
             <div className={styles.summaryChip}>
               <FiLayers />
               <div>
-                <p className={styles.summaryLabel}>Library Size</p>
-                <p className={styles.summaryValue}>{purchasedContent.length} owned titles</p>
-                <p className={styles.summaryMeta}>{movieCount} movies · {seriesCount} series</p>
+                <p className={styles.summaryLabel}>{t('myLibrary.summary.librarySize')}</p>
+                <p className={styles.summaryValue}>{t('myLibrary.summary.ownedTitles', { count: purchasedContent.length })}</p>
+                <p className={styles.summaryMeta}>{t('myLibrary.summary.breakdown', { movies: movieCount, series: seriesCount })}</p>
               </div>
             </div>
             {continueWatching.length > 0 && (
               <div className={styles.summaryChip}>
                 <FiPlay />
                 <div>
-                  <p className={styles.summaryLabel}>In Progress</p>
-                  <p className={styles.summaryValue}>{continueWatching.length} waiting</p>
-                  <p className={styles.summaryMeta}>Avg completion {averageCompletion}%</p>
+                  <p className={styles.summaryLabel}>{t('myLibrary.summary.inProgress')}</p>
+                  <p className={styles.summaryValue}>{t('myLibrary.summary.waiting', { count: continueWatching.length })}</p>
+                  <p className={styles.summaryMeta}>{t('myLibrary.summary.avgCompletion', { percent: averageCompletion })}</p>
                 </div>
               </div>
             )}
@@ -324,11 +325,11 @@ const MyLibrary: React.FC = () => {
               <div className={styles.summaryChip}>
                 <FiStar />
                 <div>
-                  <p className={styles.summaryLabel}>Hours Watched</p>
+                  <p className={styles.summaryLabel}>{t('myLibrary.summary.hoursWatched')}</p>
                   <p className={styles.summaryValue}>
-                    {progressHours >= 10 ? progressHours.toFixed(1) : progressHours.toFixed(2)} hrs
+                    {progressHours >= 10 ? progressHours.toFixed(1) : progressHours.toFixed(2)} {t('myLibrary.summary.hoursShort')}
                   </p>
-                  <p className={styles.summaryMeta}>Since syncing across devices</p>
+                  <p className={styles.summaryMeta}>{t('myLibrary.summary.hoursHint')}</p>
                 </div>
               </div>
             )}
@@ -339,11 +340,11 @@ const MyLibrary: React.FC = () => {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <p className={styles.sectionEyebrow}>Resume</p>
-                <h2 className={styles.sectionTitle}>Continue Watching</h2>
+                <p className={styles.sectionEyebrow}>{t('myLibrary.resume.eyebrow')}</p>
+                <h2 className={styles.sectionTitle}>{t('myLibrary.resume.title')}</h2>
               </div>
               <p className={styles.sectionHint}>
-                {continueWatching.length} {continueWatching.length === 1 ? 'title' : 'titles'} waiting · Keep the momentum
+                {t('myLibrary.resume.hint', { count: continueWatching.length })}
               </p>
             </div>
             <div className={styles.carousel}>
@@ -370,8 +371,8 @@ const MyLibrary: React.FC = () => {
                   <div className={styles.progressMeta}>
                     <h3>{item.content.title}</h3>
                     <div className={styles.progressInfo}>
-                      <span>{getProgressPercentage(item)}% watched</span>
-                      <span>{formatDuration(item.totalDuration - item.watchedDuration)} left</span>
+                      <span>{t('myLibrary.resume.watched', { percent: getProgressPercentage(item) })}</span>
+                      <span>{t('myLibrary.resume.left', { duration: formatDuration(item.totalDuration - item.watchedDuration) })}</span>
                     </div>
                   </div>
                 </div>
@@ -382,9 +383,9 @@ const MyLibrary: React.FC = () => {
 
         <div className={styles.filterBar}>
           {[
-            { key: 'all', label: `All (${purchasedContent.length})`, icon: <FiLayers /> },
-            { key: 'Movie', label: `Movies (${movieCount})`, icon: <FiFilm /> },
-            { key: 'Series', label: `Series (${seriesCount})`, icon: <FiTv /> },
+            { key: 'all', label: t('myLibrary.filters.all', { count: purchasedContent.length }), icon: <FiLayers /> },
+            { key: 'Movie', label: t('myLibrary.filters.movies', { count: movieCount }), icon: <FiFilm /> },
+            { key: 'Series', label: t('myLibrary.filters.series', { count: seriesCount }), icon: <FiTv /> },
           ].map((option) => (
             <button
               key={option.key}
@@ -403,23 +404,27 @@ const MyLibrary: React.FC = () => {
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <div>
-              <p className={styles.sectionEyebrow}>Collection</p>
+              <p className={styles.sectionEyebrow}>{t('myLibrary.collection.eyebrow')}</p>
               <h2 className={styles.sectionTitle}>
-                {filter === 'all' ? 'All Titles' : `${filter === 'Movie' ? 'Movies' : 'Series'}`}
+                {filter === 'all'
+                  ? t('myLibrary.collection.allTitles')
+                  : filter === 'Movie'
+                    ? t('myLibrary.collection.movies')
+                    : t('myLibrary.collection.series')}
               </h2>
             </div>
             <p className={styles.sectionHint}>
-              {filteredContent.length} {filteredContent.length === 1 ? 'title' : 'titles'} curated just for you
+              {t('myLibrary.collection.hint', { count: filteredContent.length })}
             </p>
           </div>
 
           {filteredContent.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyEmoji}>📚</div>
-              <h3>Nothing here yet</h3>
-              <p>Browse our catalog and start building your premium collection.</p>
+              <h3>{t('myLibrary.empty.title')}</h3>
+              <p>{t('myLibrary.empty.message')}</p>
               <button type="button" className={styles.emptyAction} onClick={() => navigate('/browse')}>
-                Go to Browse
+                {t('myLibrary.empty.cta')}
               </button>
             </div>
           ) : (
@@ -432,8 +437,8 @@ const MyLibrary: React.FC = () => {
                   !(content.isPurchased || content.userAccess?.isPurchased);
 
                 const badgeLabel = showPartialBadge
-                  ? `${partialSeriesAccess.episodes.length} unlocked`
-                  : 'OWNED';
+                  ? t('myLibrary.badge.partialUnlocked', { count: partialSeriesAccess.episodes.length })
+                  : t('myLibrary.badge.owned');
 
                 return (
                 <div
@@ -449,7 +454,7 @@ const MyLibrary: React.FC = () => {
                       </span>
                       <div className={styles.overlayMeta}>
                         <FiStar color="#f5c518" />
-                        <span>{content.averageRating?.toFixed(1) || 'N/A'}</span>
+                        <span>{content.averageRating?.toFixed(1) || t('myLibrary.rating.na')}</span>
                         <span>•</span>
                         <span>{content.releaseYear}</span>
                       </div>
@@ -459,14 +464,14 @@ const MyLibrary: React.FC = () => {
                           className={styles.primaryAction}
                           onClick={(event) => handleQuickPlay(event, content)}
                         >
-                          <FiPlay /> Watch
+                          <FiPlay /> {t('myLibrary.actions.watch')}
                         </button>
                         <button
                           type="button"
                           className={styles.secondaryAction}
                           onClick={(event) => handleOpenDetails(event, content._id)}
                         >
-                          Details
+                          {t('myLibrary.actions.details')}
                         </button>
                       </div>
                     </div>
@@ -474,8 +479,14 @@ const MyLibrary: React.FC = () => {
                   <div className={styles.cardBody}>
                     <h3>{content.title}</h3>
                     <div className={styles.cardMeta}>
-                      <span>{content.contentType}</span>
-                      {content.duration && content.contentType === 'Movie' && <span>• {content.duration}m</span>}
+                      <span>
+                        {content.contentType === 'Movie'
+                          ? t('myLibrary.contentType.movie')
+                          : t('myLibrary.contentType.series')}
+                      </span>
+                      {content.duration && content.contentType === 'Movie' && (
+                        <span>• {t('myLibrary.duration.minutes', { minutes: content.duration })}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -489,11 +500,13 @@ const MyLibrary: React.FC = () => {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <p className={styles.sectionEyebrow}>Episodes</p>
-                <h2 className={styles.sectionTitle}>Unlocked Episodes</h2>
+                <p className={styles.sectionEyebrow}>{t('myLibrary.episodes.eyebrow')}</p>
+                <h2 className={styles.sectionTitle}>{t('myLibrary.episodes.title')}</h2>
               </div>
               <p className={styles.sectionHint}>
-                {episodeGroups.reduce((count, group) => count + group.episodes.length, 0)} total episodes unlocked
+                {t('myLibrary.episodes.totalUnlocked', {
+                  count: episodeGroups.reduce((count, group) => count + group.episodes.length, 0)
+                })}
               </p>
             </div>
 
@@ -502,19 +515,24 @@ const MyLibrary: React.FC = () => {
                 <div key={group.contentId} className={styles.partialCard}>
                   <div className={styles.partialHeader}>
                     <div className={styles.partialPoster}>
-                      <img src={group.content?.posterImageUrl} alt={group.content?.title || 'Series'} />
+                      <img
+                        src={group.content?.posterImageUrl}
+                        alt={group.content?.title || t('myLibrary.fallbacks.series')}
+                      />
                     </div>
                     <div>
-                      <p className={styles.sectionEyebrow}>Series</p>
-                      <h3 className={styles.partialTitle}>{group.content?.title || 'Series'}</h3>
-                      <p className={styles.partialHint}>{group.episodes.length} unlocked episode{group.episodes.length > 1 ? 's' : ''}</p>
+                      <p className={styles.sectionEyebrow}>{t('myLibrary.contentType.series')}</p>
+                      <h3 className={styles.partialTitle}>{group.content?.title || t('myLibrary.fallbacks.series')}</h3>
+                      <p className={styles.partialHint}>
+                        {t('myLibrary.episodes.unlockedCount', { count: group.episodes.length })}
+                      </p>
                     </div>
                     <button
                       type="button"
                       className={styles.partialDetails}
                       onClick={() => navigate(`/content/${group.contentId}`)}
                     >
-                      View Series
+                      {t('myLibrary.episodes.viewSeries')}
                     </button>
                   </div>
 
@@ -538,7 +556,7 @@ const MyLibrary: React.FC = () => {
                           }
                         >
                           <FiPlay size={16} />
-                          Watch
+                          {t('myLibrary.actions.watch')}
                         </button>
                       </div>
                     ))}

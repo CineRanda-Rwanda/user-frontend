@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, useRef } from 'react'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { notificationsAPI } from '@/api/notifications'
 import { NotificationsEnvelope, NotificationsQuery, UserNotification } from '@/types/notification'
 import { DEFAULT_LIMIT } from '@/utils/constants'
 import { isNotificationUnread } from '@/utils/notifications'
+import { normalizeSupportedLanguage, translateTextCached } from '@/utils/translate'
 import { useAuth } from './AuthContext'
 
 interface NotificationsContextValue {
@@ -28,7 +30,9 @@ const calculateUnreadCount = (list: UserNotification[]) =>
   list.filter((notification) => !notification.isArchived).filter((notification) => isNotificationUnread(notification)).length
 
 export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
+  const targetLanguage = normalizeSupportedLanguage(i18n.resolvedLanguage || i18n.language)
   const [notifications, setNotifications] = useState<UserNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -80,21 +84,51 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         archivedOnly: params?.archivedOnly
       })
       const nextNotifications = Array.isArray(payload.notifications) ? payload.notifications : []
+
+      const localizedNotifications =
+        targetLanguage === 'fr'
+          ? await Promise.all(
+              nextNotifications.map(async (notification) => {
+                const title =
+                  (await translateTextCached(notification.title, 'fr', { source: 'en' }).catch(() => notification.title)) ||
+                  notification.title
+                const message =
+                  (await translateTextCached(notification.message, 'fr', { source: 'en' }).catch(() => notification.message)) ||
+                  notification.message
+                const type = notification.type
+                  ? (await translateTextCached(notification.type, 'fr', { source: 'en' }).catch(() => notification.type)) ||
+                    notification.type
+                  : notification.type
+                const actionLabel = notification.actionLabel
+                  ? (await translateTextCached(notification.actionLabel, 'fr', { source: 'en' }).catch(() => notification.actionLabel)) ||
+                    notification.actionLabel
+                  : notification.actionLabel
+
+                return {
+                  ...notification,
+                  title,
+                  message,
+                  type,
+                  actionLabel,
+                }
+              })
+            )
+          : nextNotifications
       const resolvedUnread = calculateUnreadCount(nextNotifications)
 
-      setNotifications(nextNotifications)
+      setNotifications(localizedNotifications)
       setUnreadCount(resolvedUnread)
       setError(null)
     } catch (err) {
       console.error('Failed to load notifications:', err)
-      setError('Unable to load notifications right now.')
+      setError(t('notifications.errors.loadFailed'))
     } finally {
       inFlightRef.current = false
       if (shouldToggleLoading) {
         setLoading(false)
       }
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, t, targetLanguage])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -134,10 +168,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       })
     } catch (err) {
       console.error('Failed to mark notification as read:', err)
-      toast.error('Failed to update notification')
+      toast.error(t('notifications.errors.updateNotification'))
       throw err
     }
-  }, [])
+  }, [t])
 
   const markAllAsRead = useCallback(async () => {
     if (!unreadCount) {
@@ -163,10 +197,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       })
     } catch (err) {
       console.error('Failed to mark notifications as read:', err)
-      toast.error('Failed to update notifications')
+      toast.error(t('notifications.errors.updateNotifications'))
       throw err
     }
-  }, [unreadCount])
+  }, [t, unreadCount])
 
   const markAsUnread = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -197,10 +231,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       })
     } catch (err) {
       console.error('Failed to mark notification as unread:', err)
-      toast.error('Failed to update notification')
+      toast.error(t('notifications.errors.updateNotification'))
       throw err
     }
-  }, [])
+  }, [t])
 
   const archiveNotification = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -226,10 +260,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       }
     } catch (err) {
       console.error('Failed to archive notification:', err)
-      toast.error('Failed to move notification to archive')
+      toast.error(t('notifications.errors.archiveFailed'))
       throw err
     }
-  }, [])
+  }, [t])
 
   const restoreNotification = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -251,10 +285,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       }
     } catch (err) {
       console.error('Failed to restore notification:', err)
-      toast.error('Failed to restore notification')
+      toast.error(t('notifications.errors.restoreFailed'))
       throw err
     }
-  }, [])
+  }, [t])
 
   const deleteNotification = useCallback(async (notificationId: string) => {
     if (!notificationId) return
@@ -282,10 +316,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
       })
     } catch (err) {
       console.error('Failed to delete notification:', err)
-      toast.error('Failed to delete notification')
+      toast.error(t('notifications.errors.deleteFailed'))
       throw err
     }
-  }, [])
+  }, [t])
 
   const markUnreadAsReadOnExit = useCallback(async () => {
     const manualSnapshot = manualUnreadIds
@@ -323,12 +357,12 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     const restoreFailed = restoreResults.some((r) => r.status === 'rejected')
 
     if (bulkFailed || restoreFailed) {
-      toast.error('Some notifications could not be synced.')
+      toast.error(t('notifications.errors.syncFailed'))
     }
 
     // One-time exemption: next exit treats these normally.
     if (manualSnapshot.size) setManualUnreadIds(new Set())
-  }, [manualUnreadIds, notifications])
+  }, [manualUnreadIds, notifications, t])
 
   const refresh = useCallback(
     async (params?: NotificationsQuery) => {

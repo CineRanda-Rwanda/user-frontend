@@ -8,8 +8,8 @@
   "nav": {
     "home": "Ahabanza",
     "movies": "Filimi",
-    "series": "Seriya",
-    "myLibrary": "Isomero ryanjye",
+    "series": "Serie",
+    "myLibrary": "Ububiko",
     "help": "Ubufasha",
     "notifications": "Ubutumwa",
     "toggleNavigation": "Hindura menu",
@@ -31,7 +31,229 @@
     "close": "Funga",
     "goToBrowse": "Jya muri Browse",
     "loading": "Birimo gupakira...",
+    "updating": "Birimo kuvugururwa...",
+    "previous": "Ibanjirije",
+    "next": "Ikurikira",
+    "cancel": "Hagarika",
     "comingSoon": "Biraje vuba!"
+  },
+  "browse": {
+    "loading": "Birimo gupakira ibikubiyemo...",
+    "errors": {
+      "loadFailed": "Kuzana ibikubiyemo byanze"
+    },
+    "smallCatalog": {
+      "exploreSeries": "Reba seriya",
+      "exploreMovies": "Reba filimi",
+      "exploreTitles": "Reba ibikubiyemo"
+    },
+    "rows": {
+      "trendingNow": "Bikunzwe ubu",
+      "popularMovies": "Filimi z'abakunzwe",
+      "topSeries": "Seriya z'ibanze"
+    },
+    "empty": {
+      "title": "Catalog irimo gutegurwa",
+      "message": "Turimo gutegura ibishya. Garuka vuba cyangwa urefresh urebe ibigezweho.",
+      "reload": "Ongera uzane ibikubiyemo"
+    }
+  },
+  "movies": {
+    "loading": "Birimo gupakira filimi...",
+    "empty": "Nta filimi zabonetse",
+    "errors": {
+      "loadFailed": "Kuzana filimi byanze"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Genres zose",
+      "category": "Category",
+      "allCategories": "Categories zose",
+      "reset": "Siba filters"
+    },
+    "pagination": {
+      "pageOf": "Urupapuro {{current}} muri {{total}}"
+    }
+  },
+  "series": {
+    "loading": "Birimo gupakira seriya...",
+    "empty": "Nta seriya zabonetse",
+    "errors": {
+      "loadFailed": "Kuzana seriya byanze"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Genres zose",
+      "category": "Category",
+      "allCategories": "Categories zose",
+      "reset": "Siba filters"
+    },
+    "pagination": {
+      "pageOf": "Urupapuro {{current}} muri {{total}}"
+    }
+  },
+  "search": {
+    "title": "Shakisha",
+    "hint": {
+      "showingResultsFor": "Ibisubizo bya \"{{query}}\"",
+      "useNavSearch": "Koresha search iri kuri navigation kugirango ubone ibishya."
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "Genres zose",
+      "category": "Category",
+      "allCategories": "Categories zose",
+      "reset": "Siba filters"
+    },
+    "resultsCount": "Habonetse igisubizo {{count}}",
+    "resultsCount_plural": "Habonetse ibisubizo {{count}}",
+    "actions": {
+      "resetSearch": "Siba search",
+      "tryAgain": "Ongera ugerageze",
+      "loadMore": "Load more"
+    },
+    "errors": {
+      "searchFailed": "Gushakisha byanze"
+    },
+    "empty": {
+      "noResultsTitle": "Nta bisubizo bibonetse",
+      "noResultsMessage": "Gerageza guhindura ibyo washakishije cyangwa filters.",
+      "errorTitle": "Habaye ikibazo",
+      "startTitle": "Tangira gushakisha",
+      "startMessage": "Andika icyo ushaka cyangwa ukoreshe filters ushakishe filimi na seriya."
+    }
+  },
+  "watch": {
+    "backToBrowse": "Subira muri Browse",
+    "errors": {
+      "loadFailed": "Kuzana ibikubiyemo byanze. Ongera ugerageze."
+    },
+    "payment": {
+      "confirmedStream": "Kwishyura byemejwe! Komeza urebe.",
+      "stillWaiting": "Turacyategereje kwemeza kwishyura. Urefresh nyuma yo kwishyura."
+    },
+    "purchase": {
+      "redirectingToCheckout": "Turakujyana kuri checkout. Rangiza kwishyura kugirango ufungure {{scope}}.",
+      "unlockFromDetails": "Fungura episodes uhereye kuri details page kugirango wirinde purchase errors.",
+      "thisTitle": "iyi title",
+      "failed": "Kugura byanze. Ongera ugerageze."
+    },
+    "stream": {
+      "fetching": "Turimo gushaka stream yizewe...",
+      "locked": "Iyi episode iracyafunze. Yifungure ukomeze kureba.",
+      "unavailable": "Stream ntibashoboye kuyipakira ubu. Ongera ugerageze nyuma."
+    },
+    "overlay": {
+      "unlockTitle": "Fungura urebe iyi title",
+      "purchase": "Gura",
+      "toWatchEpisode": "kureba S{{season}}E{{episode}}",
+      "toStartStreaming": "gutangira kureba muri HD.",
+      "openingCheckout": "Turimo gufungura checkout...",
+      "confirming": "Turimo kwemeza...",
+      "payAndUnlock": "Ishyura ufungure",
+      "viewDetails": "Reba details",
+      "checkoutNote": "Kwishyura biba binyuze kuri Flutterwave. Gumana uru rupapuro rufunguye mu gihe turimo kwemeza kwishyura.",
+      "waitingForConfirmation": "Turimo gutegereza kwemeza{{refSuffix}}."
+    },
+    "autoNext": {
+      "nextIn": "Episode ikurikira mu",
+      "playNow": "Reba nonaha"
+    },
+    "meta": {
+      "releaseYear": "Umwaka yasohotse",
+      "rating": "Rating",
+      "duration": "Igihe",
+      "language": "Ururimi",
+      "languageFallback": "Ikinyarwanda"
+    },
+    "episodes": {
+      "title": "Episodes",
+      "hideList": "Hisha list",
+      "showList": "Erekana list",
+      "season": "Season {{number}}",
+      "minutes": "{{minutes}} min",
+      "locked": "Birafunze",
+      "nowPlaying": "Uri kureba"
+    }
+  },
+  "wallet": {
+    "errors": {
+      "loadFailed": "Kuzana wallet byanze. Ongera ugerageze.",
+      "minTopUp": "Andika byibura FRW 1,000 kugirango utop-up.",
+      "topUpFailed": "Top-up byanze. Ongera ugerageze."
+    },
+    "toasts": {
+      "redirectingFlutterwave": "Turakujyana kuri Flutterwave..."
+    },
+    "balance": {
+      "available": "Amafaranga ahari",
+      "bonusLabel": "Bonus {{amount}}"
+    },
+    "stats": {
+      "bonusVault": "Bonus Vault",
+      "bonusHint": "Ikoreshwa automatik ku rentals zemewe.",
+      "totalAssets": "Total",
+      "totalHint": "Cash + promo credits."
+    },
+    "topUp": {
+      "title": "Top-up byihuse",
+      "subtitle": "Shyira amafaranga muri wallet ukoresheje Flutterwave mu masegonda.",
+      "placeholder": "Andika amafaranga",
+      "connecting": "Turimo kwihuza na Flutterwave…",
+      "cta": "Top Up Wallet"
+    },
+    "voucher": {
+      "cta": "Redeem Voucher"
+    },
+    "transactions": {
+      "title": "Transactions ziheruka",
+      "subtitle": "Urutonde rw'ibyo waguze/warentse na bonuses.",
+      "empty": "Nta transactions zirabaho. Shyiramo amafaranga muri wallet utangire.",
+      "fallbackDescription": "Wallet activity"
+    }
+  },
+  "sort": {
+    "label": "Tondeka",
+    "options": {
+      "newestFirst": "Ibishya mbere",
+      "oldestFirst": "Ibya kera mbere",
+      "titleAsc": "Umutwe: A-Z",
+      "titleDesc": "Umutwe: Z-A",
+      "priceLow": "Igiciro: gito→kinini",
+      "priceHigh": "Igiciro: kinini→gito"
+    }
+  },
+  "filters": {
+    "all": "Byose",
+    "allWithLabel": "{{label}} zose"
+  },
+  "filterPanel": {
+    "toggle": {
+      "label": "Hindura",
+      "title": "Shyungura ibisubizo"
+    },
+    "header": {
+      "title": "Filters"
+    },
+    "actions": {
+      "reset": "Siba"
+    },
+    "summary": {
+      "activeFilters": "Filter {{count}} iri gukora",
+      "activeFilters_plural": "Filters {{count}} ziri gukora",
+      "noneTitle": "Nta filters zakoreshwe",
+      "noneHint": "Hitamo genre cyangwa category uhindure ibyo ubona."
+    },
+    "sections": {
+      "genres": {
+        "eyebrow": "Genres",
+        "title": "Hitamo mood"
+      },
+      "categories": {
+        "eyebrow": "Categories",
+        "title": "Tondeka ukoresheje collection"
+      }
+    }
   },
   "emptyState": {
     "search": {
@@ -54,6 +276,10 @@
     "verificationFailed": "Kwemeza byanze. Ongera ugerageze."
   },
   "auth": {
+    "toasts": {
+      "loggedOut": "Wasohotse neza",
+      "welcomeBack": "Murakaza neza kongera kugaruka!"
+    },
     "login": {
       "title": "Murakaza neza",
       "subtitle": "Injira ukomeze",
@@ -64,11 +290,116 @@
       "emailPlaceholder": "Imeyili",
       "passwordPlaceholder": "Ijambo banga",
       "submit": "Injira",
+      "submitPhone": "Injira ukoresheje telefone",
+      "submitEmail": "Injira ukoresheje email",
+      "phoneHelper": "Koresha numero ihujwe na konti ya Randa Plus",
+      "pinHelper": "PIN irakenewe kugirango winjire ukoresheje telefone",
+      "passwordHelperMin6": "Byibura inyuguti 6",
       "google": "Komeza ukoresheje Google",
       "noAccount": "Nta konti ufite?",
       "createAccount": "Fungura konti",
       "forgotPin": "Wibagiwe PIN?",
       "forgotPassword": "Wibagiwe ijambo banga?"
+    },
+    "forgotPin": {
+      "title": "Siba PIN ya Randa",
+      "subtitleRequest": "Emeza telefone yawe kugirango ubone kode.",
+      "subtitleReset": "Andika kode na PIN nshya.",
+      "closeAria": "Funga agasanduku ko gusubizamo PIN",
+      "infoRequest": "Andika numero ihujwe na konti yawe kugirango wohereze kode yo gusubizamo PIN kuri SMS.",
+      "infoReset": "Andika kode wakiriye uhitemo PIN nshya y'imibare 4.",
+      "form": {
+        "phonePlaceholder": "Numero ya telefone",
+        "phoneHelper": "Koresha numero wiyandikishijeho.",
+        "codePlaceholder": "Kode yo kwemeza",
+        "codeHelper": "Kode y'imibare 6 yoherejwe kuri telefone.",
+        "newPinPlaceholder": "PIN nshya",
+        "newPinHelper": "Byibura imibare 4",
+        "confirmPinPlaceholder": "Emeza PIN"
+      },
+      "actions": {
+        "sendCode": "Ohereza kode",
+        "savePin": "Bika PIN nshya",
+        "cancel": "Hagarika"
+      },
+      "errors": {
+        "phoneRequired": "Numero ya telefone irakenewe kugirango wohereze kode.",
+        "codeRequired": "Andika kode yo kwemeza woherejwe.",
+        "newPinMin": "PIN nshya igomba kuba byibura imibare 4.",
+        "pinMismatch": "Kwemeza PIN ntibihuye.",
+        "sendFailed": "Kohereza kode ntibishoboye ubu.",
+        "resetFailed": "Gusubizamo PIN ntibishoboye ubu."
+      },
+      "toasts": {
+        "codeSent": "Kode yoherejwe kuri SMS",
+        "resetSuccess": "PIN yasubijweho. Injira ukoresheje PIN nshya."
+      }
+    },
+    "forgotPassword": {
+      "title": "Siba ijambo banga",
+      "subtitleRequest": "Turakohereza link yo gusubizamo.",
+      "subtitleReset": "Andika token iri muri email ushyireho ijambo banga rishya.",
+      "closeAria": "Funga agasanduku ko gusubizamo ijambo banga",
+      "form": {
+        "emailPlaceholder": "Imeyili",
+        "tokenPlaceholder": "Token yo gusubizamo",
+        "passwordPlaceholder": "Ijambo banga rishya",
+        "passwordHelper": "Byibura inyuguti 8",
+        "confirmPasswordPlaceholder": "Emeza ijambo banga"
+      },
+      "actions": {
+        "sendLink": "Ohereza link",
+        "updatePassword": "Hindura ijambo banga",
+        "cancel": "Hagarika"
+      },
+      "errors": {
+        "tokenRequired": "Andika token yo gusubizamo iri muri email.",
+        "sendFailed": "Kohereza link ntibishoboye ubu.",
+        "resetFailed": "Gusubizamo ijambo banga ntibishoboye ubu."
+      },
+      "toasts": {
+        "linkSent": "Link yo gusubizamo ijambo banga yoherejwe kuri email",
+        "updatedSuccess": "Ijambo banga rihinduwe. Ubu ushobora kwinjira."
+      }
+    },
+    "resetPassword": {
+      "title": "Siba ijambo banga",
+      "subtitle": "Shyiramo token yoherejwe kuri email, ushyireho ijambo banga rishya, hanyuma wongere winjire.",
+      "toastSuccess": "Ijambo banga ryahinduwe!",
+      "form": {
+        "passwordPlaceholder": "Ijambo banga rishya",
+        "confirmPasswordPlaceholder": "Emeza ijambo banga"
+      },
+      "actions": {
+        "update": "Hindura ijambo banga"
+      },
+      "helper": {
+        "notRequested": "Ntabwo ari wowe wasabye iri hinduka?",
+        "returnToSignIn": "Subira kwinjira"
+      },
+      "completed": {
+        "title": "Ijambo banga ryawe ryahinduwe.",
+        "message": "Injira ukoresheje ijambo banga rishya ukomeze kureba.",
+        "goToLogin": "Jya kwinjira"
+      },
+      "errors": {
+        "tokenMissing": "Link yo gusubizamo irabuze cyangwa yararangiye. Saba email nshya yo gusubizamo.",
+        "resetFailed": "Gusubizamo ijambo banga ntibishoboye ubu."
+      }
+    },
+    "oauth": {
+      "finishing": "Turimo kurangiza kwinjira na Google...",
+      "failedTitle": "Kwinjira na Google byanze",
+      "backToLogin": "Subira kwinjira",
+      "toasts": {
+        "signedIn": "Winjiye ukoresheje Google!"
+      },
+      "errors": {
+        "googleFailed": "Kwinjira na Google byanze.",
+        "exchangeMissingToken": "Google exchange byakunze ariko token ntiyagarutse.",
+        "missingSessionToken": "Token ya session ibuze muri Google response.",
+        "couldNotComplete": "Ntibashoboye kurangiza kwinjira na Google."
+      }
     },
     "register": {
       "title": "Fungura konti",
@@ -102,7 +433,15 @@
       "emailReenterPrompt": "Ongera wandike email n'ijambo banga ukomeze.",
       "verify": "Emeza",
       "haveAccount": "Usanzwe ufite konti?",
-      "signIn": "Injira"
+      "signIn": "Injira",
+      "toasts": {
+        "smsSent": "Twakohereje kode yo kwemeza kuri SMS.",
+        "accountReady": "Konti iriteguye! Murakaza neza kuri Randa Plus.",
+        "checkEmail": "Reba email yawe kugirango wemeze konti yawe.",
+        "welcomeBonusAdded": "Kwiyandikisha byarangiye! Bonus ya {{amount}} yongewe ku ikofi yawe.",
+        "completed": "Kwiyandikisha byagenze neza!",
+        "emailVerified": "Email yemejwe! Murakaza neza kuri Randa Plus."
+      }
     },
     "validation": {
       "usernameMin": "Izina ukoresha rigomba kuba byibura inyuguti 3",
@@ -114,6 +453,258 @@
       "passwordMin6": "Ijambo banga rigomba kuba byibura inyuguti 6",
       "passwordMismatch": "Amagambo banga ntahura",
       "verificationCodeRequired": "Kode yo kwemeza irakenewe"
+    }
+  },
+  "profilePage": {
+    "loading": "Birimo gupakira umwirondoro...",
+    "closeAria": "Funga umwirondoro",
+    "plan": {
+      "global": "Gahunda mpuzamahanga",
+      "rwanda": "Gahunda y'u Rwanda"
+    },
+    "sections": {
+      "profileInfo": "Amakuru y'umwirondoro",
+      "changePin": {
+        "title": "Hindura PIN",
+        "subtitle": "Vugurura PIN yawe y'imibare 4."
+      },
+      "changePassword": {
+        "title": "Hindura ijambo ry'ibanga",
+        "subtitle": "Shyiraho ijambo ry'ibanga rishya kuri konti yawe."
+      }
+    },
+    "info": {
+      "username": "Izina ry'ukoresha",
+      "email": "Email",
+      "phone": "Telefoni",
+      "plan": "Gahunda",
+      "joined": "Yiyandikishije"
+    },
+    "fallbacks": {
+      "member": "Umukoresha",
+      "username": "izina ry'ukoresha",
+      "emptyValue": "—",
+      "notLinked": "Ntabwo ihujwe",
+      "notAdded": "Ntabwo yongewemo",
+      "notSet": "Ntabwo birashyirwaho"
+    },
+    "pin": {
+      "fields": {
+        "current": "PIN iriho",
+        "new": "PIN nshya",
+        "confirm": "Emeza PIN"
+      },
+      "actions": {
+        "save": "Bika PIN"
+      },
+      "validation": {
+        "currentRequired": "Andika PIN yawe iriho.",
+        "newMin": "PIN nshya igomba kuba nibura imibare 4.",
+        "mismatch": "Kwemeza PIN ntibihura."
+      },
+      "errors": {
+        "unavailable": "Kuhindura PIN ntibiboneka kuri konti yawe.",
+        "updateFailed": "Kuvugurura PIN byanze."
+      },
+      "toasts": {
+        "updated": "PIN yavuguruwe neza."
+      }
+    },
+    "password": {
+      "fields": {
+        "current": "Ijambo ry'ibanga ririho",
+        "new": "Ijambo ry'ibanga rishya",
+        "confirm": "Emeza ijambo ry'ibanga"
+      },
+      "actions": {
+        "save": "Bika ijambo ry'ibanga"
+      },
+      "validation": {
+        "currentRequired": "Andika ijambo ry'ibanga ryawe ririho.",
+        "newMin": "Ijambo ry'ibanga rishya rigomba kuba nibura inyuguti 8.",
+        "mismatch": "Kwemeza ijambo ry'ibanga ntibihura."
+      },
+      "errors": {
+        "managedByProvider": "Ijambo ry'ibanga rigenzurwa n'uburyo winjiramo.",
+        "updateFailed": "Kuvugurura ijambo ry'ibanga byanze."
+      },
+      "toasts": {
+        "updated": "Ijambo ry'ibanga ryavuguruwe neza."
+      }
+    }
+  },
+  "notifications": {
+    "loading": "Birimo gupakira ubutumwa...",
+    "page": {
+      "kicker": "Inbox",
+      "title": "Ubutumwa",
+      "subtext": {
+        "unreadCount": "Ufite ubutumwa {{count}} butarasomwa.",
+        "caughtUp": "Mwasomye byose."
+      },
+      "empty": {
+        "all": {
+          "title": "Nta butumwa buraboneka",
+          "message": "Tuzakumenyesha igihe habaye ikintu."
+        },
+        "unread": {
+          "title": "Nta butumwa butarasomwa",
+          "message": "Mwasomye byose."
+        },
+        "archived": {
+          "title": "Imyanda irimo ubusa",
+          "message": "Ubutumwa bwoherejwe mu myanda buzagaragara hano."
+        }
+      }
+    },
+    "overlay": {
+      "label": "Ubutumwa bugezweho",
+      "tooltips": {
+        "refresh": "Ongera uvugurure ubutumwa",
+        "close": "Funga panel"
+      },
+      "actions": {
+        "markAll": "Shyira byose"
+      },
+      "empty": {
+        "unread": "Nta butumwa butarasomwa",
+        "default": "Nta gishya kugeza ubu."
+      }
+    },
+    "filters": {
+      "all": "Byose",
+      "unread": "Butarasomwa",
+      "trash": "Imyanda"
+    },
+    "labels": {
+      "system": "Sisitemu",
+      "amount": "Amafaranga"
+    },
+    "actions": {
+      "refresh": "Ongera uzane",
+      "markAllRead": "Shyira byose nk'ibisomwe",
+      "markSelectedUnread": "Shyira ibyatoranyijwe nk'bitarasomwe",
+      "clearSelection": "Kuraho ihitamo",
+      "checkAgain": "Ongera ugenzure",
+      "viewDetails": "Reba ibisobanuro",
+      "restore": "Subiza",
+      "deletePermanently": "Siba burundu",
+      "moveToTrash": "Ohereza mu myanda",
+      "markAsRead": "Shyira nk'ibisomwe",
+      "markAsUnread": "Shyira nk'bitarasomwe"
+    },
+    "errors": {
+      "loadFailed": "Kuzana ubutumwa byanze.",
+      "updateNotification": "Kuvugurura ubutumwa byanze.",
+      "updateNotifications": "Kuvugurura ubutumwa byanze.",
+      "archiveFailed": "Kohereza ubutumwa mu myanda byanze.",
+      "restoreFailed": "Gusubiza ubutumwa byanze.",
+      "deleteFailed": "Gusiba ubutumwa byanze.",
+      "syncFailed": "Ntibashoboye guhuza ubutumwa. Ongera urefresh."
+    }
+  },
+  "contentDetails": {
+    "auth": {
+      "signInToContinue": "Injira kugirango ukomeze."
+    },
+    "ui": {
+      "pricing": {
+        "free": "Ku buntu",
+        "paid": "Bishyurwa"
+      },
+      "states": {
+        "unlocking": "Birimo gufungurwa...",
+        "confirming": "Birimo kwemezwa...",
+        "seasonUnlocked": "Season yafunguwe"
+      },
+      "actions": {
+        "watchEpisode": "Reba episode",
+        "watchNow": "Reba nonaha",
+        "trailer": "Trailer",
+        "unlockEpisode": "Fungura episode",
+        "unlockSeason": "Fungura season",
+        "unlockEpisodeWithPrice": "Fungura episode • {{price}}",
+        "unlockWithPrice": "Fungura • {{price}}"
+      },
+      "hints": {
+        "signInToUnlock": "Injira kugirango ufungure iyi title.",
+        "waitingForConfirmation": "Turacyategereje kwemeza kwishyura...",
+        "waitingForConfirmationWithRef": "Turacyategereje kwemeza kwishyura{{refSuffix}}.",
+        "completeCheckoutEpisode": "Soza kwishyura kugirango ufungure iyi episode ako kanya.",
+        "completeCheckoutTitle": "Soza kwishyura kurinzwe kugirango ufungure ako kanya.",
+        "unlockEpisodeToStart": "Fungura episode utangire kureba.",
+        "unlockOnceFullHd": "Fungura rimwe urebe mu HD yuzuye iteka.",
+        "checkoutNote": "Kwishyura kurinzwe binyuze muri Flutterwave. Ntibisaba amafaranga muri wallet."
+      },
+      "badges": {
+        "series": "Seriya"
+      },
+      "seasons": {
+        "quickSeason": "Season yihuse",
+        "seasonChip": "Season {{number}}",
+        "seasonOption": "Season {{number}}",
+        "seasonOptionWithTitle": "Season {{number}} · {{title}}",
+        "episodesCount": "{{count}} Episodes"
+      },
+      "episode": {
+        "short": "EP {{number}}",
+        "label": "Episode {{number}}",
+        "minutesShort": "{{minutes}}m",
+        "nowPlaying": "Birimo gukina"
+      },
+      "stats": {
+        "creator": "Umuhanzi",
+        "cast": "Abakinnyi",
+        "language": "Ururimi",
+        "rating": "Amanota",
+        "episodes": "Episodes"
+      },
+      "upNext": {
+        "label": "Ibikurikira",
+        "fallbackDescription": "Injira mu gice gikurikira cy'iyi seriya yihariye.",
+        "durationLabel": "Igihe",
+        "minutes": "{{minutes}} min",
+        "continue": "Komeza episode"
+      },
+      "sections": {
+        "originalsBadge": "Randa Plus Originals",
+        "seasonsEpisodesTitle": "Seasons & Episodes",
+        "seasonsEpisodesSubtitle": "{{seasons}} Seasons • {{episodes}} Episodes",
+        "moreToLoveBadge": "Ibindi wakunda",
+        "recommendedTitle": "Byaguhariwe",
+        "recommendedSubtitle": "Byatoranyijwe muri Randa Plus"
+      }
+    },
+    "play": {
+      "episodeLocked": "Iyi episode irafunze. Yifungure kugirango uyirebe."
+    },
+    "payment": {
+      "confirmedShow": "Kwishyura byemejwe! Komeza urebe.",
+      "stillWaiting": "Turacyategereje kwemeza kwishyura. Ongera ugenzure umaze kwishyura.",
+      "seasonUnlocked": "Season yafunguwe! Komeza urebe.",
+      "episodeUnlocked": "Episode yafunguwe! Komeza urebe."
+    },
+    "purchase": {
+      "errors": {
+        "paymentLinkUnavailable": "Payment link ntiboneka. Ongera ugerageze."
+      },
+      "redirecting": {
+        "withAmountDiscount": "Turakujyana kuri checkout ({{amount}} hamwe na discount) kugirango ufungure {{scope}}...",
+        "withAmount": "Turakujyana kuri checkout ({{amount}}) kugirango ufungure {{scope}}...",
+        "default": "Turakujyana kuri checkout kugirango ufungure {{scope}}..."
+      },
+      "selectSeasonOrEpisode": "Hitamo season cyangwa episode ushaka gufungura.",
+      "selectEpisodeToUnlock": "Hitamo episode ushaka gufungura.",
+      "thisTitle": "iyi title"
+    },
+    "errors": {
+      "missingContentId": "Content id ibuze.",
+      "missingSeasonForEpisode": "Hitamo season mbere yo gufungura episode."
+    },
+    "trailer": {
+      "fallbackTitle": "Trailer",
+      "notAvailable": "Trailer ntiboneka.",
+      "loadFailed": "Kuzana trailer byanze."
     }
   },
   "payment": {
@@ -162,6 +753,419 @@
     "trailer": {
       "notAvailableForTitle": "Trailer ntiyabonetse kuri iyi title",
       "notAvailable": "Trailer ntiyabonetse"
+    }
+  },
+  "myLibrary": {
+    "episodeFallback": "Igice",
+    "loading": "Turimo gupakira isomero ryawe...",
+    "errors": {
+      "loadFailed": "Ntibishoboye gupakira isomero ryawe"
+    },
+    "hero": {
+      "eyebrow": "Isomero ryanjye",
+      "title": "Ibyanjye",
+      "subtitle": "Filimi, seriya n'ibice wafunguye byose hamwe."
+    },
+    "summary": {
+      "librarySize": "Ingano y'isomero",
+      "ownedTitles": "title {{count}} wafunguye",
+      "ownedTitles_plural": "titles {{count}} wafunguye",
+      "breakdown": "{{movies}} filimi • {{series}} seriya",
+      "inProgress": "Uri gukomeza",
+      "waiting": "title {{count}} watangiye",
+      "waiting_plural": "titles {{count}} watangiye",
+      "avgCompletion": "Impuzandengo y'irangiye: {{percent}}%",
+      "hoursWatched": "Amasaha warebye",
+      "hoursShort": "h",
+      "hoursHint": "Bishingiye ku mateka yo kureba"
+    },
+    "resume": {
+      "eyebrow": "Komeza",
+      "title": "Komeza kureba",
+      "hint": "Komereza aho wahagarariye kuri title {{count}}",
+      "hint_plural": "Komereza aho wahagarariye kuri titles {{count}}",
+      "watched": "{{percent}}% byarebwe",
+      "left": "{{duration}} hasigaye"
+    },
+    "filters": {
+      "all": "Byose ({{count}})",
+      "movies": "Filimi ({{count}})",
+      "series": "Seriya ({{count}})"
+    },
+    "collection": {
+      "eyebrow": "Isomero ryawe",
+      "allTitles": "Titles zose",
+      "movies": "Filimi",
+      "series": "Seriya",
+      "hint": "Yerekana title {{count}}",
+      "hint_plural": "Yerekana titles {{count}}"
+    },
+    "empty": {
+      "title": "Nta kintu kirimo",
+      "message": "Fungura filimi cyangwa seriya kugira ngo bigaragarire mu isomero.",
+      "cta": "Jya kuri Browse"
+    },
+    "badge": {
+      "owned": "WAFUNGUYE",
+      "partialUnlocked": "WAFUNGUYE IGICE {{count}}",
+      "partialUnlocked_plural": "WAFUNGUYE IBICE {{count}}"
+    },
+    "rating": {
+      "na": "N/A"
+    },
+    "actions": {
+      "watch": "Reba",
+      "details": "Ibisobanuro"
+    },
+    "contentType": {
+      "movie": "Filimi",
+      "series": "Seriya"
+    },
+    "duration": {
+      "minutes": "{{minutes}} min"
+    },
+    "episodes": {
+      "eyebrow": "Ibice wafunguye",
+      "title": "Ibice byawe",
+      "totalUnlocked": "igice {{count}} cyafunguwe",
+      "totalUnlocked_plural": "ibice {{count}} byafunguwe",
+      "unlockedCount": "igice {{count}} cyafunguwe",
+      "unlockedCount_plural": "ibice {{count}} byafunguwe",
+      "viewSeries": "Reba seriya"
+    },
+    "fallbacks": {
+      "series": "Seriya"
+    }
+  },
+  "support": {
+    "common": {
+      "back": "← Subira inyuma",
+      "home": "Ahabanza",
+      "helpCenter": "Ubufasha",
+      "faq": "Ibibazo",
+      "contact": "Twandikire",
+      "terms": "Amategeko",
+      "onThisPage": "Kuri uru rupapuro"
+    },
+    "helpCenter": {
+      "hero": {
+        "label": "Ubufasha",
+        "title": "Ihuriro ry'ubufasha",
+        "subtitle": "Ibisubizo byihuse n'ubuyobozi ku bibazo bikunze kubazwa.",
+        "actions": {
+          "browseFaq": "Reba FAQ",
+          "contactSupport": "Twandikire"
+        }
+      },
+      "nav": {
+        "gettingStarted": "Gutangira",
+        "accountSecurity": "Konti n'umutekano",
+        "billing": "Kwishyura",
+        "playback": "Kureba",
+        "devices": "Ibikoresho"
+      },
+      "sections": {
+        "gettingStarted": {
+          "eyebrow": "Murakaza neza",
+          "title": "Gutangira",
+          "subtitle": "Menya uko ushakisha, ufungura kandi ukareba.",
+          "steps": {
+            "1": "Shakisha filimi na seriya muri Browse, Movies cyangwa Series.",
+            "2": "Fungura title urebe ibisobanuro, trailer n'uburyo bwo kwishyura.",
+            "3": "Fungura filimi, season cyangwa episode ukoresheje uburyo bwo kwishyura.",
+            "4": "Tangira kureba ako kanya mu Isomero ryawe cyangwa kuri title."
+          },
+          "tutorialTitle": "Inyigisho",
+          "tutorialSubtitle": "Reba videwo ngufi igusobanurira uko bikora.",
+          "tutorialMissing": "Videwo y'inyigisho ntirashyirwaho. <0>Ongera ugaruke vuba.</0>"
+        },
+        "accountSecurity": {
+          "eyebrow": "Rinda konti yawe",
+          "title": "Konti n'umutekano",
+          "subtitle": "Inama zo kurinda konti no kugarura uko winjira.",
+          "cards": {
+            "passwords": {
+              "title": "Koresha ijambo banga rikomeye",
+              "body": "Hitamo ijambo banga utasangiye ahandi kandi uribike ibanga."
+            },
+            "google": {
+              "title": "Kwinjira na Google",
+              "body": "Niba waranditse ukoresheje Google, injira ukoresheje iyo konti ya Google."
+            },
+            "cantSignIn": {
+              "title": "Ntushobora kwinjira?",
+              "body": "Gerageza gusubiramo ijambo banga cyangwa twandikire niba bikomeje."
+            }
+          }
+        },
+        "billing": {
+          "eyebrow": "Kwishyura",
+          "title": "Kwishyura no gufungura",
+          "subtitle": "Ubufasha ku kwishyura, gufungura n'inyemezabwishyu.",
+          "bullets": {
+            "1": "Kwishyura bigufungurira title, season cyangwa episode runaka.",
+            "2": "Niba wishyuye ariko access ntihinduke, tegereza gato wongere u-refresh.",
+            "3": "Bika reference y'ubwishyu niba ukeneye ubufasha."
+          }
+        },
+        "playback": {
+          "eyebrow": "Streaming",
+          "title": "Kureba",
+          "subtitle": "Kemura ibibazo byo kureba byihuse.",
+          "cards": {
+            "buffering": {
+              "title": "Buffering",
+              "body": "Gerageza internet yihuta, gabanya ibyo uri gukoresha kuri network cyangwa wongere utangire app."
+            },
+            "audio": {
+              "title": "Ijwi ntirihura",
+              "body": "Hagarika gato wongere utangire, cyangwa usubiremo video kugira ngo bihure."
+            }
+          }
+        },
+        "devices": {
+          "eyebrow": "Guhuza",
+          "title": "Ibikoresho",
+          "subtitle": "Rebera ku bikoresho byemewe kandi ujye u-update.",
+          "cards": {
+            "mobile": {
+              "title": "Ubufasha kuri mobile",
+              "body": "Jya u-update app kugira ngo ikore neza kandi ibone fixes."
+            },
+            "stuck": {
+              "title": "App yafashwe cyangwa irahanuka",
+              "body": "Gerageza kongera utangire app cyangwa device. Niba bikomeje, <0>twandikire</0>."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Ukeneye ubundi bufasha?",
+        "body": "Niba utabonye igisubizo, itsinda ryacu rishobora kugufasha.",
+        "actions": {
+          "openFaq": "Fungura FAQ",
+          "contactSupport": "Twandikire"
+        }
+      }
+    },
+    "faq": {
+      "hero": {
+        "label": "Ubufasha",
+        "title": "Ibibazo bikunze kubazwa",
+        "subtitle": "Ibisubizo ku bibazo bijyanye na konti, kureba no kwishyura.",
+        "actions": {
+          "visitHelpCenter": "Jya ku bufasha",
+          "contactSupport": "Twandikire"
+        }
+      },
+      "section": {
+        "eyebrow": "FAQ",
+        "title": "Shaka ibisubizo",
+        "subtitle": "Hitamo icyiciro ubone ibisubizo byihuse."
+      },
+      "groups": {
+        "account": {
+          "title": "Konti",
+          "description": "Kwinjira, PIN, ijambo banga n'uburenganzira.",
+          "items": {
+            "methods": {
+              "q": "Ninjira nte?",
+              "a": "Koresha numero ya telefone cyangwa konti ya Google niba waranditse na Google."
+            },
+            "googlePassword": {
+              "q": "Nakoresheje Google. Mfite ijambo banga?",
+              "a": "Niba waranditse na Google, usanzwe winjira ukoresheje Google aho gukoresha ijambo banga rihariye."
+            },
+            "forgot": {
+              "q": "NIBAGIWE PIN cyangwa ijambo banga. Nakora iki?",
+              "a": "Twandikire kuri <0>Contact</0> tugufashe kugarura uko winjira."
+            }
+          }
+        },
+        "playback": {
+          "title": "Kureba",
+          "description": "Ibibazo bya streaming n'ibikoresho.",
+          "items": {
+            "buffering": {
+              "q": "Kuki video ibuffer?",
+              "a": "Akenshi biterwa na internet. Gerageza internet ihamye cyangwa gabanya downloads."
+            },
+            "audio": {
+              "q": "Ijwi ntirihura na video.",
+              "a": "Hagarika gato wongere utangire, cyangwa usubiremo video."
+            },
+            "downloads": {
+              "q": "Nshobora gukurura videos nkazireba offline?",
+              "a": "Offline downloads ntibishobora kuboneka kuri titles cyangwa devices zose."
+            }
+          }
+        },
+        "billing": {
+          "title": "Kwishyura",
+          "description": "Kwishyura, gufungura no gusubizwa amafaranga.",
+          "items": {
+            "paymentMethods": {
+              "q": "Ni ubuhe buryo bwo kwishyura mukoresha?",
+              "a": "Uburyo buboneka biterwa n'aho uri n'uwishyura (provider)."
+            },
+            "notUnlocked": {
+              "q": "Nishyuye ariko content iracyafunze.",
+              "a": "Tegereza gato wongere u-refresh. Niba bikomeje, <0>twandikire</0> utange reference y'ubwishyu."
+            },
+            "refunds": {
+              "q": "Musubiza amafaranga?",
+              "a": "Gusaba gusubizwa amafaranga bigenzurwa uko byakabaye (case-by-case) aho amategeko abyemerera. Reba <0>Amategeko</0> ku bisobanuro."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Uracyakeneye ubufasha?",
+        "body": "Niba ikibazo cyawe kitanditse, itsinda ryacu rishobora kugufasha.",
+        "actions": {
+          "helpCenter": "Ubufasha",
+          "contactSupport": "Twandikire"
+        }
+      }
+    },
+    "contact": {
+      "hero": {
+        "label": "Ubufasha",
+        "title": "Twandikire",
+        "subtitle": "Tubafasha ku kwishyura, access, kureba cyangwa ibibazo bya konti.",
+        "actions": {
+          "checkFaq": "Reba FAQ",
+          "writeMessage": "Andika ubutumwa"
+        }
+      },
+      "channels": {
+        "email": "Email",
+        "phone": "Telefone",
+        "whatsapp": "WhatsApp"
+      },
+      "direct": {
+        "eyebrow": "Direct",
+        "title": "Twandikire ako kanya",
+        "subtitle": "Koresha uburyo buboneka hasi.",
+        "notConfigured": "Ibisobanuro byo kuvugana na support ntibirashyirwaho."
+      },
+      "availability": {
+        "eyebrow": "Igihe",
+        "title": "Igihe dusubiza",
+        "response": {
+          "label": "Igihe gisanzwe dusubiza",
+          "value": "Mu masaha 24–48"
+        },
+        "bestTime": {
+          "label": "Igihe cyiza",
+          "value": "Mu minsi y'akazi"
+        },
+        "include": {
+          "label": "Shyiramo",
+          "value": "Numero ya telefone yawe na reference y'ubwishyu (niba bihari)"
+        }
+      },
+      "form": {
+        "eyebrow": "Ubutumwa",
+        "title": "Ohereza ubutumwa",
+        "subtitle": "Tuzafungura email yawe ifite draft yiteguye.",
+        "fields": {
+          "name": "Izina",
+          "email": "Email",
+          "subject": "Ingingo",
+          "message": "Ubutumwa"
+        },
+        "actions": {
+          "openDraft": "Fungura email draft"
+        }
+      },
+      "validation": {
+        "nameRequired": "Izina rirakenewe",
+        "emailRequired": "Email irakenewe",
+        "subjectRequired": "Ingingo irakenewe",
+        "messageMin": "Ubutumwa bugomba kuba byibura inyuguti 10"
+      },
+      "toasts": {
+        "openingEmail": "Turimo gufungura email yawe..."
+      }
+    },
+    "terms": {
+      "hero": {
+        "label": "Amategeko",
+        "title": "Amategeko yo gukoresha",
+        "subtitle": "Aya mategeko agenga uko winjira no uko ukoresha serivisi. Yasubiwemo: {{date}}.",
+        "actions": {
+          "readTerms": "Soma amategeko",
+          "contactLegal": "Twandikire (legal)"
+        }
+      },
+      "nav": {
+        "overview": "Incamake",
+        "accounts": "Konti",
+        "payments": "Kwishyura",
+        "content": "Content n'uburenganzira",
+        "acceptableUse": "Ibyemewe",
+        "disclaimers": "Ibisobanuro",
+        "changes": "Impinduka"
+      },
+      "sections": {
+        "overview": {
+          "eyebrow": "Amasezerano",
+          "title": "Incamake",
+          "subtitle": "Iyo ukoresheje serivisi, uba wemeye aya mategeko. Niba utabyemeye, ntukoreshe serivisi.",
+          "body": "Aya mategeko akorera abasuye n'abakoresha bose. Hashobora kubaho andi mategeko ku bintu bimwe na bimwe (urugero: kugura/gufungura cyangwa promotions)."
+        },
+        "accounts": {
+          "eyebrow": "Konti",
+          "title": "Kwiyandikisha n'umutekano",
+          "subtitle": "Bika ibanga n'amakuru yawe nyayo.",
+          "bullets": {
+            "1": "Uri responsable ku bikorwa bikorwa kuri konti yawe.",
+            "2": "Tanga amakuru nyayo kandi uyavugurure igihe bikenewe.",
+            "3": "Ntugasangire amakuru yo kwinjira cyangwa ngo ugerageze kwinjira muri konti utari iyawe."
+          }
+        },
+        "payments": {
+          "eyebrow": "Kwishyura",
+          "title": "Kwishyura, kugura no gusubizwa amafaranga",
+          "subtitle": "Uko kwishyura bikora n'uko wabona ubufasha.",
+          "body1": "Iyo uguze cyangwa ufunguye content, uba wemeye ko twishyuza (hamwe n'abafatanyabikorwa bacu) ukoresheje uburyo wahisemo.",
+          "body2": "Gusaba gusubizwa amafaranga bigenzurwa uko byakabaye aho amategeko abyemerera. Ku bibazo by'ubwishyu, twandikire kuri <0>Contact</0> utange reference y'ubwishyu."
+        },
+        "content": {
+          "eyebrow": "Content",
+          "title": "Uburenganzira n'uko iboneka",
+          "subtitle": "Titles zishobora guhinduka uko igihe kigenda.",
+          "bullets": {
+            "1": "Content ishobora kuboneka bitewe n'igihugu, licences n'igihe.",
+            "2": "Kureba bigenewe umuntu ku giti cye, atari ubucuruzi, keretse byemejwe mu nyandiko.",
+            "3": "Dushobora kuvugurura, gukuraho cyangwa gusimbuza titles n'ibikorwa kugira ngo tunoze serivisi."
+          }
+        },
+        "acceptableUse": {
+          "eyebrow": "Ibyemewe",
+          "title": "Ibyo utagomba gukora",
+          "subtitle": "Amategeko arinda abakoresha n'ibikoresho byacu.",
+          "bullets": {
+            "1": "Ntugerageze gusenya uburyo bikora, gusaka data (scrape), gukoresha nabi cyangwa guhungabanya serivisi.",
+            "2": "Ntugasangire cyangwa ngo ugaragaze content ku mugaragaro nta burenganzira.",
+            "3": "Ntukoreshe serivisi mu bikorwa bitemewe n'amategeko, bibangamira cyangwa bikomeretsa abandi."
+          }
+        },
+        "disclaimers": {
+          "eyebrow": "Ibisobanuro",
+          "title": "Serivisi \"uko iri\"",
+          "subtitle": "Dukora uko dushoboye, ariko hashobora kubaho interruptions.",
+          "body": "Serivisi itangwa \"uko iri\" kandi \"uko iboneka\". Uko amategeko abiteganya, ntitwemeza guarantee ku bwiza, ku rwego runaka cyangwa ku kutabangamira uburenganzira bw'abandi."
+        },
+        "changes": {
+          "eyebrow": "Impinduka",
+          "title": "Impinduka ku mategeko",
+          "subtitle": "Dushobora kuvugurura aya mategeko bitewe n'impinduka z'ibicuruzwa cyangwa amategeko.",
+          "body1": "Niba hari impinduka zikomeye, tuzabitangaza muri app cyangwa mu bundi buryo buboneye. Gukomeza gukoresha serivisi bisobanura ko wemeye amategeko mashya.",
+          "body2": "Ufite ikibazo? Jya kuri <0>Contact</0>."
+        }
+      }
     }
   }
 }

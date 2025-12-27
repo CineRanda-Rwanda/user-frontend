@@ -11,10 +11,12 @@ import FeaturedHero from '@/components/content/FeaturedHero'
 import Loader from '@/components/common/Loader'
 import Button from '@/components/common/Button'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import styles from './Browse.module.css'
 
 const Browse: React.FC = () => {
   const { isAuthenticated } = useAuth()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [trending, setTrending] = useState<Content[]>([])
   const [movies, setMovies] = useState<Content[]>([])
@@ -70,7 +72,7 @@ const Browse: React.FC = () => {
       setContinueWatching(isAuthenticated ? continueWatchingRes : [])
     } catch (error) {
       console.error('Error in loadContent:', error)
-      toast.error('Failed to load content')
+      toast.error(t('browse.errors.loadFailed'))
       console.error('Error loading content:', error)
     } finally {
       setLoading(false)
@@ -78,7 +80,7 @@ const Browse: React.FC = () => {
   }
 
   if (loading) {
-    return <Loader fullScreen text="Loading content..." />
+    return <Loader fullScreen text={t('browse.loading')} />
   }
 
   const heroPool = trending.length > 0
@@ -113,7 +115,11 @@ const Browse: React.FC = () => {
   // With 2 titles (e.g., 1 movie + 1 series), the hero rotation already gives both visibility and a single-item row looks awkward.
   const showSmallCatalogRow = catalogSize >= 3 && catalogSize <= 6 && smallCatalogPicks.length > 0
 
-  const smallCatalogTitle = hasSeries && !hasMovies ? 'Explore series' : hasMovies && !hasSeries ? 'Explore movies' : 'Explore titles'
+  const smallCatalogTitle = hasSeries && !hasMovies
+    ? t('browse.smallCatalog.exploreSeries')
+    : hasMovies && !hasSeries
+      ? t('browse.smallCatalog.exploreMovies')
+      : t('browse.smallCatalog.exploreTitles')
   const smallCatalogViewAllLink = hasSeries && !hasMovies ? '/series' : hasMovies && !hasSeries ? '/movies' : undefined
 
   const showFullRows = catalogSize > 6
@@ -144,19 +150,19 @@ const Browse: React.FC = () => {
 
           {showFullRows && (
             <>
-              <ContentRow title="Trending Now" content={trending} hidePrice autoAdvance />
-              <ContentRow title="Popular Movies" content={movies} viewAllLink="/movies" hidePrice />
-              <ContentRow title="Top Series" content={series} viewAllLink="/series" hidePrice />
+              <ContentRow title={t('browse.rows.trendingNow')} content={trending} hidePrice autoAdvance />
+              <ContentRow title={t('browse.rows.popularMovies')} content={movies} viewAllLink="/movies" hidePrice />
+              <ContentRow title={t('browse.rows.topSeries')} content={series} viewAllLink="/series" hidePrice />
             </>
           )}
         </div>
 
         {showEmptyState && (
           <div className={styles.emptyState}>
-            <h3>Catalog is warming up</h3>
-            <p>We are curating fresh premieres. Check back soon or refresh to pull the latest titles.</p>
+            <h3>{t('browse.empty.title')}</h3>
+            <p>{t('browse.empty.message')}</p>
             <Button variant="primary" onClick={() => loadContent()}>
-              Reload content
+              {t('browse.empty.reload')}
             </Button>
           </div>
         )}

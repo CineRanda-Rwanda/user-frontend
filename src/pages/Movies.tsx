@@ -11,10 +11,13 @@ import FilterDropdown from '@/components/search/FilterDropdown'
 import Loader from '@/components/common/Loader'
 import { toast } from 'react-toastify'
 import { extractCollection } from '@/utils/collection'
+import { useTranslation } from 'react-i18next'
+import { normalizeSupportedLanguage, translateTextCached } from '@/utils/translate'
 import styles from './Movies.module.css'
 
 const Movies: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t, i18n } = useTranslation()
   const [movies, setMovies] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'newest')
@@ -78,14 +81,38 @@ const Movies: React.FC = () => {
         const extractedGenres = extractCollection<{ _id: string; name: string }>(genresRes, ['genres'])
         const extractedCategories = extractCollection<{ _id: string; name: string }>(categoriesRes, ['categories'])
 
-        setGenres(extractedGenres)
-        setCategories(extractedCategories)
+        const targetLanguage = normalizeSupportedLanguage(i18n.language)
+
+        if (targetLanguage === 'fr') {
+          const [translatedGenres, translatedCategories] = await Promise.all([
+            Promise.all(
+              extractedGenres.map(async (genre) => ({
+                ...genre,
+                name: (await translateTextCached(genre.name, 'fr', { source: 'en' }).catch(() => genre.name)) || genre.name,
+              }))
+            ),
+            Promise.all(
+              extractedCategories.map(async (category) => ({
+                ...category,
+                name:
+                  (await translateTextCached(category.name, 'fr', { source: 'en' }).catch(() => category.name)) ||
+                  category.name,
+              }))
+            ),
+          ])
+
+          setGenres(translatedGenres)
+          setCategories(translatedCategories)
+        } else {
+          setGenres(extractedGenres)
+          setCategories(extractedCategories)
+        }
       } catch (error) {
         console.error('Failed to load genres/categories:', error)
       }
     }
     loadFilters()
-  }, [])
+  }, [i18n.language])
 
   const loadMovies = async () => {
     try {
@@ -130,7 +157,7 @@ const Movies: React.FC = () => {
       const pagination = result.data?.data?.pagination || result.data?.pagination || {}
       setTotalPages(pagination.totalPages || pagination.pages || 1)
     } catch (error) {
-      toast.error('Failed to load movies')
+      toast.error(t('movies.errors.loadFailed'))
       console.error('Error loading movies:', error)
     } finally {
       setLoading(false)
@@ -191,22 +218,22 @@ const Movies: React.FC = () => {
         <div className={styles.controls}>
           <SortDropdown value={sortBy} onChange={handleSortChange} />
           <FilterDropdown
-            label="Genre"
+            label={t('movies.filters.genre')}
             options={genres.map((genre) => ({ value: genre._id, label: genre.name }))}
             value={filters.genres[0] || null}
-            placeholder="All genres"
+            placeholder={t('movies.filters.allGenres')}
             onChange={(value) => handleFilterSelect('genres', value)}
           />
           <FilterDropdown
-            label="Category"
+            label={t('movies.filters.category')}
             options={categories.map((category) => ({ value: category._id, label: category.name }))}
             value={filters.categories[0] || null}
-            placeholder="All categories"
+            placeholder={t('movies.filters.allCategories')}
             onChange={(value) => handleFilterSelect('categories', value)}
           />
           {hasFilters && (
             <button type="button" className={styles.clearAllButton} onClick={clearAllFilters}>
-              Reset filters
+              {t('movies.filters.reset')}
             </button>
           )}
         </div>
@@ -214,10 +241,10 @@ const Movies: React.FC = () => {
         <div className={styles.content}>
           <main className={styles.main}>
             {loading ? (
-              <Loader text="Loading movies..." />
+              <Loader text={t('movies.loading')} />
             ) : movies.length === 0 ? (
               <div className={styles.empty}>
-                <p>No movies found</p>
+                <p>{t('movies.empty')}</p>
               </div>
             ) : (
               <>
@@ -234,17 +261,17 @@ const Movies: React.FC = () => {
                       onClick={() => setCurrentPage(prev => prev - 1)}
                       className={styles.paginationButton}
                     >
-                      Previous
+                      {t('common.previous')}
                     </button>
                     <span className={styles.pageInfo}>
-                      Page {currentPage} of {totalPages}
+                      {t('movies.pagination.pageOf', { current: currentPage, total: totalPages })}
                     </span>
                     <button
                       disabled={currentPage === totalPages}
                       onClick={() => setCurrentPage(prev => prev + 1)}
                       className={styles.paginationButton}
                     >
-                      Next
+                      {t('common.next')}
                     </button>
                   </div>
                 )}

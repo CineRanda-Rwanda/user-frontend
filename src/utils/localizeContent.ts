@@ -21,6 +21,15 @@ const tryString = (value: unknown): string | null => {
   return trimmed ? trimmed : null
 }
 
+const suffixFromLanguageCode = (code: string): string | null => {
+  const normalized = String(code || '').toLowerCase()
+  if (normalized.startsWith('en')) return 'En'
+  if (normalized.startsWith('fr')) return 'Fr'
+  if (normalized.startsWith('rw')) return 'Rw'
+  if (normalized.startsWith('kin') || normalized.includes('kinyarwanda')) return 'Kin'
+  return null
+}
+
 const languageAliases = (lng: SupportedLanguage | string): string[] => {
   const normalized = String(lng || '').toLowerCase()
   if (normalized.startsWith('rw')) return ['rw', 'kin', 'kinyarwanda', 'rw-rw']
@@ -58,6 +67,14 @@ export const getLocalizedText = (
 
     const fromFlat = tryString(record[`${field}_${code}`])
     if (fromFlat) return fromFlat
+
+    const suffix = suffixFromLanguageCode(code)
+    if (suffix) {
+      const fromCamel = tryString(record[`${field}${suffix}`])
+      if (fromCamel) return fromCamel
+      const fromUpper = tryString(record[`${field}${suffix.toUpperCase()}`])
+      if (fromUpper) return fromUpper
+    }
   }
 
   return tryString(record[field]) || ''

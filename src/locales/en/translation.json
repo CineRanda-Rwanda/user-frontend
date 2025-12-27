@@ -9,7 +9,7 @@
     "home": "Home",
     "movies": "Movies",
     "series": "Series",
-    "myLibrary": "My Library",
+    "myLibrary": "Library",
     "help": "Help",
     "notifications": "Notifications",
     "toggleNavigation": "Toggle navigation menu",
@@ -31,7 +31,229 @@
     "close": "Close",
     "goToBrowse": "Go to Browse",
     "loading": "Loading...",
+    "updating": "Updating...",
+    "previous": "Previous",
+    "next": "Next",
+    "cancel": "Cancel",
     "comingSoon": "Coming soon!"
+  },
+  "browse": {
+    "loading": "Loading content...",
+    "errors": {
+      "loadFailed": "Failed to load content"
+    },
+    "smallCatalog": {
+      "exploreSeries": "Explore series",
+      "exploreMovies": "Explore movies",
+      "exploreTitles": "Explore titles"
+    },
+    "rows": {
+      "trendingNow": "Trending Now",
+      "popularMovies": "Popular Movies",
+      "topSeries": "Top Series"
+    },
+    "empty": {
+      "title": "Catalog is warming up",
+      "message": "We are curating fresh premieres. Check back soon or refresh to pull the latest titles.",
+      "reload": "Reload content"
+    }
+  },
+  "movies": {
+    "loading": "Loading movies...",
+    "empty": "No movies found",
+    "errors": {
+      "loadFailed": "Failed to load movies"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "All genres",
+      "category": "Category",
+      "allCategories": "All categories",
+      "reset": "Reset filters"
+    },
+    "pagination": {
+      "pageOf": "Page {{current}} of {{total}}"
+    }
+  },
+  "series": {
+    "loading": "Loading series...",
+    "empty": "No series found",
+    "errors": {
+      "loadFailed": "Failed to load series"
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "All genres",
+      "category": "Category",
+      "allCategories": "All categories",
+      "reset": "Reset filters"
+    },
+    "pagination": {
+      "pageOf": "Page {{current}} of {{total}}"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "hint": {
+      "showingResultsFor": "Showing results for \"{{query}}\"",
+      "useNavSearch": "Use the global search in the navigation bar to discover something new."
+    },
+    "filters": {
+      "genre": "Genre",
+      "allGenres": "All genres",
+      "category": "Category",
+      "allCategories": "All categories",
+      "reset": "Reset filters"
+    },
+    "resultsCount": "Found {{count}} result",
+    "resultsCount_plural": "Found {{count}} results",
+    "actions": {
+      "resetSearch": "Reset Search",
+      "tryAgain": "Try Again",
+      "loadMore": "Load More"
+    },
+    "errors": {
+      "searchFailed": "Failed to search content"
+    },
+    "empty": {
+      "noResultsTitle": "No results found",
+      "noResultsMessage": "Try adjusting your search query or filters to find what you're looking for.",
+      "errorTitle": "Something went wrong",
+      "startTitle": "Start searching",
+      "startMessage": "Enter a search query or use filters to discover movies and series."
+    }
+  },
+  "watch": {
+    "backToBrowse": "Back to Browse",
+    "errors": {
+      "loadFailed": "Failed to load content. Please try again."
+    },
+    "payment": {
+      "confirmedStream": "Payment confirmed! Enjoy your stream.",
+      "stillWaiting": "Still waiting for payment confirmation. Refresh once checkout completes."
+    },
+    "purchase": {
+      "redirectingToCheckout": "Redirecting to checkout. Complete payment to unlock {{scope}}.",
+      "unlockFromDetails": "Unlock episodes from the details page to avoid purchase errors.",
+      "thisTitle": "this title",
+      "failed": "Purchase failed. Please try again."
+    },
+    "stream": {
+      "fetching": "Fetching secure stream...",
+      "locked": "This episode is still locked. Unlock it to keep watching.",
+      "unavailable": "Unable to load video stream right now. Please try again later."
+    },
+    "overlay": {
+      "unlockTitle": "Unlock to watch this title",
+      "purchase": "Purchase",
+      "toWatchEpisode": "to watch S{{season}}E{{episode}}",
+      "toStartStreaming": "to start streaming in full HD.",
+      "openingCheckout": "Opening checkout...",
+      "confirming": "Confirming...",
+      "payAndUnlock": "Pay & Unlock",
+      "viewDetails": "View Details",
+      "checkoutNote": "Secure checkout powered by Flutterwave. Keep this page open while we confirm your payment.",
+      "waitingForConfirmation": "Waiting for confirmation{{refSuffix}}."
+    },
+    "autoNext": {
+      "nextIn": "Next episode in",
+      "playNow": "Play Now"
+    },
+    "meta": {
+      "releaseYear": "Release Year",
+      "rating": "Rating",
+      "duration": "Duration",
+      "language": "Language",
+      "languageFallback": "Kinyarwanda"
+    },
+    "episodes": {
+      "title": "Episodes",
+      "hideList": "Hide List",
+      "showList": "Show List",
+      "season": "Season {{number}}",
+      "minutes": "{{minutes}} min",
+      "locked": "Locked",
+      "nowPlaying": "Now Playing"
+    }
+  },
+  "wallet": {
+    "errors": {
+      "loadFailed": "Unable to load wallet details. Please retry.",
+      "minTopUp": "Enter at least FRW 1,000 to top up.",
+      "topUpFailed": "Top-up failed. Please try again."
+    },
+    "toasts": {
+      "redirectingFlutterwave": "Redirecting you to Flutterwave..."
+    },
+    "balance": {
+      "available": "Available Balance",
+      "bonusLabel": "Bonus {{amount}}"
+    },
+    "stats": {
+      "bonusVault": "Bonus Vault",
+      "bonusHint": "Auto-applied on eligible rentals.",
+      "totalAssets": "Total Assets",
+      "totalHint": "Cash + promo credits."
+    },
+    "topUp": {
+      "title": "Instant Top-Up",
+      "subtitle": "Fund your wallet via Flutterwave in seconds.",
+      "placeholder": "Enter amount",
+      "connecting": "Connecting to Flutterwave…",
+      "cta": "Top Up Wallet"
+    },
+    "voucher": {
+      "cta": "Redeem Voucher"
+    },
+    "transactions": {
+      "title": "Recent Transactions",
+      "subtitle": "A live feed of your rentals, subscriptions, and bonuses.",
+      "empty": "No transactions yet. Fund your wallet to get started.",
+      "fallbackDescription": "Wallet activity"
+    }
+  },
+  "sort": {
+    "label": "Sort",
+    "options": {
+      "newestFirst": "Newest First",
+      "oldestFirst": "Oldest First",
+      "titleAsc": "Title: A-Z",
+      "titleDesc": "Title: Z-A",
+      "priceLow": "Price: Low to High",
+      "priceHigh": "Price: High to Low"
+    }
+  },
+  "filters": {
+    "all": "All",
+    "allWithLabel": "All {{label}}"
+  },
+  "filterPanel": {
+    "toggle": {
+      "label": "Refine",
+      "title": "Filter results"
+    },
+    "header": {
+      "title": "Filters"
+    },
+    "actions": {
+      "reset": "Reset"
+    },
+    "summary": {
+      "activeFilters": "{{count}} active filter",
+      "activeFilters_plural": "{{count}} active filters",
+      "noneTitle": "No filters applied",
+      "noneHint": "Pick a genre or category to tailor the lineup."
+    },
+    "sections": {
+      "genres": {
+        "eyebrow": "Genres",
+        "title": "Choose the mood"
+      },
+      "categories": {
+        "eyebrow": "Categories",
+        "title": "Refine by collection"
+      }
+    }
   },
   "emptyState": {
     "search": {
@@ -54,6 +276,10 @@
     "verificationFailed": "Verification failed. Please try again."
   },
   "auth": {
+    "toasts": {
+      "loggedOut": "Logged out successfully",
+      "welcomeBack": "Welcome back!"
+    },
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to continue",
@@ -64,11 +290,116 @@
       "emailPlaceholder": "Email address",
       "passwordPlaceholder": "Password",
       "submit": "Sign In",
+      "submitPhone": "Sign in with phone",
+      "submitEmail": "Sign in with email",
+      "phoneHelper": "Use the number linked to your Randa Plus account",
+      "pinHelper": "PIN is required for phone login",
+      "passwordHelperMin6": "Minimum 6 characters",
       "google": "Continue with Google",
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
       "forgotPin": "Forgot PIN?",
       "forgotPassword": "Forgot password?"
+    },
+    "forgotPin": {
+      "title": "Reset Randa PIN",
+      "subtitleRequest": "Verify your phone to receive a code.",
+      "subtitleReset": "Enter the code and a new PIN.",
+      "closeAria": "Close reset PIN dialog",
+      "infoRequest": "Enter the phone number linked to your account to receive a PIN reset code via SMS.",
+      "infoReset": "Enter the code you received and choose a new 4-digit PIN.",
+      "form": {
+        "phonePlaceholder": "Phone number",
+        "phoneHelper": "Use the number you registered with.",
+        "codePlaceholder": "Verification code",
+        "codeHelper": "6-digit code sent to your phone.",
+        "newPinPlaceholder": "New PIN",
+        "newPinHelper": "Minimum 4 digits",
+        "confirmPinPlaceholder": "Confirm PIN"
+      },
+      "actions": {
+        "sendCode": "Send reset code",
+        "savePin": "Save new PIN",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "phoneRequired": "Phone number is required to send a reset code.",
+        "codeRequired": "Enter the verification code that was sent to you.",
+        "newPinMin": "New PIN must be at least 4 digits.",
+        "pinMismatch": "PIN confirmation does not match.",
+        "sendFailed": "Could not send reset code right now.",
+        "resetFailed": "Could not reset PIN right now."
+      },
+      "toasts": {
+        "codeSent": "Reset code sent via SMS",
+        "resetSuccess": "PIN reset successfully. Please sign in with your new PIN."
+      }
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitleRequest": "We will email you a reset link.",
+      "subtitleReset": "Enter the token from your email and set a new password.",
+      "closeAria": "Close reset password dialog",
+      "form": {
+        "emailPlaceholder": "Email address",
+        "tokenPlaceholder": "Reset token",
+        "passwordPlaceholder": "New password",
+        "passwordHelper": "Minimum 8 characters",
+        "confirmPasswordPlaceholder": "Confirm password"
+      },
+      "actions": {
+        "sendLink": "Send reset link",
+        "updatePassword": "Update password",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "tokenRequired": "Enter the reset token from your email.",
+        "sendFailed": "Could not send reset link right now.",
+        "resetFailed": "Could not reset password right now."
+      },
+      "toasts": {
+        "linkSent": "Password reset link sent to your email",
+        "updatedSuccess": "Password updated successfully. You can now log in."
+      }
+    },
+    "resetPassword": {
+      "title": "Reset your password",
+      "subtitle": "Paste the token we emailed you, set a new password, and you are back in.",
+      "toastSuccess": "Password updated successfully!",
+      "form": {
+        "passwordPlaceholder": "New password",
+        "confirmPasswordPlaceholder": "Confirm password"
+      },
+      "actions": {
+        "update": "Update password"
+      },
+      "helper": {
+        "notRequested": "Didn’t request this change?",
+        "returnToSignIn": "Return to sign in"
+      },
+      "completed": {
+        "title": "Your password has been updated.",
+        "message": "Sign in with your new password to continue watching.",
+        "goToLogin": "Go to Sign in"
+      },
+      "errors": {
+        "tokenMissing": "Reset link is missing or expired. Please request a fresh password reset email.",
+        "resetFailed": "Could not reset password right now."
+      }
+    },
+    "oauth": {
+      "finishing": "Finishing Google login...",
+      "failedTitle": "Google sign-in failed",
+      "backToLogin": "Back to login",
+      "toasts": {
+        "signedIn": "Signed in with Google!"
+      },
+      "errors": {
+        "googleFailed": "Google sign-in failed.",
+        "exchangeMissingToken": "Google exchange succeeded but returned no token.",
+        "missingSessionToken": "Missing session token from Google response.",
+        "couldNotComplete": "Could not complete Google sign-in."
+      }
     },
     "register": {
       "title": "Create your account",
@@ -102,7 +433,15 @@
       "emailReenterPrompt": "Please provide your email and password again to continue.",
       "verify": "Verify",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "toasts": {
+        "smsSent": "We sent you a verification code via SMS.",
+        "accountReady": "Account ready! Welcome to Randa Plus.",
+        "checkEmail": "Check your email to verify your account.",
+        "welcomeBonusAdded": "Registration complete! {{amount}} welcome bonus added to your wallet.",
+        "completed": "Registration completed successfully!",
+        "emailVerified": "Email verified! Welcome to Randa Plus."
+      }
     },
     "validation": {
       "usernameMin": "Username must be at least 3 characters",
@@ -114,6 +453,258 @@
       "passwordMin6": "Password must be at least 6 characters",
       "passwordMismatch": "Passwords do not match",
       "verificationCodeRequired": "Verification code is required"
+    }
+  },
+  "profilePage": {
+    "loading": "Loading profile...",
+    "closeAria": "Close profile",
+    "plan": {
+      "global": "Global plan",
+      "rwanda": "Rwanda plan"
+    },
+    "sections": {
+      "profileInfo": "Profile info",
+      "changePin": {
+        "title": "Change PIN",
+        "subtitle": "Update your 4-digit PIN."
+      },
+      "changePassword": {
+        "title": "Change password",
+        "subtitle": "Set a new password for your account."
+      }
+    },
+    "info": {
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone",
+      "plan": "Plan",
+      "joined": "Joined"
+    },
+    "fallbacks": {
+      "member": "Member",
+      "username": "username",
+      "emptyValue": "—",
+      "notLinked": "Not linked",
+      "notAdded": "Not added",
+      "notSet": "Not yet set"
+    },
+    "pin": {
+      "fields": {
+        "current": "Current PIN",
+        "new": "New PIN",
+        "confirm": "Confirm PIN"
+      },
+      "actions": {
+        "save": "Save PIN"
+      },
+      "validation": {
+        "currentRequired": "Enter your current PIN.",
+        "newMin": "New PIN must be at least 4 digits.",
+        "mismatch": "PIN confirmation does not match."
+      },
+      "errors": {
+        "unavailable": "PIN changes are not available for your account.",
+        "updateFailed": "Failed to update PIN."
+      },
+      "toasts": {
+        "updated": "PIN updated successfully."
+      }
+    },
+    "password": {
+      "fields": {
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm password"
+      },
+      "actions": {
+        "save": "Save password"
+      },
+      "validation": {
+        "currentRequired": "Enter your current password.",
+        "newMin": "New password must be at least 8 characters.",
+        "mismatch": "Password confirmation does not match."
+      },
+      "errors": {
+        "managedByProvider": "Password is managed by your sign-in provider.",
+        "updateFailed": "Failed to update password."
+      },
+      "toasts": {
+        "updated": "Password updated successfully."
+      }
+    }
+  },
+  "notifications": {
+    "loading": "Loading your notifications...",
+    "page": {
+      "kicker": "Inbox",
+      "title": "Notifications",
+      "subtext": {
+        "unreadCount": "You have {{count}} unread notifications.",
+        "caughtUp": "You're all caught up."
+      },
+      "empty": {
+        "all": {
+          "title": "No notifications yet",
+          "message": "We'll let you know when something happens."
+        },
+        "unread": {
+          "title": "No unread notifications",
+          "message": "You're all caught up."
+        },
+        "archived": {
+          "title": "Trash is empty",
+          "message": "Archived notifications will appear here."
+        }
+      }
+    },
+    "overlay": {
+      "label": "Live feed",
+      "tooltips": {
+        "refresh": "Refresh notifications",
+        "close": "Close panel"
+      },
+      "actions": {
+        "markAll": "Mark all"
+      },
+      "empty": {
+        "unread": "No unread messages",
+        "default": "Nothing new just yet."
+      }
+    },
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "trash": "Trash"
+    },
+    "labels": {
+      "system": "System",
+      "amount": "Amount"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "markAllRead": "Mark all as read",
+      "markSelectedUnread": "Mark selected unread",
+      "clearSelection": "Clear selection",
+      "checkAgain": "Check again",
+      "viewDetails": "View details",
+      "restore": "Restore",
+      "deletePermanently": "Delete permanently",
+      "moveToTrash": "Move to trash",
+      "markAsRead": "Mark as read",
+      "markAsUnread": "Mark unread"
+    },
+    "errors": {
+      "loadFailed": "Failed to load notifications.",
+      "updateNotification": "Failed to update notification.",
+      "updateNotifications": "Failed to update notifications.",
+      "archiveFailed": "Failed to move notification to trash.",
+      "restoreFailed": "Failed to restore notification.",
+      "deleteFailed": "Failed to delete notification.",
+      "syncFailed": "Could not sync notifications. Please refresh."
+    }
+  },
+  "contentDetails": {
+    "auth": {
+      "signInToContinue": "Please sign in to continue."
+    },
+    "ui": {
+      "pricing": {
+        "free": "Free",
+        "paid": "Paid"
+      },
+      "states": {
+        "unlocking": "Unlocking...",
+        "confirming": "Confirming...",
+        "seasonUnlocked": "Season unlocked"
+      },
+      "actions": {
+        "watchEpisode": "Watch Episode",
+        "watchNow": "Watch Now",
+        "trailer": "Trailer",
+        "unlockEpisode": "Unlock Episode",
+        "unlockSeason": "Unlock Season",
+        "unlockEpisodeWithPrice": "Unlock Episode • {{price}}",
+        "unlockWithPrice": "Unlock • {{price}}"
+      },
+      "hints": {
+        "signInToUnlock": "Sign in to unlock this title.",
+        "waitingForConfirmation": "Waiting for payment confirmation...",
+        "waitingForConfirmationWithRef": "Waiting for payment confirmation{{refSuffix}}.",
+        "completeCheckoutEpisode": "Complete checkout to unlock this episode instantly.",
+        "completeCheckoutTitle": "Complete the secure checkout to unlock instantly.",
+        "unlockEpisodeToStart": "Unlock the episode to start watching.",
+        "unlockOnceFullHd": "Unlock once and stream in full HD forever.",
+        "checkoutNote": "Secure checkout powered by Flutterwave. No wallet balance required."
+      },
+      "badges": {
+        "series": "Series"
+      },
+      "seasons": {
+        "quickSeason": "Quick Season",
+        "seasonChip": "Season {{number}}",
+        "seasonOption": "Season {{number}}",
+        "seasonOptionWithTitle": "Season {{number}} · {{title}}",
+        "episodesCount": "{{count}} Episodes"
+      },
+      "episode": {
+        "short": "EP {{number}}",
+        "label": "Episode {{number}}",
+        "minutesShort": "{{minutes}}m",
+        "nowPlaying": "Now Playing"
+      },
+      "stats": {
+        "creator": "Creator",
+        "cast": "Cast",
+        "language": "Language",
+        "rating": "Rating",
+        "episodes": "Episodes"
+      },
+      "upNext": {
+        "label": "Up Next",
+        "fallbackDescription": "Dive into the next chapter of this exclusive series.",
+        "durationLabel": "Duration",
+        "minutes": "{{minutes}} min",
+        "continue": "Continue Episode"
+      },
+      "sections": {
+        "originalsBadge": "Randa Plus Originals",
+        "seasonsEpisodesTitle": "Seasons & Episodes",
+        "seasonsEpisodesSubtitle": "{{seasons}} Seasons • {{episodes}} Episodes",
+        "moreToLoveBadge": "More To Love",
+        "recommendedTitle": "Recommended For You",
+        "recommendedSubtitle": "Hand-picked from the Randa Plus vault"
+      }
+    },
+    "play": {
+      "episodeLocked": "This episode is locked. Unlock it to watch."
+    },
+    "payment": {
+      "confirmedShow": "Payment confirmed! Enjoy the show.",
+      "stillWaiting": "Still waiting for payment confirmation. Check again after you complete payment.",
+      "seasonUnlocked": "Season unlocked! Enjoy.",
+      "episodeUnlocked": "Episode unlocked! Enjoy."
+    },
+    "purchase": {
+      "errors": {
+        "paymentLinkUnavailable": "Payment link unavailable. Please try again."
+      },
+      "redirecting": {
+        "withAmountDiscount": "Redirecting to checkout ({{amount}} with discount) to unlock {{scope}}...",
+        "withAmount": "Redirecting to checkout ({{amount}}) to unlock {{scope}}...",
+        "default": "Redirecting to checkout to unlock {{scope}}..."
+      },
+      "selectSeasonOrEpisode": "Select a season or episode to unlock.",
+      "selectEpisodeToUnlock": "Select an episode to unlock.",
+      "thisTitle": "this title"
+    },
+    "errors": {
+      "missingContentId": "Missing content id.",
+      "missingSeasonForEpisode": "Select a season before unlocking an episode."
+    },
+    "trailer": {
+      "fallbackTitle": "Trailer",
+      "notAvailable": "Trailer not available.",
+      "loadFailed": "Failed to load trailer."
     }
   },
   "payment": {
@@ -163,6 +754,419 @@
     "trailer": {
       "notAvailableForTitle": "Trailer not available for this title",
       "notAvailable": "Trailer not available"
+    }
+  },
+  "myLibrary": {
+    "episodeFallback": "Episode",
+    "loading": "Loading your library...",
+    "errors": {
+      "loadFailed": "Failed to load your library"
+    },
+    "hero": {
+      "eyebrow": "My Library",
+      "title": "Your Collection",
+      "subtitle": "All your unlocked movies, series, and episodes in one place."
+    },
+    "summary": {
+      "librarySize": "Library size",
+      "ownedTitles": "{{count}} owned title",
+      "ownedTitles_plural": "{{count}} owned titles",
+      "breakdown": "{{movies}} movies • {{series}} series",
+      "inProgress": "In progress",
+      "waiting": "{{count}} title started",
+      "waiting_plural": "{{count}} titles started",
+      "avgCompletion": "Avg. completion: {{percent}}%",
+      "hoursWatched": "Hours watched",
+      "hoursShort": "hrs",
+      "hoursHint": "Across your watch history"
+    },
+    "resume": {
+      "eyebrow": "Continue",
+      "title": "Continue Watching",
+      "hint": "Pick up where you left off on {{count}} title",
+      "hint_plural": "Pick up where you left off on {{count}} titles",
+      "watched": "{{percent}}% watched",
+      "left": "{{duration}} left"
+    },
+    "filters": {
+      "all": "All ({{count}})",
+      "movies": "Movies ({{count}})",
+      "series": "Series ({{count}})"
+    },
+    "collection": {
+      "eyebrow": "Your library",
+      "allTitles": "All Titles",
+      "movies": "Movies",
+      "series": "Series",
+      "hint": "Showing {{count}} title",
+      "hint_plural": "Showing {{count}} titles"
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "message": "Unlock a movie or series to see it in your library.",
+      "cta": "Go to Browse"
+    },
+    "badge": {
+      "owned": "OWNED",
+      "partialUnlocked": "UNLOCKED {{count}} EPISODE",
+      "partialUnlocked_plural": "UNLOCKED {{count}} EPISODES"
+    },
+    "rating": {
+      "na": "N/A"
+    },
+    "actions": {
+      "watch": "Watch",
+      "details": "Details"
+    },
+    "contentType": {
+      "movie": "Movie",
+      "series": "Series"
+    },
+    "duration": {
+      "minutes": "{{minutes}} min"
+    },
+    "episodes": {
+      "eyebrow": "Unlocked episodes",
+      "title": "Your Episodes",
+      "totalUnlocked": "{{count}} episode unlocked",
+      "totalUnlocked_plural": "{{count}} episodes unlocked",
+      "unlockedCount": "{{count}} unlocked episode",
+      "unlockedCount_plural": "{{count}} unlocked episodes",
+      "viewSeries": "View series"
+    },
+    "fallbacks": {
+      "series": "Series"
+    }
+  },
+  "support": {
+    "common": {
+      "back": "← Back",
+      "home": "Home",
+      "helpCenter": "Help Center",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "terms": "Terms",
+      "onThisPage": "On this page"
+    },
+    "helpCenter": {
+      "hero": {
+        "label": "Support",
+        "title": "Help Center",
+        "subtitle": "Quick answers and guides for common questions.",
+        "actions": {
+          "browseFaq": "Browse FAQ",
+          "contactSupport": "Contact support"
+        }
+      },
+      "nav": {
+        "gettingStarted": "Getting started",
+        "accountSecurity": "Account & security",
+        "billing": "Billing",
+        "playback": "Playback",
+        "devices": "Devices"
+      },
+      "sections": {
+        "gettingStarted": {
+          "eyebrow": "Welcome",
+          "title": "Getting started",
+          "subtitle": "Learn the basics of browsing, unlocking, and watching.",
+          "steps": {
+            "1": "Browse movies and series in Browse, Movies, or Series.",
+            "2": "Open a title to view details, trailer, and purchase options.",
+            "3": "Unlock a movie, season, or episode using your preferred payment method.",
+            "4": "Start watching instantly from your library or the title page."
+          },
+          "tutorialTitle": "Tutorial",
+          "tutorialSubtitle": "Watch a short walkthrough of the app experience.",
+          "tutorialMissing": "The tutorial video is not configured yet. <0>Check back soon.</0>"
+        },
+        "accountSecurity": {
+          "eyebrow": "Protect your account",
+          "title": "Account & security",
+          "subtitle": "Tips to keep your account safe and recover access.",
+          "cards": {
+            "passwords": {
+              "title": "Use strong passwords",
+              "body": "Choose a password you don’t reuse elsewhere and keep it private."
+            },
+            "google": {
+              "title": "Google sign-in",
+              "body": "If you signed up with Google, use the same Google account to log in."
+            },
+            "cantSignIn": {
+              "title": "Can’t sign in?",
+              "body": "Try resetting your password or reach out to support if you’re stuck."
+            }
+          }
+        },
+        "billing": {
+          "eyebrow": "Payments",
+          "title": "Billing & purchases",
+          "subtitle": "Help with payments, unlocks, and receipts.",
+          "bullets": {
+            "1": "Purchases unlock access to specific titles, seasons, or episodes.",
+            "2": "If your payment succeeded but access didn’t update, wait a moment and refresh.",
+            "3": "Keep your payment reference if you need support assistance."
+          }
+        },
+        "playback": {
+          "eyebrow": "Streaming",
+          "title": "Playback",
+          "subtitle": "Fix common playback issues quickly.",
+          "cards": {
+            "buffering": {
+              "title": "Buffering",
+              "body": "Try a faster connection, reduce other network usage, or restart the app."
+            },
+            "audio": {
+              "title": "Audio out of sync",
+              "body": "Pause and resume, or restart playback to re-sync audio."
+            }
+          }
+        },
+        "devices": {
+          "eyebrow": "Compatibility",
+          "title": "Devices",
+          "subtitle": "Watch on supported devices and keep things updated.",
+          "cards": {
+            "mobile": {
+              "title": "Mobile support",
+              "body": "Keep your app updated for the best performance and latest fixes."
+            },
+            "stuck": {
+              "title": "App stuck or crashing",
+              "body": "Try restarting the app or your device. If it continues, <0>contact support</0>."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Need more help?",
+        "body": "If you can’t find an answer, our support team can help.",
+        "actions": {
+          "openFaq": "Open FAQ",
+          "contactSupport": "Contact support"
+        }
+      }
+    },
+    "faq": {
+      "hero": {
+        "label": "Support",
+        "title": "Frequently asked questions",
+        "subtitle": "Answers to common questions about accounts, playback, and billing.",
+        "actions": {
+          "visitHelpCenter": "Visit Help Center",
+          "contactSupport": "Contact support"
+        }
+      },
+      "section": {
+        "eyebrow": "FAQ",
+        "title": "Browse answers",
+        "subtitle": "Choose a topic to see quick answers."
+      },
+      "groups": {
+        "account": {
+          "title": "Account",
+          "description": "Login, PIN, password, and access questions.",
+          "items": {
+            "methods": {
+              "q": "How do I log in?",
+              "a": "Use your phone number or your Google account if you signed up with Google."
+            },
+            "googlePassword": {
+              "q": "I used Google sign-in. Do I have a password?",
+              "a": "If you registered with Google, you typically log in with Google rather than a separate password."
+            },
+            "forgot": {
+              "q": "I forgot my PIN or password. What should I do?",
+              "a": "Reach out via <0>Contact</0> and we’ll help you recover access."
+            }
+          }
+        },
+        "playback": {
+          "title": "Playback",
+          "description": "Streaming performance and device issues.",
+          "items": {
+            "buffering": {
+              "q": "Why is the video buffering?",
+              "a": "Buffering is usually network-related. Try a stronger connection or reduce other downloads."
+            },
+            "audio": {
+              "q": "The audio is not synchronized.",
+              "a": "Pause and resume, or restart playback to re-sync."
+            },
+            "downloads": {
+              "q": "Can I download videos for offline viewing?",
+              "a": "Offline downloads may not be available for all titles or devices."
+            }
+          }
+        },
+        "billing": {
+          "title": "Billing",
+          "description": "Payments, unlocks, and refunds.",
+          "items": {
+            "paymentMethods": {
+              "q": "What payment methods do you support?",
+              "a": "Available payment methods depend on your region and the payment provider."
+            },
+            "notUnlocked": {
+              "q": "I paid but the content is still locked.",
+              "a": "Wait a moment and refresh. If it’s still locked, <0>contact us</0> with your payment reference."
+            },
+            "refunds": {
+              "q": "Do you offer refunds?",
+              "a": "Refund requests are reviewed case-by-case where allowed by law. See <0>Terms</0> for details."
+            }
+          }
+        }
+      },
+      "callout": {
+        "title": "Still need help?",
+        "body": "If your question isn’t listed, our team can assist.",
+        "actions": {
+          "helpCenter": "Help Center",
+          "contactSupport": "Contact support"
+        }
+      }
+    },
+    "contact": {
+      "hero": {
+        "label": "Support",
+        "title": "Contact us",
+        "subtitle": "Get help with billing, access, playback, or account issues.",
+        "actions": {
+          "checkFaq": "Check FAQ",
+          "writeMessage": "Write a message"
+        }
+      },
+      "channels": {
+        "email": "Email",
+        "phone": "Phone",
+        "whatsapp": "WhatsApp"
+      },
+      "direct": {
+        "eyebrow": "Direct",
+        "title": "Reach us directly",
+        "subtitle": "Use any of the available channels below.",
+        "notConfigured": "Support contact details are not configured yet."
+      },
+      "availability": {
+        "eyebrow": "Availability",
+        "title": "When we respond",
+        "response": {
+          "label": "Typical response time",
+          "value": "Within 24–48 hours"
+        },
+        "bestTime": {
+          "label": "Best time to reach us",
+          "value": "Weekdays"
+        },
+        "include": {
+          "label": "Include",
+          "value": "Your phone number and payment reference (if applicable)"
+        }
+      },
+      "form": {
+        "eyebrow": "Message",
+        "title": "Send a message",
+        "subtitle": "We’ll open your email app with a pre-filled draft.",
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "subject": "Subject",
+          "message": "Message"
+        },
+        "actions": {
+          "openDraft": "Open email draft"
+        }
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Email is required",
+        "subjectRequired": "Subject is required",
+        "messageMin": "Message must be at least 10 characters"
+      },
+      "toasts": {
+        "openingEmail": "Opening your email app..."
+      }
+    },
+    "terms": {
+      "hero": {
+        "label": "Legal",
+        "title": "Terms of Service",
+        "subtitle": "These terms govern your access to and use of the service. Last updated: {{date}}.",
+        "actions": {
+          "readTerms": "Read terms",
+          "contactLegal": "Contact legal"
+        }
+      },
+      "nav": {
+        "overview": "Overview",
+        "accounts": "Accounts",
+        "payments": "Payments",
+        "content": "Content & licensing",
+        "acceptableUse": "Acceptable use",
+        "disclaimers": "Disclaimers",
+        "changes": "Changes"
+      },
+      "sections": {
+        "overview": {
+          "eyebrow": "Agreement",
+          "title": "Overview",
+          "subtitle": "By using the service, you agree to these Terms. If you do not agree, do not use the service.",
+          "body": "These Terms apply to all visitors and users. Additional rules may apply to specific features (for example, purchases/unlocks or promotional offers)."
+        },
+        "accounts": {
+          "eyebrow": "Accounts",
+          "title": "Registration and security",
+          "subtitle": "Keep your credentials secure and accurate.",
+          "bullets": {
+            "1": "You are responsible for activity that occurs under your account.",
+            "2": "Provide accurate account information and keep it up to date.",
+            "3": "Do not share your credentials or attempt to access accounts you do not own."
+          }
+        },
+        "payments": {
+          "eyebrow": "Payments",
+          "title": "Billing, purchases, and refunds",
+          "subtitle": "How payments work and how to request help.",
+          "body1": "When you purchase or unlock content, you authorize us (and our payment providers) to charge the selected payment method.",
+          "body2": "Refund requests are reviewed case-by-case where allowed by applicable law. For purchase issues, contact us via <0>Contact</0> and include the payment reference."
+        },
+        "content": {
+          "eyebrow": "Content",
+          "title": "Licensing and availability",
+          "subtitle": "Titles may change over time.",
+          "bullets": {
+            "1": "Content availability can vary by region, licensing terms, and time period.",
+            "2": "Streaming is for personal, non-commercial use unless explicitly authorized in writing.",
+            "3": "We may update, remove, or replace titles and features to improve the service."
+          }
+        },
+        "acceptableUse": {
+          "eyebrow": "Acceptable use",
+          "title": "What you may not do",
+          "subtitle": "Rules that protect our members, partners, and infrastructure.",
+          "bullets": {
+            "1": "Do not reverse engineer, scrape, exploit, or interfere with the service.",
+            "2": "Do not share, redistribute, or publicly screen content without permission.",
+            "3": "Do not use the service for unlawful, harmful, or abusive activity."
+          }
+        },
+        "disclaimers": {
+          "eyebrow": "Disclaimers",
+          "title": "Service \u201Cas is\u201D",
+          "subtitle": "We work hard to keep the service stable, but outages can happen.",
+          "body": "The service is provided on an \u201Cas is\u201D and \u201Cas available\u201D basis. To the fullest extent permitted by law, we disclaim warranties of merchantability, fitness for a particular purpose, and non-infringement."
+        },
+        "changes": {
+          "eyebrow": "Changes",
+          "title": "Updates to these terms",
+          "subtitle": "We may update these Terms to reflect product or legal changes.",
+          "body1": "If we make material changes, we’ll provide notice in the app or by other reasonable means. Continued use of the service after updates means you accept the revised Terms.",
+          "body2": "Questions? Visit <0>Contact</0>."
+        }
+      }
     }
   }
 }

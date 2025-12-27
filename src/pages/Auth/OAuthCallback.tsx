@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import Loader from '@/components/common/Loader'
 import Button from '@/components/common/Button'
 import { useAuth } from '@/contexts/AuthContext'
@@ -112,6 +113,7 @@ const extractAuthFields = (raw: any) => {
 }
 
 const OAuthCallback: React.FC = () => {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const { completeOAuthLogin } = useAuth()
@@ -129,7 +131,7 @@ const OAuthCallback: React.FC = () => {
       const reportedError = getParam('error')
       const status = getParam('status')
       if (reportedError || status === 'error') {
-        throw new Error(reportedError || getParam('message') || 'Google sign-in failed.')
+        throw new Error(reportedError || getParam('message') || t('auth.oauth.errors.googleFailed'))
       }
 
       const payload = extractOAuthPayload(getParam)
@@ -145,7 +147,7 @@ const OAuthCallback: React.FC = () => {
 
         const fields = extractAuthFields(data)
         if (!fields.token) {
-          throw new Error('Google exchange succeeded but returned no token.')
+          throw new Error(t('auth.oauth.errors.exchangeMissingToken'))
         }
 
         await completeOAuthLogin({
@@ -159,7 +161,7 @@ const OAuthCallback: React.FC = () => {
 
       // 2) Also support token-in-URL redirects (some backends do this).
       if (!payload.token) {
-        throw new Error('Missing session token from Google response.')
+        throw new Error(t('auth.oauth.errors.missingSessionToken'))
       }
 
       await completeOAuthLogin({
@@ -172,7 +174,7 @@ const OAuthCallback: React.FC = () => {
 
     finalizeLogin().catch((err) => {
       if (!isMounted) return
-      const fallback = err instanceof Error ? err.message : 'Could not complete Google sign-in.'
+      const fallback = err instanceof Error ? err.message : t('auth.oauth.errors.couldNotComplete')
       setError(fallback)
       toast.error(fallback)
       redirectTimer = window.setTimeout(() => navigate('/login', { replace: true }), 4000)
@@ -184,19 +186,19 @@ const OAuthCallback: React.FC = () => {
         window.clearTimeout(redirectTimer)
       }
     }
-  }, [completeOAuthLogin, location.hash, location.search, navigate])
+  }, [completeOAuthLogin, location.hash, location.search, navigate, t])
 
   if (!error) {
-    return <Loader fullScreen text="Finishing Google login..." />
+    return <Loader fullScreen text={t('auth.oauth.finishing')} />
   }
 
   return (
     <div className={styles['login-container']}>
       <div className={styles['login-box']}>
-        <h2 className={styles.title}>Google sign-in failed</h2>
+        <h2 className={styles.title}>{t('auth.oauth.failedTitle')}</h2>
         <p className={styles['helper-note']}>{error}</p>
         <Button type="button" variant="secondary" fullWidth onClick={() => navigate('/login')}>
-          Back to login
+          {t('auth.oauth.backToLogin')}
         </Button>
       </div>
     </div>
