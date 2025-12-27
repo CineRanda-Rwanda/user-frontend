@@ -372,29 +372,30 @@ const Navbar: React.FC = () => {
             >
               {t('nav.help')}
             </NavLink>
-            {isAuthenticated ? (
-              null
-            ) : (
-              <>
-                <NavLink
-                  to="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
-                  }
+
+            {!isAuthenticated && (
+              <div className={styles.mobileAuthButtons}>
+                <button
+                  type="button"
+                  className={styles.loginButton}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    navigate('/login')
+                  }}
                 >
                   {t('nav.auth.login')}
-                </NavLink>
-                <NavLink
-                  to="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
-                  }
+                </button>
+                <button
+                  type="button"
+                  className={styles.signupButton}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    navigate('/register')
+                  }}
                 >
                   {t('nav.auth.signUp')}
-                </NavLink>
-              </>
+                </button>
+              </div>
             )}
           </div>
         </div>

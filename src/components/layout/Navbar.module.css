@@ -663,6 +663,22 @@
     border-color: rgba(255, 215, 0, 0.6);
     background: rgba(255, 215, 0, 0.12);
   }
+
+  .mobileAuthButtons {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+  }
+
+  .mobileAuthButtons button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* On small screens, show auth actions inside the hamburger menu. */
+  .authButtons {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
