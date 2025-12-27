@@ -80,7 +80,7 @@ const Wallet = () => {
       setIsTopUpLoading(true);
       const { paymentLink } = await topUpWallet(numericAmount);
       toast.success('Redirecting you to Flutterwave...');
-      window.open(paymentLink, '_blank');
+      window.location.replace(paymentLink);
     } catch (error) {
       toast.error('Top-up failed. Please try again.');
     } finally {

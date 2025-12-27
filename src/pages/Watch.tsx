@@ -263,18 +263,8 @@ const Watch: React.FC = () => {
     }
     lastCheckoutRef.current = { url, openedAt: now }
 
-    const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer')
-    if (!checkoutWindow) {
-      toast.info(
-        <span>
-          Popup blocked.{' '}
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            Click here to open checkout
-          </a>
-          .
-        </span>
-      )
-    }
+    // Redirect in the same tab (replace current page) per UX request.
+    window.location.replace(url)
   }
 
   const startDirectCheckout = useCallback(
@@ -285,7 +275,7 @@ const Watch: React.FC = () => {
         throw new Error('Payment link unavailable.')
       }
       setPendingTransactionRef(response.transactionRef)
-      toast.info(`Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`)
+      toast.info(`Redirecting to checkout. Complete payment to unlock ${scopeLabel}.`)
       openCheckoutTab(paymentLink)
       beginPaymentPolling(contentId)
     },

@@ -41,9 +41,9 @@ const Wallet: React.FC = () => {
     try {
       const response = await topUpWallet(amount);
       toast.success('Redirecting to payment...');
-      // Open Flutterwave payment link in new window
+          // Redirect to Flutterwave checkout in the same tab
       if (response.paymentLink) {
-        window.open(response.paymentLink, '_blank');
+            window.location.replace(response.paymentLink);
       } else {
         toast.error('Payment link not generated');
       }

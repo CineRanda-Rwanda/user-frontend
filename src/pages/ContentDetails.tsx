@@ -410,18 +410,8 @@ const ContentDetails: React.FC = () => {
     }
     lastCheckoutRef.current = { url, openedAt: now };
 
-    const checkoutWindow = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!checkoutWindow) {
-      toast.info(
-        <span>
-          Popup blocked.{' '}
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            Click here to open checkout
-          </a>
-          .
-        </span>
-      );
-    }
+    // Redirect in the same tab (replace current page) per UX request.
+    window.location.replace(url);
   };
 
   const startDirectCheckout = useCallback(
@@ -447,9 +437,9 @@ const ContentDetails: React.FC = () => {
       toast.info(
         amountLabel
           ? discount && discount > 0
-            ? `Checkout opened in a new tab. Pay ${amountLabel} (discount applied) to unlock ${scopeLabel}.`
-            : `Checkout opened in a new tab. Pay ${amountLabel} to unlock ${scopeLabel}.`
-          : `Checkout opened in a new tab. Complete payment to unlock ${scopeLabel}.`
+            ? `Redirecting to checkout. Pay ${amountLabel} (discount applied) to unlock ${scopeLabel}.`
+            : `Redirecting to checkout. Pay ${amountLabel} to unlock ${scopeLabel}.`
+          : `Redirecting to checkout. Complete payment to unlock ${scopeLabel}.`
       );
       openCheckoutTab(paymentLink);
       if (payloadOverrides?.scope === 'episode' && payloadOverrides.episodeId) {
