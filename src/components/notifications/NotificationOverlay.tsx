@@ -196,7 +196,14 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
   }
 
   return (
-    <div className={styles.overlay}>
+    <div
+      id="notifications-panel"
+      data-notification-overlay
+      className={styles.overlay}
+      role="dialog"
+      aria-label={t('notifications.page.title')}
+      tabIndex={-1}
+    >
       <header className={styles.overlayHeader}>
         <div>
           <p className={styles.overlayLabel}>{t('notifications.overlay.label')}</p>
@@ -211,16 +218,18 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
             className={styles.iconButton}
             onClick={handleRefresh}
             title={t('notifications.overlay.tooltips.refresh')}
+            aria-label={t('notifications.overlay.tooltips.refresh')}
           >
-            <FiRefreshCcw />
+            <FiRefreshCcw aria-hidden="true" />
           </button>
           <button
             type="button"
             className={styles.iconButton}
             onClick={handleClose}
             title={t('notifications.overlay.tooltips.close')}
+            aria-label={t('notifications.overlay.tooltips.close')}
           >
-            <FiX />
+            <FiX aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -267,7 +276,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className={styles.emptyState}>
-            <FiBell />
+            <FiBell aria-hidden="true" />
             <p>
               {filter === 'unread'
                 ? t('notifications.overlay.empty.unread')
@@ -278,14 +287,28 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
           <ul className={styles.list}>
             {filteredNotifications.map((notification) => {
               const unread = isNotificationUnread(notification)
+              const actionable =
+                filter !== 'archived' &&
+                !exitingIds.has(notification._id) &&
+                Boolean(notification.actionUrl || notification.actionType)
+
               return (
                 <li
                   key={notification._id}
                   className={`${styles.item} ${unread ? styles.itemUnread : ''} ${exitingIds.has(notification._id) ? styles.itemExiting : ''}`}
+                  role={actionable ? 'button' : undefined}
+                  tabIndex={actionable ? 0 : -1}
+                  aria-label={actionable ? notification.title : undefined}
                   onClick={(event) => {
                     if (filter === 'archived') return
                     if (isInteractiveTarget(event.target)) return
                     if (!notification.actionUrl && !notification.actionType) return
+                    handleOpenNotification(notification)
+                  }}
+                  onKeyDown={(event) => {
+                    if (!actionable) return
+                    if (event.key !== 'Enter' && event.key !== ' ') return
+                    event.preventDefault()
                     handleOpenNotification(notification)
                   }}
                   onPointerDown={(event) => {
@@ -320,8 +343,9 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                         className={styles.itemLink}
                         onClick={() => handleOpenNotification(notification)}
                         title={notification.actionLabel || t('notifications.actions.viewDetails')}
+                        aria-label={notification.actionLabel || t('notifications.actions.viewDetails')}
                       >
-                        <FiExternalLink />
+                        <FiExternalLink aria-hidden="true" />
                       </button>
                     )}
                     {filter === 'archived' ? (
@@ -351,8 +375,9 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                           onClick={() => startExit(notification._id, () => handleArchive(notification._id))}
                           disabled={exitingIds.has(notification._id)}
                           title={t('notifications.actions.moveToTrash')}
+                          aria-label={t('notifications.actions.moveToTrash')}
                         >
-                          <FiTrash />
+                          <FiTrash aria-hidden="true" />
                         </button>
                         {unread ? (
                           <button
@@ -361,7 +386,7 @@ const NotificationOverlay: React.FC<NotificationOverlayProps> = ({ onClose }) =>
                             onClick={() => handleMarkSingle(notification._id)}
                             disabled={exitingIds.has(notification._id)}
                           >
-                            <FiCheckCircle />
+                            <FiCheckCircle aria-hidden="true" />
                             {t('notifications.actions.markAsRead')}
                           </button>
                         ) : (

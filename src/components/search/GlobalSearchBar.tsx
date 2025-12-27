@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiSearch, FiChevronDown, FiPlay } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import { contentAPI } from '@/api/content'
 import { Content } from '@/types/content'
 import { extractCollection } from '@/utils/collection'
@@ -62,7 +63,7 @@ const extractResults = (response: any): Content[] => {
 }
 
 const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
-  placeholder = 'Search across movies and series...',
+  placeholder,
   context,
   className,
   showHeading = false,
@@ -71,8 +72,14 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   showSubmitButton = true,
   lockCompactLayout = false
 }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const suggestionsPanelId = useId()
+  const genreMenuId = useId()
+  const categoryMenuId = useId()
 
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -85,6 +92,9 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [genreOpen, setGenreOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState(false)
+
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1)
+  const suggestionRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   useEffect(() => {
     if (!showFilters) return
@@ -117,6 +127,7 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     if (debouncedQuery.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
+      setActiveSuggestionIndex(-1)
       return
     }
 
@@ -128,11 +139,13 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
         if (!cancelled) {
           setSuggestions(extractResults(response))
           setShowSuggestions(true)
+          setActiveSuggestionIndex(-1)
         }
       } catch (error) {
         console.warn('Unable to fetch search suggestions', error)
         if (!cancelled) {
           setSuggestions([])
+          setActiveSuggestionIndex(-1)
         }
       } finally {
         if (!cancelled) {
@@ -152,6 +165,7 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       if (!wrapperRef.current) return
       if (!wrapperRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
+        setActiveSuggestionIndex(-1)
         setGenreOpen(false)
         setCategoryOpen(false)
       }
@@ -167,20 +181,20 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   }, [])
 
   const selectedGenreLabel = useMemo(() => {
-    if (!selectedGenres.length) return 'All genres'
+    if (!selectedGenres.length) return t('globalSearch.filters.genres.all')
     if (selectedGenres.length === 1) {
-      return genres.find((g) => g._id === selectedGenres[0])?.name || '1 genre'
+      return genres.find((g) => g._id === selectedGenres[0])?.name || t('globalSearch.filters.genres.count', { count: 1 })
     }
-    return `${selectedGenres.length} genres`
-  }, [selectedGenres, genres])
+    return t('globalSearch.filters.genres.count', { count: selectedGenres.length })
+  }, [selectedGenres, genres, t])
 
   const selectedCategoryLabel = useMemo(() => {
-    if (!selectedCategories.length) return 'All categories'
+    if (!selectedCategories.length) return t('globalSearch.filters.categories.all')
     if (selectedCategories.length === 1) {
-      return categories.find((c) => c._id === selectedCategories[0])?.name || '1 category'
+      return categories.find((c) => c._id === selectedCategories[0])?.name || t('globalSearch.filters.categories.count', { count: 1 })
     }
-    return `${selectedCategories.length} categories`
-  }, [selectedCategories, categories])
+    return t('globalSearch.filters.categories.count', { count: selectedCategories.length })
+  }, [selectedCategories, categories, t])
 
   const handleSubmit = (event?: React.FormEvent) => {
     event?.preventDefault()
@@ -200,14 +214,20 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     if (!content?._id) return
     navigate(`/content/${content._id}`)
     setShowSuggestions(false)
+    setActiveSuggestionIndex(-1)
   }
 
-  const renderSuggestion = (item: Content) => (
+  const renderSuggestion = (item: Content, index: number) => (
     <button
       type="button"
       key={item._id}
       className={styles.suggestionItem}
       onClick={() => handleSuggestionNavigate(item)}
+      aria-label={t('globalSearch.suggestions.openAria', { title: item.title })}
+      ref={(node) => {
+        suggestionRefs.current[index] = node
+      }}
+      role="option"
     >
       <div className={styles.suggestionLeft}>
         <img
@@ -225,12 +245,12 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
         <div>
           <p className={styles.suggestionTitle}>{item.title}</p>
           <p className={styles.suggestionMeta}>
-            {item.contentType || 'Content'}
+            {item.contentType || t('common.content')}
             {item.releaseYear ? ` • ${item.releaseYear}` : ''}
           </p>
         </div>
       </div>
-      <FiPlay size={16} />
+      <FiPlay size={16} aria-hidden="true" focusable="false" />
     </button>
   )
 
@@ -243,40 +263,73 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  const resolvedPlaceholder = placeholder ?? t('globalSearch.placeholder')
+
   return (
     <div className={wrapperClasses} ref={wrapperRef}>
       {showHeading && (
-        <p className={styles.sectionLabel}>Find something to watch</p>
+        <p className={styles.sectionLabel}>{t('globalSearch.heading')}</p>
       )}
       <form className={styles.inputShell} onSubmit={handleSubmit}>
-        <FiSearch className={styles.searchIcon} />
+        <FiSearch className={styles.searchIcon} aria-hidden="true" focusable="false" />
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              setShowSuggestions(false)
+              setActiveSuggestionIndex(-1)
+              setGenreOpen(false)
+              setCategoryOpen(false)
+              return
+            }
+
+            if (event.key === 'ArrowDown') {
+              if (suggestions.length) {
+                event.preventDefault()
+                setShowSuggestions(true)
+                setActiveSuggestionIndex(0)
+                requestAnimationFrame(() => suggestionRefs.current[0]?.focus())
+              }
+            }
+          }}
           onFocus={() => {
             if (suggestions.length) {
               setShowSuggestions(true)
             }
           }}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className={styles.input}
+          aria-label={t('globalSearch.inputAria')}
+          aria-controls={showSuggestions ? suggestionsPanelId : undefined}
+          aria-expanded={showSuggestions}
         />
         {showSubmitButton && (
           <button type="submit" className={styles.searchButton}>
-            Search
+            {t('globalSearch.actions.search')}
           </button>
         )}
       </form>
 
       {showSuggestions && (
-        <div className={styles.suggestionsPanel}>
+        <div
+          className={styles.suggestionsPanel}
+          id={suggestionsPanelId}
+          role="listbox"
+          aria-label={t('globalSearch.suggestions.listAria')}
+        >
           {loadingSuggestions ? (
-            <div className={styles.suggestionItem}>Searching…</div>
+            <div className={styles.suggestionItem} role="status" aria-live="polite">
+              {t('globalSearch.status.searching')}
+            </div>
           ) : suggestions.length ? (
-            suggestions.map(renderSuggestion)
+            suggestions.map((item, index) => renderSuggestion(item, index))
           ) : (
-            <div className={styles.suggestionItem}>No matches yet</div>
+            <div className={styles.suggestionItem} role="status" aria-live="polite">
+              {t('globalSearch.status.noMatches')}
+            </div>
           )}
         </div>
       )}
@@ -292,14 +345,22 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                 setGenreOpen((prev) => !prev)
                 setCategoryOpen(false)
               }}
+              aria-haspopup="listbox"
+              aria-expanded={genreOpen}
+              aria-controls={genreMenuId}
             >
               {selectedGenreLabel}
-              <FiChevronDown />
+              <FiChevronDown aria-hidden="true" focusable="false" />
             </button>
             {genreOpen && (
-              <div className={styles.dropdownMenu}>
-                <button type="button" onClick={() => setSelectedGenres([])}>
-                  All genres
+              <div className={styles.dropdownMenu} id={genreMenuId} role="listbox" aria-multiselectable="true">
+                <button
+                  type="button"
+                  onClick={() => setSelectedGenres([])}
+                  role="option"
+                  aria-selected={!selectedGenres.length}
+                >
+                  {t('globalSearch.filters.genres.all')}
                 </button>
                 {genres.map((genre) => (
                   <button
@@ -307,6 +368,8 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                     key={genre._id}
                     className={selectedGenres.includes(genre._id) ? styles.dropdownOptionActive : ''}
                     onClick={() => setSelectedGenres((prev) => toggleSelection(prev, genre._id))}
+                    role="option"
+                    aria-selected={selectedGenres.includes(genre._id)}
                   >
                     {genre.name}
                   </button>
@@ -323,14 +386,22 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                 setCategoryOpen((prev) => !prev)
                 setGenreOpen(false)
               }}
+              aria-haspopup="listbox"
+              aria-expanded={categoryOpen}
+              aria-controls={categoryMenuId}
             >
               {selectedCategoryLabel}
-              <FiChevronDown />
+              <FiChevronDown aria-hidden="true" focusable="false" />
             </button>
             {categoryOpen && (
-              <div className={styles.dropdownMenu}>
-                <button type="button" onClick={() => setSelectedCategories([])}>
-                  All categories
+              <div className={styles.dropdownMenu} id={categoryMenuId} role="listbox" aria-multiselectable="true">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategories([])}
+                  role="option"
+                  aria-selected={!selectedCategories.length}
+                >
+                  {t('globalSearch.filters.categories.all')}
                 </button>
                 {categories.map((category) => (
                   <button
@@ -340,6 +411,8 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                     onClick={() =>
                       setSelectedCategories((prev) => toggleSelection(prev, category._id))
                     }
+                    role="option"
+                    aria-selected={selectedCategories.includes(category._id)}
                   >
                     {category.name}
                   </button>

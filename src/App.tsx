@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import React, { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
@@ -257,6 +257,14 @@ const AppRoutes = () => {
 }
 
 function App() {
+  const { i18n } = useTranslation()
+
+  useEffect(() => {
+    const raw = i18n.language || 'en'
+    const normalized = raw.split('-')[0] || 'en'
+    document.documentElement.lang = normalized
+  }, [i18n.language])
+
   return (
     <AuthProvider>
       <NotificationsProvider>

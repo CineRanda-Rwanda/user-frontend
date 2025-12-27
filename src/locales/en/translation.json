@@ -23,12 +23,22 @@
       "myProfile": "My Profile",
       "myLibrary": "My Library",
       "settings": "Settings",
-      "logout": "Logout"
+      "logout": "Logout",
+      "openMenuAria": "Open profile menu",
+      "menuLabel": "Profile menu"
     }
   },
   "common": {
     "back": "Back",
+    "skipToContent": "Skip to main content",
     "close": "Close",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "viewAll": "View All",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "untitled": "Untitled",
+    "content": "Content",
     "goToBrowse": "Go to Browse",
     "loading": "Loading...",
     "updating": "Updating...",
@@ -36,6 +46,22 @@
     "next": "Next",
     "cancel": "Cancel",
     "comingSoon": "Coming soon!"
+  },
+  "animatedCarousel": {
+    "defaultTitle": "New Releases",
+    "goToItem": "Go to item {{index}}",
+    "openAria": "Open {{title}}"
+  },
+  "watchMenu": {
+    "label": "Watch options",
+    "watchTrailer": "Watch Trailer",
+    "watchFullVideo": "Watch Full Video"
+  },
+  "trailerModal": {
+    "title": "{{title}} - Trailer",
+    "closeAria": "Close trailer",
+    "invalidUrl": "Unable to load trailer. Invalid YouTube URL.",
+    "watchOnYouTube": "Watch on YouTube"
   },
   "browse": {
     "loading": "Loading content...",
@@ -121,6 +147,34 @@
       "errorTitle": "Something went wrong",
       "startTitle": "Start searching",
       "startMessage": "Enter a search query or use filters to discover movies and series."
+    }
+  },
+  "globalSearch": {
+    "heading": "Find something to watch",
+    "placeholder": "Search across movies and series...",
+    "inputAria": "Search",
+    "actions": {
+      "search": "Search"
+    },
+    "status": {
+      "searching": "Searching…",
+      "noMatches": "No matches yet"
+    },
+    "suggestions": {
+      "listAria": "Search suggestions",
+      "openAria": "Open {{title}}"
+    },
+    "filters": {
+      "genres": {
+        "all": "All genres",
+        "count": "{{count}} genre",
+        "count_plural": "{{count}} genres"
+      },
+      "categories": {
+        "all": "All categories",
+        "count": "{{count}} category",
+        "count_plural": "{{count}} categories"
+      }
     }
   },
   "watch": {
@@ -236,7 +290,8 @@
       "title": "Filters"
     },
     "actions": {
-      "reset": "Reset"
+      "reset": "Reset",
+      "closeAria": "Close filters"
     },
     "summary": {
       "activeFilters": "{{count}} active filter",
@@ -739,9 +794,15 @@
   }
   ,
   "content": {
+    "card": {
+      "openAria": "Open details for {{title}}"
+    },
     "badge": {
       "featured": "Featured",
       "new": "New"
+    },
+    "rating": {
+      "na": "N/A"
     },
     "status": {
       "locked": "Locked",

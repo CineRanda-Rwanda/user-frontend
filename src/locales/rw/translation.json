@@ -23,12 +23,22 @@
       "myProfile": "Umwirondoro",
       "myLibrary": "Isomero ryanjye",
       "settings": "Igenamiterere",
-      "logout": "Sohoka"
+      "logout": "Sohoka",
+      "openMenuAria": "Fungura menu y'umwirondoro",
+      "menuLabel": "Menu y'umwirondoro"
     }
   },
   "common": {
     "back": "Subira inyuma",
+    "skipToContent": "Simbuka ujye ku birimo",
     "close": "Funga",
+    "showPassword": "Erekana ijambo ry'ibanga",
+    "hidePassword": "Hisha ijambo ry'ibanga",
+    "viewAll": "Reba byose",
+    "scrollLeft": "Jya ibumoso",
+    "scrollRight": "Jya iburyo",
+    "untitled": "Nta zina",
+    "content": "Ibikubiyemo",
     "goToBrowse": "Jya muri Browse",
     "loading": "Birimo gupakira...",
     "updating": "Birimo kuvugururwa...",
@@ -36,6 +46,22 @@
     "next": "Ikurikira",
     "cancel": "Hagarika",
     "comingSoon": "Biraje vuba!"
+  },
+  "animatedCarousel": {
+    "defaultTitle": "Ibisohotse vuba",
+    "goToItem": "Jya ku kintu {{index}}",
+    "openAria": "Fungura {{title}}"
+  },
+  "watchMenu": {
+    "label": "Amahitamo yo kureba",
+    "watchTrailer": "Reba Trailer",
+    "watchFullVideo": "Reba Video Yuzuye"
+  },
+  "trailerModal": {
+    "title": "{{title}} - Trailer",
+    "closeAria": "Funga trailer",
+    "invalidUrl": "Ntibishoboye gupakira trailer. YouTube URL si yo.",
+    "watchOnYouTube": "Reba kuri YouTube"
   },
   "browse": {
     "loading": "Birimo gupakira ibikubiyemo...",
@@ -121,6 +147,34 @@
       "errorTitle": "Habaye ikibazo",
       "startTitle": "Tangira gushakisha",
       "startMessage": "Andika icyo ushaka cyangwa ukoreshe filters ushakishe filimi na seriya."
+    }
+  },
+  "globalSearch": {
+    "heading": "Shakisha icyo wareba",
+    "placeholder": "Shakisha muri filimi na seriya...",
+    "inputAria": "Shakisha",
+    "actions": {
+      "search": "Shakisha"
+    },
+    "status": {
+      "searching": "Turimo gushakisha…",
+      "noMatches": "Nta bisubizo biraboneka"
+    },
+    "suggestions": {
+      "listAria": "Ibyifuzo byo gushakisha",
+      "openAria": "Fungura {{title}}"
+    },
+    "filters": {
+      "genres": {
+        "all": "Genres zose",
+        "count": "Genre {{count}}",
+        "count_plural": "Genres {{count}}"
+      },
+      "categories": {
+        "all": "Categories zose",
+        "count": "Category {{count}}",
+        "count_plural": "Categories {{count}}"
+      }
     }
   },
   "watch": {
@@ -236,7 +290,8 @@
       "title": "Filters"
     },
     "actions": {
-      "reset": "Siba"
+      "reset": "Siba",
+      "closeAria": "Funga filters"
     },
     "summary": {
       "activeFilters": "Filter {{count}} iri gukora",
@@ -738,9 +793,15 @@
     "copyright": "{{year}} Randa Plus. Uburenganzira bwose burabitswe."
   },
   "content": {
+    "card": {
+      "openAria": "Fungura ibisobanuro bya {{title}}"
+    },
     "badge": {
       "featured": "Byatoranyijwe",
       "new": "Gishya"
+    },
+    "rating": {
+      "na": "N/A"
     },
     "status": {
       "locked": "Birafunze",
@@ -842,6 +903,8 @@
       "back": "← Subira inyuma",
       "home": "Ahabanza",
       "helpCenter": "Ubufasha",
+      "showPassword": "Erekana ijambo ry'ibanga",
+      "hidePassword": "Hisha ijambo ry'ibanga",
       "faq": "Ibibazo",
       "contact": "Twandikire",
       "terms": "Amategeko",

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { Content } from '@/types/content'
 import ContentCard from './ContentCard'
+import { useTranslation } from 'react-i18next'
 import styles from './ContentRow.module.css'
 
 interface ContentRowProps {
@@ -24,6 +25,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
   autoAdvance = false,
   autoAdvanceIntervalMs = 3500,
 }) => {
+  const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
   const isSingle = content.length === 1
   const isFew = content.length > 1 && content.length <= 4
@@ -105,7 +107,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
         <h2 className={styles.title}>{title}</h2>
         {viewAllLink && (
           <Link to={viewAllLink} className={styles.viewAll}>
-            View All
+            {t('common.viewAll')}
           </Link>
         )}
       </div>
@@ -115,10 +117,10 @@ const ContentRow: React.FC<ContentRowProps> = ({
           <button
             className={`${styles.scrollButton} ${styles.left}`}
             onClick={() => scroll('left')}
-            aria-label="Scroll left"
+            aria-label={t('common.scrollLeft')}
             type="button"
           >
-            <FiChevronLeft />
+            <FiChevronLeft aria-hidden="true" />
           </button>
         )}
 
@@ -140,10 +142,10 @@ const ContentRow: React.FC<ContentRowProps> = ({
           <button
             className={`${styles.scrollButton} ${styles.right}`}
             onClick={() => scroll('right')}
-            aria-label="Scroll right"
+            aria-label={t('common.scrollRight')}
             type="button"
           >
-            <FiChevronRight />
+            <FiChevronRight aria-hidden="true" />
           </button>
         )}
       </div>

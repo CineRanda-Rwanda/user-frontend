@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { Content } from '@/types/content'
+import { useTranslation } from 'react-i18next'
 import styles from './AnimatedCarousel.module.css'
 
 interface AnimatedCarouselProps {
@@ -9,19 +10,12 @@ interface AnimatedCarouselProps {
   title?: string
 }
 
-const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New Releases' }) => {
+const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(true)
   const intervalRef = useRef<number | null>(null)
-
-  // Debug: Log items to see what we're receiving
-  useEffect(() => {
-    console.log('AnimatedCarousel items:', items)
-    if (items.length > 0) {
-      console.log('First item posterImageUrl:', items[0].posterImageUrl)
-    }
-  }, [items])
 
   useEffect(() => {
     if (isAnimating && items.length > 0) {
@@ -39,13 +33,10 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
 
   const handleItemClick = (item: Content) => {
     setIsAnimating(false)
-    console.log('Clicked item:', item.title, 'Type:', item.contentType)
     
     // Check both contentType and type field for compatibility
     const type = item.contentType || (item as any).type
     const route = type === 'Movie' ? '/movies' : '/series'
-    
-    console.log('Navigating to:', route)
     navigate(`${route}?selected=${item._id}`)
   }
 
@@ -107,6 +98,7 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
   // Get the primary (focused) item for background
   const primaryItem = visibleItems.find(item => item.focusLevel === 'primary')
   const backgroundImage = primaryItem?.item.posterImageUrl || ''
+  const heading = title ?? t('animatedCarousel.defaultTitle')
 
   return (
     <div className={styles.carouselContainer}>
@@ -115,31 +107,36 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
         <div 
           className={styles.backgroundImage}
           style={{ backgroundImage: `url(${backgroundImage})` }}
+          aria-hidden="true"
         />
       )}
       
-      {title && <h2 className={styles.title}>{title}</h2>}
+      {heading && <h2 className={styles.title}>{heading}</h2>}
       
       <div 
         className={styles.carousel}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onFocusCapture={() => setIsAnimating(false)}
+        onBlurCapture={() => setIsAnimating(true)}
       >
         {/* Previous Button */}
         <button
           className={`${styles.navButton} ${styles.prevButton}`}
           onClick={goToPrevious}
-          aria-label="Previous"
+          aria-label={t('common.previous')}
         >
-          <FiChevronLeft />
+          <FiChevronLeft aria-hidden="true" />
         </button>
 
         <div className={styles.track}>
           {visibleItems.map(({ item, focusLevel, position, key }) => (
-            <div
+            <button
               key={key}
               className={`${styles.item} ${styles[focusLevel]}`}
               onClick={() => handleItemClick(item)}
+              type="button"
+              aria-label={t('animatedCarousel.openAria', { title: item.title })}
               style={{
                 transform: `translateX(${position * 200}px) scale(${
                   focusLevel === 'primary' ? 1.08 : 0.95
@@ -168,7 +165,7 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -176,9 +173,9 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
         <button
           className={`${styles.navButton} ${styles.nextButton}`}
           onClick={goToNext}
-          aria-label="Next"
+          aria-label={t('common.next')}
         >
-          <FiChevronRight />
+          <FiChevronRight aria-hidden="true" />
         </button>
 
         {/* Navigation dots */}
@@ -191,7 +188,7 @@ const AnimatedCarousel: React.FC<AnimatedCarouselProps> = ({ items, title = 'New
                 setCurrentIndex(index)
                 setIsAnimating(false)
               }}
-              aria-label={`Go to item ${index + 1}`}
+              aria-label={t('animatedCarousel.goToItem', { index: index + 1 })}
             />
           ))}
         </div>

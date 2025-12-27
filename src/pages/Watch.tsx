@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
 import { toast } from 'react-toastify'
@@ -67,6 +67,14 @@ const Watch: React.FC = () => {
   } | null>(null)
 
   const [videoRefreshKey, setVideoRefreshKey] = useState(0)
+
+  const lockedPanelRef = useRef<HTMLDivElement>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+
+  const lockedTitleId = useId()
+  const lockedDescId = useId()
+  const lockedNoteId = useId()
+  const episodesListId = useId()
 
   // Machine-translation fallback for dynamic backend content.
   // Hooks must run even during loading states, so we compute safe defaults.
@@ -161,6 +169,59 @@ const Watch: React.FC = () => {
   const canPlayCurrent = Boolean(
     content && (isSeries ? activeEpisode && isEpisodeUnlocked(activeEpisode) : isContentUnlocked)
   )
+
+  const lockedOverlayOpen = Boolean(content && (!canPlayCurrent || !streamSource))
+
+  useEffect(() => {
+    if (!lockedOverlayOpen) return
+
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+
+    const focusInitial = window.setTimeout(() => {
+      lockedPanelRef.current?.focus()
+    }, 0)
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+      const container = lockedPanelRef.current
+      if (!container) return
+
+      const focusables = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((node) => !node.hasAttribute('disabled') && node.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) {
+        event.preventDefault()
+        container.focus()
+        return
+      }
+
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !container.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.clearTimeout(focusInitial)
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocusedRef.current?.focus?.()
+    }
+  }, [lockedOverlayOpen])
 
 
   const loadContent = useCallback(async () => {
@@ -537,9 +598,9 @@ const Watch: React.FC = () => {
 
   const durationLabel =
     content.contentType === 'Movie'
-      ? `${content.duration ?? Math.round((content.watchProgress?.duration || 0) / 60)} min`
+      ? t('watch.episodes.minutes', { minutes: content.duration ?? Math.round((content.watchProgress?.duration || 0) / 60) })
       : activeEpisode
-      ? `${activeEpisode.duration} min`
+      ? t('watch.episodes.minutes', { minutes: activeEpisode.duration })
       : '—'
 
   const unlockButtonDisabled = purchasing || paymentPolling
@@ -549,8 +610,8 @@ const Watch: React.FC = () => {
   return (
     <div className={styles.page}>
       <div className={styles.backBar}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <FiArrowLeft size={20} />
+        <button type="button" className={styles.backButton} onClick={() => navigate(-1)}>
+          <FiArrowLeft size={20} aria-hidden="true" focusable="false" />
           <span>{t('watch.backToBrowse')}</span>
         </button>
       </div>
@@ -575,12 +636,22 @@ const Watch: React.FC = () => {
               </video>
             </div>
 
-            {(!canPlayCurrent || !streamSource) && (
+            {lockedOverlayOpen && (
               <div className={styles.playerOverlay}>
-                <div className={styles.lockedPanel}>
-                  <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} />
-                  <h2 className={styles.lockedTitle}>{t('watch.overlay.unlockTitle')}</h2>
-                  <p style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
+                <div
+                  className={styles.lockedPanel}
+                  ref={lockedPanelRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby={lockedTitleId}
+                  aria-describedby={`${lockedDescId} ${lockedNoteId}`}
+                  tabIndex={-1}
+                >
+                  <FiLock size={40} color="#FFD700" style={{ marginBottom: 16 }} aria-hidden="true" focusable="false" />
+                  <h2 className={styles.lockedTitle} id={lockedTitleId}>
+                    {t('watch.overlay.unlockTitle')}
+                  </h2>
+                  <p id={lockedDescId} style={{ color: 'var(--text-gray)', marginBottom: 16 }}>
                     {t('watch.overlay.purchase')}{' '}
                     <strong>{content.title}</strong>{' '}
                     {isSeries && activeEpisode
@@ -598,7 +669,7 @@ const Watch: React.FC = () => {
                       >
                         {purchasing ? t('watch.overlay.openingCheckout') : paymentPolling ? t('watch.overlay.confirming') : (
                           <>
-                            <FiUnlock size={18} /> {t('watch.overlay.payAndUnlock')}
+                            <FiUnlock size={18} aria-hidden="true" focusable="false" /> {t('watch.overlay.payAndUnlock')}
                           </>
                         )}
                       </button>
@@ -608,10 +679,10 @@ const Watch: React.FC = () => {
                       className={`${styles.ctaButton} ${styles.secondaryCta}`}
                       onClick={() => navigate(`/content/${resolveContentIdentifier(content)}`)}
                     >
-                      <FiPlay size={16} /> {t('watch.overlay.viewDetails')}
+                      <FiPlay size={16} aria-hidden="true" focusable="false" /> {t('watch.overlay.viewDetails')}
                     </button>
                   </div>
-                  <p style={{ marginTop: 12, color: 'var(--text-gray)' }}>
+                  <p id={lockedNoteId} style={{ marginTop: 12, color: 'var(--text-gray)' }}>
                     {t('watch.overlay.checkoutNote')}
                   </p>
                   {paymentPolling && (
@@ -632,10 +703,14 @@ const Watch: React.FC = () => {
             </div>
           )}
 
-          {streamError && <div className={styles.streamError}>{streamError}</div>}
+          {streamError && (
+            <div className={styles.streamError} role="alert" aria-live="assertive">
+              {streamError}
+            </div>
+          )}
 
           {autoNextCountdown !== null && pendingNextEpisode && (
-            <div className={styles.autoNextBanner}>
+            <div className={styles.autoNextBanner} role="status" aria-live="polite">
               <p className={styles.autoNextTitle}>
                 {t('watch.autoNext.nextIn')}{' '}
                 <strong>{autoNextCountdown}s</strong>
@@ -688,7 +763,13 @@ const Watch: React.FC = () => {
           <div className={styles.episodesHeader}>
             <h2 className={styles.metaTitle} style={{ fontSize: 24 }}>{t('watch.episodes.title')}</h2>
             <div className={styles.episodesActions}>
-              <button className={styles.toggleButton} onClick={() => setEpisodesOpen((prev) => !prev)}>
+              <button
+                type="button"
+                className={styles.toggleButton}
+                onClick={() => setEpisodesOpen((prev) => !prev)}
+                aria-expanded={episodesOpen}
+                aria-controls={episodesListId}
+              >
                 {episodesOpen ? t('watch.episodes.hideList') : t('watch.episodes.showList')}
               </button>
             </div>
@@ -703,13 +784,14 @@ const Watch: React.FC = () => {
                     type="button"
                     onClick={() => handleSeasonChange(season.seasonNumber)}
                     className={`${styles.seasonTab} ${season.seasonNumber === activeSeason ? styles.seasonTabActive : ''}`}
+                    aria-pressed={season.seasonNumber === activeSeason}
                   >
                     {t('watch.episodes.season', { number: season.seasonNumber })}
                   </button>
                 ))}
               </div>
 
-              <div className={styles.episodesList}>
+              <div className={styles.episodesList} id={episodesListId}>
                 {currentSeason?.episodes?.map((episode) => {
                   const isActive = activeEpisode?._id === episode._id
                   const unlocked = isEpisodeUnlocked(episode)
@@ -732,13 +814,13 @@ const Watch: React.FC = () => {
                           <span>{t('watch.episodes.minutes', { minutes: episode.duration })}</span>
                           {!unlocked && (
                             <span className={styles.episodeLock}>
-                              <FiLock size={14} /> {t('watch.episodes.locked')}
+                              <FiLock size={14} aria-hidden="true" focusable="false" /> {t('watch.episodes.locked')}
                             </span>
                           )}
                           {isActive && <span style={{ color: 'var(--primary-yellow)' }}>{t('watch.episodes.nowPlaying')}</span>}
                         </div>
                       </div>
-                      <FiChevronRight size={20} color="var(--text-gray)" />
+                      <FiChevronRight size={20} color="var(--text-gray)" aria-hidden="true" focusable="false" />
                     </button>
                   )
                 })}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FcGoogle } from 'react-icons/fc'
@@ -23,6 +23,7 @@ const Login: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [generalError, setGeneralError] = useState('')
+  const generalErrorRef = useRef<HTMLDivElement | null>(null)
   const [pinModalOpen, setPinModalOpen] = useState(false)
   const [pinStep, setPinStep] = useState<'request' | 'reset'>('request')
   const [pinForm, setPinForm] = useState({ phoneNumber: '', code: '', newPin: '', confirmPin: '' })
@@ -34,6 +35,115 @@ const Login: React.FC = () => {
   const [passwordStep, setPasswordStep] = useState<'request' | 'reset'>('request')
   const [passwordError, setPasswordError] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
+
+  const pinOpenerRef = useRef<HTMLElement | null>(null)
+  const pinModalCardRef = useRef<HTMLDivElement | null>(null)
+  const passwordOpenerRef = useRef<HTMLElement | null>(null)
+  const passwordModalCardRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!generalError) return
+    generalErrorRef.current?.focus()
+  }, [generalError])
+
+  useEffect(() => {
+    const firstErrorField = Object.keys(errors).find((key) => errors[key])
+    if (!firstErrorField) return
+    const fieldEl = document.querySelector<HTMLInputElement>(`[name="${firstErrorField}"]`)
+    fieldEl?.focus()
+  }, [errors, method])
+
+  useEffect(() => {
+    if (!pinModalOpen) return
+
+    const card = pinModalCardRef.current
+    requestAnimationFrame(() => {
+      const firstFocusable = card?.querySelector<HTMLElement>(
+        'input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      firstFocusable?.focus()
+    })
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!card) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        closePinModal()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const focusables = Array.from(
+        card.querySelectorAll<HTMLElement>('input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !card.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [pinModalOpen, pinStep])
+
+  useEffect(() => {
+    if (!passwordModalOpen) return
+
+    const card = passwordModalCardRef.current
+    requestAnimationFrame(() => {
+      const firstFocusable = card?.querySelector<HTMLElement>(
+        'input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      firstFocusable?.focus()
+    })
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!card) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        closePasswordModal()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const focusables = Array.from(
+        card.querySelectorAll<HTMLElement>('input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !card.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [passwordModalOpen, passwordStep])
 
   const resetErrors = () => {
     setErrors({})
@@ -112,6 +222,7 @@ const Login: React.FC = () => {
   }
 
   const openPinModal = () => {
+    pinOpenerRef.current = document.activeElement as HTMLElement | null
     setPinModalOpen(true)
     setPinStep('request')
     setPinForm({ phoneNumber: '', code: '', newPin: '', confirmPin: '' })
@@ -125,6 +236,7 @@ const Login: React.FC = () => {
     setPinError('')
     setPinInfo('')
     setPinStep('request')
+    requestAnimationFrame(() => pinOpenerRef.current?.focus())
   }
 
   const handlePinInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,6 +297,7 @@ const Login: React.FC = () => {
   }
 
   const openPasswordModal = () => {
+    passwordOpenerRef.current = document.activeElement as HTMLElement | null
     setPasswordModalOpen(true)
     setPasswordStep('request')
     setPasswordForm({ email: '', token: '', password: '', confirmPassword: '' })
@@ -196,6 +309,7 @@ const Login: React.FC = () => {
     setPasswordLoading(false)
     setPasswordError('')
     setPasswordStep('request')
+    requestAnimationFrame(() => passwordOpenerRef.current?.focus())
   }
 
   const handlePasswordInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,7 +386,15 @@ const Login: React.FC = () => {
         <h2 className={styles.title}>{t('auth.login.title')}</h2>
 
         {generalError && (
-          <div className={styles['error-box']}>{generalError}</div>
+          <div
+            ref={generalErrorRef}
+            className={styles['error-box']}
+            role="alert"
+            aria-live="assertive"
+            tabIndex={-1}
+          >
+            {generalError}
+          </div>
         )}
 
         <div className={styles['method-toggle']}>
@@ -282,6 +404,7 @@ const Login: React.FC = () => {
               type="button"
               className={`${styles['method-tab']} ${method === option ? styles['method-tab-active'] : ''}`}
               onClick={() => handleMethodChange(option as LoginMethod)}
+              aria-pressed={method === option}
             >
               {option === 'phone' ? t('auth.login.methodPhone') : t('auth.login.methodEmail')}
             </button>
@@ -294,6 +417,7 @@ const Login: React.FC = () => {
               <Input
                 type="tel"
                 name="phoneNumber"
+                label={t('auth.register.phonePlaceholder')}
                 placeholder={t('auth.register.phonePlaceholder')}
                 value={phoneForm.phoneNumber}
                 onChange={handlePhoneChange}
@@ -306,6 +430,7 @@ const Login: React.FC = () => {
               <Input
                 type="password"
                 name="pin"
+                label={t('auth.login.pinPlaceholder')}
                 placeholder={t('auth.login.pinPlaceholder')}
                 value={phoneForm.pin}
                 onChange={handlePhoneChange}
@@ -321,6 +446,7 @@ const Login: React.FC = () => {
               <Input
                 type="email"
                 name="email"
+                label={t('auth.register.emailPlaceholder')}
                 placeholder={t('auth.register.emailPlaceholder')}
                 value={emailForm.email}
                 onChange={handleEmailChange}
@@ -332,6 +458,7 @@ const Login: React.FC = () => {
               <Input
                 type="password"
                 name="password"
+                label={t('auth.login.passwordPlaceholder')}
                 placeholder={t('auth.login.passwordPlaceholder')}
                 value={emailForm.password}
                 onChange={handleEmailChange}
@@ -392,12 +519,20 @@ const Login: React.FC = () => {
       </div>
 
       {pinModalOpen && (
-        <div className={styles['modal-backdrop']} role="dialog" aria-modal="true">
-          <div className={styles['modal-card']}>
+        <div
+          className={styles['modal-backdrop']}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="forgot-pin-title"
+          aria-describedby="forgot-pin-subtitle"
+        >
+          <div ref={pinModalCardRef} className={styles['modal-card']} tabIndex={-1}>
             <div className={styles['modal-header']}>
               <div>
-                <h3 className={styles['modal-title']}>{t('auth.forgotPin.title')}</h3>
-                <p className={styles['modal-subtitle']}>
+                <h3 id="forgot-pin-title" className={styles['modal-title']}>
+                  {t('auth.forgotPin.title')}
+                </h3>
+                <p id="forgot-pin-subtitle" className={styles['modal-subtitle']}>
                   {pinStep === 'request' ? t('auth.forgotPin.subtitleRequest') : t('auth.forgotPin.subtitleReset')}
                 </p>
               </div>
@@ -411,7 +546,11 @@ const Login: React.FC = () => {
               </button>
             </div>
 
-            {pinError && <div className={styles['error-box']}>{pinError}</div>}
+            {pinError && (
+              <div className={styles['error-box']} role="alert" aria-live="assertive">
+                {pinError}
+              </div>
+            )}
             {pinInfo && <p className={styles['modal-info']}>{pinInfo}</p>}
 
             <form className={styles['modal-form']} onSubmit={handlePinSubmit}>
@@ -419,6 +558,7 @@ const Login: React.FC = () => {
                 <Input
                   type="tel"
                   name="phoneNumber"
+                  label={t('auth.forgotPin.form.phonePlaceholder')}
                   placeholder={t('auth.forgotPin.form.phonePlaceholder')}
                   value={pinForm.phoneNumber}
                   onChange={handlePinInputChange}
@@ -431,6 +571,7 @@ const Login: React.FC = () => {
                   <Input
                     type="text"
                     name="code"
+                    label={t('auth.forgotPin.form.codePlaceholder')}
                     placeholder={t('auth.forgotPin.form.codePlaceholder')}
                     value={pinForm.code}
                     onChange={handlePinInputChange}
@@ -441,6 +582,7 @@ const Login: React.FC = () => {
                   <Input
                     type="password"
                     name="newPin"
+                    label={t('auth.forgotPin.form.newPinPlaceholder')}
                     placeholder={t('auth.forgotPin.form.newPinPlaceholder')}
                     value={pinForm.newPin}
                     onChange={handlePinInputChange}
@@ -452,6 +594,7 @@ const Login: React.FC = () => {
                   <Input
                     type="password"
                     name="confirmPin"
+                    label={t('auth.forgotPin.form.confirmPinPlaceholder')}
                     placeholder={t('auth.forgotPin.form.confirmPinPlaceholder')}
                     value={pinForm.confirmPin}
                     onChange={handlePinInputChange}
@@ -474,12 +617,20 @@ const Login: React.FC = () => {
       )}
 
       {passwordModalOpen && (
-        <div className={styles['modal-backdrop']} role="dialog" aria-modal="true">
-          <div className={styles['modal-card']}>
+        <div
+          className={styles['modal-backdrop']}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="forgot-password-title"
+          aria-describedby="forgot-password-subtitle"
+        >
+          <div ref={passwordModalCardRef} className={styles['modal-card']} tabIndex={-1}>
             <div className={styles['modal-header']}>
               <div>
-                <h3 className={styles['modal-title']}>{t('auth.forgotPassword.title')}</h3>
-                <p className={styles['modal-subtitle']}>
+                <h3 id="forgot-password-title" className={styles['modal-title']}>
+                  {t('auth.forgotPassword.title')}
+                </h3>
+                <p id="forgot-password-subtitle" className={styles['modal-subtitle']}>
                   {passwordStep === 'request'
                     ? t('auth.forgotPassword.subtitleRequest')
                     : t('auth.forgotPassword.subtitleReset')}
@@ -495,13 +646,18 @@ const Login: React.FC = () => {
               </button>
             </div>
 
-            {passwordError && <div className={styles['error-box']}>{passwordError}</div>}
+            {passwordError && (
+              <div className={styles['error-box']} role="alert" aria-live="assertive">
+                {passwordError}
+              </div>
+            )}
 
             <form className={styles['modal-form']} onSubmit={handlePasswordSubmit}>
               {passwordStep === 'request' ? (
                 <Input
                   type="email"
                   name="email"
+                  label={t('auth.forgotPassword.form.emailPlaceholder')}
                   placeholder={t('auth.forgotPassword.form.emailPlaceholder')}
                   value={passwordForm.email}
                   onChange={handlePasswordInputChange}
@@ -513,6 +669,7 @@ const Login: React.FC = () => {
                   <Input
                     type="text"
                     name="token"
+                    label={t('auth.forgotPassword.form.tokenPlaceholder')}
                     placeholder={t('auth.forgotPassword.form.tokenPlaceholder')}
                     value={passwordForm.token}
                     onChange={handlePasswordInputChange}
@@ -521,6 +678,7 @@ const Login: React.FC = () => {
                   <Input
                     type="password"
                     name="password"
+                    label={t('auth.forgotPassword.form.passwordPlaceholder')}
                     placeholder={t('auth.forgotPassword.form.passwordPlaceholder')}
                     value={passwordForm.password}
                     onChange={handlePasswordInputChange}
@@ -532,6 +690,7 @@ const Login: React.FC = () => {
                   <Input
                     type="password"
                     name="confirmPassword"
+                    label={t('auth.forgotPassword.form.confirmPasswordPlaceholder')}
                     placeholder={t('auth.forgotPassword.form.confirmPasswordPlaceholder')}
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordInputChange}

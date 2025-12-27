@@ -35,7 +35,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
   }
 
   return (
-    <div className={styles.card} onClick={handleClick}>
+    <button
+      type="button"
+      className={styles.card}
+      onClick={handleClick}
+      aria-label={t('content.card.openAria', { title })}
+    >
       <img
         src={content.posterImageUrl}
         alt={title}
@@ -48,14 +53,14 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
       )}
 
       {isLocked && (
-        <div className={styles.lockBadge} title={t('content.status.locked')}>
-          <FiLock size={16} />
+        <div className={styles.lockBadge} title={t('content.status.locked')} aria-label={t('content.status.locked')}>
+          <FiLock size={16} aria-hidden="true" />
         </div>
       )}
 
       {isUnlockedPremium && (
-        <div className={styles.unlockBadge} title={t('content.status.unlocked')}>
-          <FiUnlock size={16} />
+        <div className={styles.unlockBadge} title={t('content.status.unlocked')} aria-label={t('content.status.unlocked')}>
+          <FiUnlock size={16} aria-hidden="true" />
         </div>
       )}
 
@@ -67,8 +72,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
         <div className={styles.title}>{title}</div>
         <div className={styles.meta}>
           <span className={styles.rating}>
-            <FiStar fill="currentColor" />
-            {content.averageRating?.toFixed(1) || 'N/A'}
+            <FiStar fill="currentColor" aria-hidden="true" />
+            {content.averageRating?.toFixed(1) || t('content.rating.na')}
           </span>
           <span>•</span>
           <span>{content.releaseYear}</span>
@@ -76,7 +81,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, showBadge = false, h
           <span>{content.contentType}</span>
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 

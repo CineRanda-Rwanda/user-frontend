@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FiCalendar, FiMail, FiPhone, FiShield, FiUser, FiX } from 'react-icons/fi'
@@ -12,6 +12,15 @@ const Profile: React.FC = () => {
   const { t } = useTranslation()
   const { user, loading, refreshUser } = useAuth()
   const navigate = useNavigate()
+
+  const panelRef = useRef<HTMLElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+
+  const dialogTitleId = useId()
+  const pinErrorId = useId()
+  const passwordErrorId = useId()
+
   const [pinForm, setPinForm] = useState({ oldPin: '', newPin: '', confirmPin: '' })
   const [pinError, setPinError] = useState<string | null>(null)
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -54,6 +63,61 @@ const Profile: React.FC = () => {
       navigate('/browse')
     }
   }
+
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+
+    const focusInitial = window.setTimeout(() => {
+      closeButtonRef.current?.focus()
+    }, 0)
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        handleClose()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+      const container = panelRef.current
+      if (!container) return
+
+      const focusables = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((node) => !node.hasAttribute('disabled') && node.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) {
+        event.preventDefault()
+        container.focus()
+        return
+      }
+
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !container.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.clearTimeout(focusInitial)
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocusedRef.current?.focus?.()
+    }
+  }, [navigate])
 
   const handlePinSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -136,21 +200,33 @@ const Profile: React.FC = () => {
 
   return (
     <div className={styles.overlay}>
-      <section className={styles.panel}>
+      <section
+        className={styles.panel}
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={dialogTitleId}
+        tabIndex={-1}
+      >
         <button
           type="button"
           className={styles.closeButton}
           onClick={handleClose}
           aria-label={t('profilePage.closeAria')}
+          ref={closeButtonRef}
         >
-          <FiX size={18} />
+          <span aria-hidden="true">
+            <FiX size={18} />
+          </span>
         </button>
 
         <header className={styles.header}>
           <div className={styles.avatar}>{initials}</div>
           <div>
             <p className={styles.overline}>{planLabel}</p>
-            <h1 className={styles.title}>{displayName}</h1>
+            <h1 className={styles.title} id={dialogTitleId}>
+              {displayName}
+            </h1>
             <p className={styles.subtitle}>@{user.username || t('profilePage.fallbacks.username')}</p>
           </div>
         </header>
@@ -160,7 +236,9 @@ const Profile: React.FC = () => {
           <div className={styles.infoList}>
             {infoRows.map(({ label, value, icon: Icon }) => (
               <div className={styles.infoRow} key={label}>
-                <Icon size={16} />
+                <span aria-hidden="true">
+                  <Icon size={16} />
+                </span>
                 <div>
                   <p className={styles.infoLabel}>{label}</p>
                   <p className={styles.infoValue}>{value}</p>
@@ -188,6 +266,8 @@ const Profile: React.FC = () => {
                   maxLength={6}
                   value={pinForm.oldPin}
                   onChange={(event) => setPinForm({ ...pinForm, oldPin: event.target.value })}
+                  aria-invalid={Boolean(pinError)}
+                  aria-describedby={pinError ? pinErrorId : undefined}
                 />
               </label>
               <label className={styles.field}>
@@ -199,6 +279,8 @@ const Profile: React.FC = () => {
                   maxLength={6}
                   value={pinForm.newPin}
                   onChange={(event) => setPinForm({ ...pinForm, newPin: event.target.value })}
+                  aria-invalid={Boolean(pinError)}
+                  aria-describedby={pinError ? pinErrorId : undefined}
                 />
               </label>
               <label className={styles.field}>
@@ -210,9 +292,15 @@ const Profile: React.FC = () => {
                   maxLength={6}
                   value={pinForm.confirmPin}
                   onChange={(event) => setPinForm({ ...pinForm, confirmPin: event.target.value })}
+                  aria-invalid={Boolean(pinError)}
+                  aria-describedby={pinError ? pinErrorId : undefined}
                 />
               </label>
-              {pinError && <p className={styles.errorText}>{pinError}</p>}
+              {pinError && (
+                <p className={styles.errorText} id={pinErrorId} role="alert" aria-live="assertive">
+                  {pinError}
+                </p>
+              )}
               <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
                 {isSubmitting ? t('common.updating') : t('profilePage.pin.actions.save')}
               </button>
@@ -238,6 +326,8 @@ const Profile: React.FC = () => {
                   onChange={(event) =>
                     setPasswordForm({ ...passwordForm, currentPassword: event.target.value })
                   }
+                  aria-invalid={Boolean(passwordError)}
+                  aria-describedby={passwordError ? passwordErrorId : undefined}
                 />
               </label>
               <label className={styles.field}>
@@ -247,6 +337,8 @@ const Profile: React.FC = () => {
                   autoComplete="new-password"
                   value={passwordForm.newPassword}
                   onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })}
+                  aria-invalid={Boolean(passwordError)}
+                  aria-describedby={passwordError ? passwordErrorId : undefined}
                 />
               </label>
               <label className={styles.field}>
@@ -258,9 +350,15 @@ const Profile: React.FC = () => {
                   onChange={(event) =>
                     setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })
                   }
+                  aria-invalid={Boolean(passwordError)}
+                  aria-describedby={passwordError ? passwordErrorId : undefined}
                 />
               </label>
-              {passwordError && <p className={styles.errorText}>{passwordError}</p>}
+              {passwordError && (
+                <p className={styles.errorText} id={passwordErrorId} role="alert" aria-live="assertive">
+                  {passwordError}
+                </p>
+              )}
               <button type="submit" className={styles.primaryAction} disabled={isSubmitting}>
                 {isSubmitting ? t('common.updating') : t('profilePage.password.actions.save')}
               </button>

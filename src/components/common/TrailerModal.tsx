@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useId, useRef } from 'react'
 import { FiX } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import styles from './TrailerModal.module.css'
 
 interface TrailerModalProps {
@@ -10,27 +11,67 @@ interface TrailerModalProps {
 }
 
 const TrailerModal: React.FC<TrailerModalProps> = ({ isOpen, onClose, youtubeUrl, title }) => {
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
-    }
+  const { t } = useTranslation()
+  const titleId = useId()
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null)
+  const openerRef = useRef<HTMLElement | null>(null)
 
+  useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      openerRef.current = document.activeElement as HTMLElement | null
       document.body.style.overflow = 'hidden'
+      requestAnimationFrame(() => closeButtonRef.current?.focus())
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  useEffect(() => {
+    if (!isOpen) {
+      requestAnimationFrame(() => openerRef.current?.focus())
+      return
+    }
 
-  console.log('TrailerModal - isOpen:', isOpen, 'youtubeUrl:', youtubeUrl)
+    const dialogEl = dialogRef.current
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab') return
+      if (!dialogEl) return
+
+      const focusables = Array.from(
+        dialogEl.querySelectorAll<HTMLElement>('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !dialogEl.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
 
   // Extract video ID from YouTube URL
   const getYouTubeVideoId = (url: string): string | null => {
@@ -49,7 +90,6 @@ const TrailerModal: React.FC<TrailerModalProps> = ({ isOpen, onClose, youtubeUrl
   }
 
   const videoId = getYouTubeVideoId(youtubeUrl)
-  console.log('Extracted videoId:', videoId)
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -59,15 +99,24 @@ const TrailerModal: React.FC<TrailerModalProps> = ({ isOpen, onClose, youtubeUrl
 
   return (
     <div className={styles.modalOverlay} onClick={handleBackdropClick}>
-      <div className={styles.modalContent}>
+      <div
+        ref={dialogRef}
+        className={styles.modalContent}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
         <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>{title} - Trailer</h2>
+          <h2 id={titleId} className={styles.modalTitle}>
+            {t('trailerModal.title', { title })}
+          </h2>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             className={styles.closeButton}
-            aria-label="Close trailer"
+            aria-label={t('trailerModal.closeAria')}
           >
-            <FiX size={24} />
+            <FiX size={24} aria-hidden="true" />
           </button>
         </div>
         
@@ -83,14 +132,14 @@ const TrailerModal: React.FC<TrailerModalProps> = ({ isOpen, onClose, youtubeUrl
             />
           ) : (
             <div className={styles.errorMessage}>
-              <p>Unable to load trailer. Invalid YouTube URL.</p>
+              <p>{t('trailerModal.invalidUrl')}</p>
               <a
                 href={youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.fallbackLink}
               >
-                Watch on YouTube
+                {t('trailerModal.watchOnYouTube')}
               </a>
             </div>
           )}

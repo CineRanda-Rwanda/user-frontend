@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { FiFilter, FiX, FiRefreshCw } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
 import styles from './FilterPanel.module.css'
@@ -26,6 +26,73 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   onToggle
 }) => {
   const { t } = useTranslation()
+  const panelId = useId()
+  const titleId = `${panelId}-title`
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null)
+  const openerRef = useRef<HTMLElement | null>(null)
+
+  // Mount/unmount the panel so closed content isn't tabbable.
+  const [isMounted, setIsMounted] = useState(isOpen)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      openerRef.current = document.activeElement as HTMLElement | null
+      setIsMounted(true)
+      requestAnimationFrame(() => setIsVisible(true))
+      requestAnimationFrame(() => closeButtonRef.current?.focus())
+      return
+    }
+
+    // Closing: let the CSS transition complete, then unmount.
+    setIsVisible(false)
+    const timeout = window.setTimeout(() => {
+      setIsMounted(false)
+      requestAnimationFrame(() => openerRef.current?.focus())
+    }, 320)
+    return () => window.clearTimeout(timeout)
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const panelEl = panelRef.current
+    if (!panelEl) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onToggle()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusables = Array.from(
+        panelEl.querySelectorAll<HTMLElement>('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+
+      if (event.shiftKey) {
+        if (!active || active === first || !panelEl.contains(active)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onToggle])
   const handleGenreToggle = (genreId: string) => {
     const newGenres = filters.genres.includes(genreId)
       ? filters.genres.filter(id => id !== genreId)
@@ -67,9 +134,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
   return (
     <>
-      <button className={styles.toggleButton} onClick={onToggle}>
+      <button
+        className={styles.toggleButton}
+        onClick={onToggle}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+      >
         <div className={styles.toggleIcon}>
-          <FiFilter />
+          <FiFilter aria-hidden="true" />
         </div>
         <div className={styles.toggleCopy}>
           <span className={styles.toggleLabel}>{t('filterPanel.toggle.label')}</span>
@@ -80,21 +153,37 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         )}
       </button>
 
-      <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
-        <div className={styles.header}>
-          <h3>{t('filterPanel.header.title')}</h3>
-          <div className={styles.headerActions}>
-            {activeFilterCount > 0 && (
-              <button className={styles.resetButton} onClick={resetFilters}>
-                <FiRefreshCw />
-                {t('filterPanel.actions.reset')}
-              </button>
-            )}
-            <button className={styles.closeButton} onClick={onToggle}>
-              <FiX />
-            </button>
-          </div>
-        </div>
+      {isMounted && (
+        <>
+          <div
+            ref={panelRef}
+            id={panelId}
+            className={`${styles.panel} ${isVisible ? styles.open : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+          >
+            <div className={styles.header}>
+              <h3 id={titleId}>{t('filterPanel.header.title')}</h3>
+              <div className={styles.headerActions}>
+                {activeFilterCount > 0 && (
+                  <button className={styles.resetButton} onClick={resetFilters} type="button">
+                    <FiRefreshCw aria-hidden="true" />
+                    {t('filterPanel.actions.reset')}
+                  </button>
+                )}
+                <button
+                  ref={closeButtonRef}
+                  className={styles.closeButton}
+                  onClick={onToggle}
+                  type="button"
+                  aria-label={t('filterPanel.actions.closeAria')}
+                >
+                  <FiX aria-hidden="true" />
+                </button>
+              </div>
+            </div>
 
         <div className={styles.summaryBox}>
           {activeFilterCount > 0 ? (
@@ -170,9 +259,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           )}
 
         </div>
-      </div>
+          </div>
 
-      {isOpen && <div className={styles.overlay} onClick={onToggle} />}
+          <div className={styles.overlay} onClick={onToggle} aria-hidden="true" />
+        </>
+      )}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FcGoogle } from 'react-icons/fc'
 import { useTranslation } from 'react-i18next'
@@ -49,6 +49,19 @@ const Register: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [generalError, setGeneralError] = useState('')
+  const generalErrorRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!generalError) return
+    generalErrorRef.current?.focus()
+  }, [generalError])
+
+  useEffect(() => {
+    const firstErrorField = Object.keys(errors).find((key) => errors[key])
+    if (!firstErrorField) return
+    const fieldEl = document.querySelector<HTMLInputElement>(`[name="${firstErrorField}"]`)
+    fieldEl?.focus()
+  }, [errors, method, step])
 
   const resetErrors = () => {
     setErrors({})
@@ -234,7 +247,17 @@ const Register: React.FC = () => {
 
         <h2 className={styles.title}>{t('auth.register.title')}</h2>
 
-        {generalError && <div className={styles['error-box']}>{generalError}</div>}
+        {generalError && (
+          <div
+            ref={generalErrorRef}
+            className={styles['error-box']}
+            role="alert"
+            aria-live="assertive"
+            tabIndex={-1}
+          >
+            {generalError}
+          </div>
+        )}
 
         <div className={styles['method-toggle']}>
           {['phone', 'email'].map((option) => (
@@ -243,6 +266,7 @@ const Register: React.FC = () => {
               type="button"
               className={`${styles['method-tab']} ${method === option ? styles['method-tab-active'] : ''}`}
               onClick={() => handleMethodChange(option as RegisterMethod)}
+              aria-pressed={method === option}
             >
               {option === 'phone' ? t('auth.register.methodPhone') : t('auth.register.methodEmail')}
             </button>
@@ -254,6 +278,7 @@ const Register: React.FC = () => {
             <Input
               type="text"
               name="verificationCode"
+              label={t('auth.register.verificationCodePlaceholder')}
               placeholder={t('auth.register.verificationCodePlaceholder')}
               value={phoneVerificationCode}
               onChange={(event) => setPhoneVerificationCode(event.target.value)}
@@ -281,6 +306,7 @@ const Register: React.FC = () => {
             <Input
               type="text"
               name="emailVerificationCode"
+              label={t('auth.register.emailVerificationPlaceholder')}
               placeholder={t('auth.register.emailVerificationPlaceholder')}
               value={emailVerificationCode}
               onChange={(event) => setEmailVerificationCode(event.target.value)}
@@ -311,6 +337,7 @@ const Register: React.FC = () => {
                 <Input
                   type="text"
                   name="username"
+                  label={t('auth.register.username')}
                   placeholder={t('auth.register.username')}
                   value={phoneForm.username}
                   onChange={handlePhoneChange}
@@ -323,6 +350,7 @@ const Register: React.FC = () => {
                 <Input
                   type="tel"
                   name="phoneNumber"
+                  label={t('auth.register.phonePlaceholder')}
                   placeholder={t('auth.register.phonePlaceholder')}
                   value={phoneForm.phoneNumber}
                   onChange={handlePhoneChange}
@@ -334,6 +362,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="pin"
+                  label={t('auth.register.pin')}
                   placeholder={t('auth.register.pin')}
                   value={phoneForm.pin}
                   onChange={handlePhoneChange}
@@ -346,6 +375,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="confirmPin"
+                  label={t('auth.register.confirmPin')}
                   placeholder={t('auth.register.confirmPin')}
                   value={phoneForm.confirmPin}
                   onChange={handlePhoneChange}
@@ -362,6 +392,7 @@ const Register: React.FC = () => {
                 <Input
                   type="text"
                   name="username"
+                  label={t('auth.register.username')}
                   placeholder={t('auth.register.username')}
                   value={emailForm.username}
                   onChange={handleEmailChange}
@@ -373,6 +404,7 @@ const Register: React.FC = () => {
                 <Input
                   type="email"
                   name="email"
+                  label={t('auth.register.emailPlaceholder')}
                   placeholder={t('auth.register.emailPlaceholder')}
                   value={emailForm.email}
                   onChange={handleEmailChange}
@@ -384,6 +416,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="password"
+                  label={t('auth.register.password')}
                   placeholder={t('auth.register.password')}
                   value={emailForm.password}
                   onChange={handleEmailChange}
@@ -397,6 +430,7 @@ const Register: React.FC = () => {
                 <Input
                   type="password"
                   name="confirmPassword"
+                  label={t('auth.register.confirmPassword')}
                   placeholder={t('auth.register.confirmPassword')}
                   value={emailForm.confirmPassword}
                   onChange={handleEmailChange}

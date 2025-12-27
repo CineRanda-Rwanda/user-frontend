@@ -35,6 +35,24 @@ const Navbar: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null)
   const languageRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    if (!isLanguageOpen) return
+    const firstItem = languageRef.current?.querySelector<HTMLButtonElement>('[role="menu"] button')
+    window.setTimeout(() => firstItem?.focus(), 0)
+  }, [isLanguageOpen])
+
+  useEffect(() => {
+    if (!isProfileOpen) return
+    const firstItem = dropdownRef.current?.querySelector<HTMLButtonElement>('[role="menu"] button')
+    window.setTimeout(() => firstItem?.focus(), 0)
+  }, [isProfileOpen])
+
+  useEffect(() => {
+    if (!isNotificationsOpen) return
+    const panel = notificationRef.current?.querySelector<HTMLElement>('[data-notification-overlay]')
+    window.setTimeout(() => panel?.focus(), 0)
+  }, [isNotificationsOpen])
+
   const closeNotifications = useCallback(() => {
     setIsNotificationsOpen(false)
     void markUnreadAsReadOnExit().catch(() => undefined)
@@ -214,6 +232,7 @@ const Navbar: React.FC = () => {
             aria-label={t('language.label')}
             aria-haspopup="menu"
             aria-expanded={isLanguageOpen}
+            aria-controls="language-menu"
             onClick={() => {
               setIsLanguageOpen((prev) => !prev)
               setIsProfileOpen(false)
@@ -224,7 +243,12 @@ const Navbar: React.FC = () => {
           </button>
 
           {isLanguageOpen && (
-            <div className={`${styles.dropdown} ${styles.simpleDropdown}`} role="menu" aria-label={t('language.label')}>
+            <div
+              id="language-menu"
+              className={`${styles.dropdown} ${styles.simpleDropdown}`}
+              role="menu"
+              aria-label={t('language.label')}
+            >
               <button
                 type="button"
                 role="menuitem"
@@ -266,6 +290,7 @@ const Navbar: React.FC = () => {
           <>
             <div className={styles.notificationWrapper} ref={notificationRef}>
               <button
+                type="button"
                 className={styles.actionButton}
                 onClick={() => {
                   setIsNotificationsOpen((prev) => {
@@ -277,9 +302,12 @@ const Navbar: React.FC = () => {
                   })
                   setIsProfileOpen(false)
                 }}
-                title={t('nav.notifications')}
+                aria-label={t('nav.notifications')}
+                aria-haspopup="dialog"
+                aria-expanded={isNotificationsOpen}
+                aria-controls="notifications-panel"
               >
-                <FiBell />
+                <FiBell aria-hidden="true" />
                 {unreadCount > 0 && (
                   <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
                 )}
@@ -293,40 +321,58 @@ const Navbar: React.FC = () => {
 
             <div style={{ position: 'relative' }} ref={dropdownRef}>
               <button
+                type="button"
                 className={styles.profileButton}
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
+                aria-label={t('nav.profile.openMenuAria')}
+                aria-haspopup="menu"
+                aria-expanded={isProfileOpen}
+                aria-controls="profile-menu"
               >
                 <div className={styles.avatar}>{getInitials(user?.username)}</div>
               </button>
 
               {isProfileOpen && (
-                <div className={`${styles.dropdown} ${styles.simpleDropdown}`}>
+                <div
+                  id="profile-menu"
+                  className={`${styles.dropdown} ${styles.simpleDropdown}`}
+                  role="menu"
+                  aria-label={t('nav.profile.menuLabel')}
+                >
                   <button
+                    type="button"
+                    role="menuitem"
                     className={styles.dropdownItem}
                     onClick={() => handleProfileNavigation('/profile')}
                   >
-                    <FiUser />
+                    <FiUser aria-hidden="true" />
                     <span>{t('nav.profile.myProfile')}</span>
                   </button>
                   <button
+                    type="button"
+                    role="menuitem"
                     className={styles.dropdownItem}
                     onClick={() => handleProfileNavigation('/my-library')}
                   >
-                    <FiBookOpen />
+                    <FiBookOpen aria-hidden="true" />
                     <span>{t('nav.profile.myLibrary')}</span>
                   </button>
                   <button
+                    type="button"
+                    role="menuitem"
                     className={styles.dropdownItem}
                     onClick={() => handleProfileNavigation('/profile#settings')}
                   >
-                    <FiSettings />
+                    <FiSettings aria-hidden="true" />
                     <span>{t('nav.profile.settings')}</span>
                   </button>
                   <button
+                    type="button"
+                    role="menuitem"
                     className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
                     onClick={handleLogout}
                   >
-                    <FiLogOut />
+                    <FiLogOut aria-hidden="true" />
                     <span>{t('nav.profile.logout')}</span>
                   </button>
                 </div>

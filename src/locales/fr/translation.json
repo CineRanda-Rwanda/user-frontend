@@ -23,12 +23,22 @@
       "myProfile": "Mon profil",
       "myLibrary": "Ma bibliothèque",
       "settings": "Paramètres",
-      "logout": "Déconnexion"
+      "logout": "Déconnexion",
+      "openMenuAria": "Ouvrir le menu du profil",
+      "menuLabel": "Menu du profil"
     }
   },
   "common": {
     "back": "Retour",
+    "skipToContent": "Aller au contenu principal",
     "close": "Fermer",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "viewAll": "Voir tout",
+    "scrollLeft": "Faire défiler vers la gauche",
+    "scrollRight": "Faire défiler vers la droite",
+    "untitled": "Sans titre",
+    "content": "Contenu",
     "goToBrowse": "Aller à Parcourir",
     "loading": "Chargement...",
     "updating": "Mise à jour...",
@@ -36,6 +46,22 @@
     "next": "Suivant",
     "cancel": "Annuler",
     "comingSoon": "Bientôt disponible !"
+  },
+  "animatedCarousel": {
+    "defaultTitle": "Nouveautés",
+    "goToItem": "Aller à l'élément {{index}}",
+    "openAria": "Ouvrir {{title}}"
+  },
+  "watchMenu": {
+    "label": "Options de lecture",
+    "watchTrailer": "Voir la bande-annonce",
+    "watchFullVideo": "Voir la vidéo complète"
+  },
+  "trailerModal": {
+    "title": "{{title}} - Bande-annonce",
+    "closeAria": "Fermer la bande-annonce",
+    "invalidUrl": "Impossible de charger la bande-annonce. URL YouTube invalide.",
+    "watchOnYouTube": "Regarder sur YouTube"
   },
   "browse": {
     "loading": "Chargement du contenu...",
@@ -167,6 +193,34 @@
       "languageFallback": "Kinyarwanda"
     },
     "episodes": {
+  "globalSearch": {
+    "heading": "Trouvez quelque chose à regarder",
+    "placeholder": "Rechercher parmi les films et les séries...",
+    "inputAria": "Rechercher",
+    "actions": {
+      "search": "Rechercher"
+    },
+    "status": {
+      "searching": "Recherche…",
+      "noMatches": "Aucun résultat pour le moment"
+    },
+    "suggestions": {
+      "listAria": "Suggestions de recherche",
+      "openAria": "Ouvrir {{title}}"
+    },
+    "filters": {
+      "genres": {
+        "all": "Tous les genres",
+        "count": "{{count}} genre",
+        "count_plural": "{{count}} genres"
+      },
+      "categories": {
+        "all": "Toutes les catégories",
+        "count": "{{count}} catégorie",
+        "count_plural": "{{count}} catégories"
+      }
+    }
+  },
       "title": "Épisodes",
       "hideList": "Masquer la liste",
       "showList": "Afficher la liste",
@@ -236,7 +290,8 @@
       "title": "Filtres"
     },
     "actions": {
-      "reset": "Réinitialiser"
+      "reset": "Réinitialiser",
+      "closeAria": "Fermer les filtres"
     },
     "summary": {
       "activeFilters": "{{count}} filtre actif",
@@ -739,9 +794,15 @@
   }
   ,
   "content": {
+    "card": {
+      "openAria": "Ouvrir les détails de {{title}}"
+    },
     "badge": {
       "featured": "À la une",
       "new": "Nouveau"
+    },
+    "rating": {
+      "na": "N/A"
     },
     "status": {
       "locked": "Verrouillé",
