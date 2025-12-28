@@ -70,12 +70,16 @@ api.interceptors.request.use(
 let refreshing: Promise<{ token: string; refreshToken?: string }> | null = null
 api.interceptors.response.use(
   (response) => {
-    // Debug successful responses
-    console.log('API Response:', response.config.url, response.data)
+    // Avoid heavy logging in production.
+    if (import.meta.env.DEV) {
+      console.log('API Response:', response.config.url, response.data)
+    }
     return response
   },
   async (error: AxiosError) => {
-    console.error('API Error:', error.config?.url, error.response?.status, error.response?.data)
+    if (import.meta.env.DEV) {
+      console.error('API Error:', error.config?.url, error.response?.status, error.response?.data)
+    }
     
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 

@@ -30,21 +30,17 @@ const Browse: React.FC = () => {
   const loadContent = async () => {
     try {
       setLoading(true)
-      // Load all content in parallel using the new API structure
-      const [moviesRes, seriesRes] = await Promise.all([
+      // Load all content in parallel.
+      const [moviesRes, seriesRes, continueWatchingRes] = await Promise.all([
         contentAPI.getContentByType('Movie', 1, 20),
         contentAPI.getContentByType('Series', 1, 20),
+        isAuthenticated
+          ? getContinueWatching().catch((error) => {
+              console.error('Error loading continue watching:', error)
+              return [] as WatchHistoryItem[]
+            })
+          : Promise.resolve([] as WatchHistoryItem[])
       ])
-
-      let continueWatchingRes: WatchHistoryItem[] = []
-      if (isAuthenticated) {
-        try {
-          continueWatchingRes = await getContinueWatching()
-        } catch (error) {
-          console.error('Error loading continue watching:', error)
-          continueWatchingRes = []
-        }
-      }
 
       // Extract data from responses
       // API Response format: { status, results, pagination, data: { content: [] } }
@@ -68,8 +64,7 @@ const Browse: React.FC = () => {
       setMovies(safeMovies)
       setSeries(safeSeries)
       
-      // Set continue watching if authenticated
-      setContinueWatching(isAuthenticated ? continueWatchingRes : [])
+      setContinueWatching(continueWatchingRes)
     } catch (error) {
       console.error('Error in loadContent:', error)
       toast.error(t('browse.errors.loadFailed'))
