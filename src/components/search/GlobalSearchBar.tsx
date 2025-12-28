@@ -93,7 +93,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   const [genreOpen, setGenreOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState(false)
 
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1)
   const suggestionRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   useEffect(() => {
@@ -127,7 +126,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     if (debouncedQuery.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
-      setActiveSuggestionIndex(-1)
       return
     }
 
@@ -139,13 +137,11 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
         if (!cancelled) {
           setSuggestions(extractResults(response))
           setShowSuggestions(true)
-          setActiveSuggestionIndex(-1)
         }
       } catch (error) {
         console.warn('Unable to fetch search suggestions', error)
         if (!cancelled) {
           setSuggestions([])
-          setActiveSuggestionIndex(-1)
         }
       } finally {
         if (!cancelled) {
@@ -165,7 +161,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       if (!wrapperRef.current) return
       if (!wrapperRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
-        setActiveSuggestionIndex(-1)
         setGenreOpen(false)
         setCategoryOpen(false)
       }
@@ -214,7 +209,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     if (!content?._id) return
     navigate(`/content/${content._id}`)
     setShowSuggestions(false)
-    setActiveSuggestionIndex(-1)
   }
 
   const renderSuggestion = (item: Content, index: number) => (
@@ -280,7 +274,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               setShowSuggestions(false)
-              setActiveSuggestionIndex(-1)
               setGenreOpen(false)
               setCategoryOpen(false)
               return
@@ -290,7 +283,6 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
               if (suggestions.length) {
                 event.preventDefault()
                 setShowSuggestions(true)
-                setActiveSuggestionIndex(0)
                 requestAnimationFrame(() => suggestionRefs.current[0]?.focus())
               }
             }
