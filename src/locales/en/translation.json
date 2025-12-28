@@ -46,6 +46,8 @@
     "next": "Next",
     "cancel": "Cancel",
     "comingSoon": "Coming soon!"
+    ,
+    "search": "Search"
   },
   "animatedCarousel": {
     "defaultTitle": "New Releases",
@@ -356,6 +358,9 @@
       "forgotPin": "Forgot PIN?",
       "forgotPassword": "Forgot password?"
     },
+    "phone": {
+      "countryCodeLabel": "Country code"
+    },
     "forgotPin": {
       "title": "Reset Randa PIN",
       "subtitleRequest": "Verify your phone to receive a code.",
@@ -462,12 +467,12 @@
       "methodEmail": "Email address",
       "username": "Username",
       "phoneNumber": "Phone number",
-      "phonePlaceholder": "e.g. +250783000111",
+      "phonePlaceholder": "e.g. 783000111",
       "usernameHelper": "3-20 characters, letters, numbers, underscore",
       "pin": "PIN",
       "confirmPin": "Confirm PIN",
       "email": "Email",
-      "emailPlaceholder": "you@example.com",
+      "emailPlaceholder": "Email address",
       "password": "Password",
       "confirmPassword": "Confirm password",
       "passwordHelper": "Minimum 8 characters",

@@ -76,6 +76,7 @@
   border-radius: 20px;
   background: #000;
   object-fit: cover;
+  object-position: center;
 }
 
 .videoWrapper :global(.video-js) {
@@ -89,6 +90,7 @@
 
 .videoWrapper :global(.video-js .vjs-tech) {
   object-fit: cover;
+  object-position: center;
 }
 
 .playerOverlay {
@@ -430,6 +432,10 @@
     min-height: 240px;
   }
 
+  .videoWrapper {
+    min-height: 0;
+  }
+
   .episodesHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -442,5 +448,21 @@
   .episodeNumber {
     width: 48px;
     height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .playerSection {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .playerShell {
+    border-radius: 0;
+  }
+
+  .videoWrapper :global(.video-js),
+  .videoElement {
+    border-radius: 0;
   }
 }

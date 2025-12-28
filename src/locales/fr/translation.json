@@ -45,7 +45,8 @@
     "previous": "Précédent",
     "next": "Suivant",
     "cancel": "Annuler",
-    "comingSoon": "Bientôt disponible !"
+    "comingSoon": "Bientôt disponible !",
+    "search": "Rechercher"
   },
   "animatedCarousel": {
     "defaultTitle": "Nouveautés",
@@ -356,6 +357,9 @@
       "forgotPin": "PIN oublié ?",
       "forgotPassword": "Mot de passe oublié ?"
     },
+    "phone": {
+      "countryCodeLabel": "Indicatif du pays"
+    },
     "forgotPin": {
       "title": "Réinitialiser le PIN Randa",
       "subtitleRequest": "Vérifiez votre téléphone pour recevoir un code.",
@@ -462,12 +466,12 @@
       "methodEmail": "Adresse e-mail",
       "username": "Nom d'utilisateur",
       "phoneNumber": "Numéro de téléphone",
-      "phonePlaceholder": "ex. +250783000111",
+        "phonePlaceholder": "ex. 783000111",
       "usernameHelper": "3-20 caractères, lettres, chiffres, underscore",
       "pin": "PIN",
       "confirmPin": "Confirmer le PIN",
       "email": "E-mail",
-      "emailPlaceholder": "vous@exemple.com",
+        "emailPlaceholder": "Adresse e-mail",
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "passwordHelper": "Minimum 8 caractères",

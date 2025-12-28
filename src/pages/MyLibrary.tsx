@@ -31,6 +31,9 @@ interface EpisodeAccessGroup {
 const normalizeContentEntity = (raw: any): Content | null => {
   if (!raw || typeof raw !== 'object') return null;
   const entity = raw.content ?? raw;
+  const wrapperMeta = raw.content
+    ? Object.fromEntries(Object.entries(raw).filter(([key]) => key !== 'content'))
+    : {};
   const fallbackId =
     entity._id ||
     entity.id ||
@@ -38,7 +41,7 @@ const normalizeContentEntity = (raw: any): Content | null => {
     entity.seriesId;
 
   if (!fallbackId) return null;
-  return { ...entity, _id: fallbackId } as Content;
+  return { ...entity, ...wrapperMeta, _id: fallbackId } as Content;
 };
 
 const extractContentFromResponse = (response: any): Content | null => {
@@ -99,14 +102,10 @@ const MyLibrary: React.FC = () => {
   const loadLibraryData = async () => {
     try {
       setLoading(true);
-      const [libraryResponse, continueWatchingData] = await Promise.all([
+      const [libraryResponse] = await Promise.all([
         userAPI.getLibrary().catch(err => {
           console.error('Library load error:', err);
           return { data: { data: { content: [] } } };
-        }),
-        getContinueWatching().catch(err => {
-          console.error('Continue watching error:', err);
-          return [];
         }),
       ]);
 
@@ -195,7 +194,20 @@ const MyLibrary: React.FC = () => {
       }
 
       const resolvedContent = Array.from(aggregatedContentMap.values());
-      setPurchasedContent(resolvedContent);
+      const getAddedAt = (item: any) => {
+        const candidate =
+          item?.unlockedAt ||
+          item?.purchasedAt ||
+          item?.addedAt ||
+          item?.purchaseDate ||
+          item?.updatedAt ||
+          item?.createdAt;
+        const ts = candidate ? new Date(candidate).getTime() : 0;
+        return Number.isFinite(ts) ? ts : 0;
+      };
+
+      const sortedByLatestAdded = [...resolvedContent].sort((a: any, b: any) => getAddedAt(b) - getAddedAt(a));
+      setPurchasedContent(sortedByLatestAdded);
 
       const resolvedEpisodeGroups = Array.from(episodeMap.values())
         .map((group) => ({
@@ -215,13 +227,29 @@ const MyLibrary: React.FC = () => {
           return acc;
         }, {})
       );
-      setContinueWatching(Array.isArray(continueWatchingData) ? continueWatchingData : []);
+      setContinueWatching([]);
     } catch (error: any) {
       toast.error(error.response?.data?.message || t('myLibrary.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    getContinueWatching()
+      .then((items) => {
+        if (cancelled) return;
+        setContinueWatching(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setContinueWatching([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredContent =
     filter === 'all'

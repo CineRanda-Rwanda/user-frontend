@@ -6,19 +6,35 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { authAPI } from '@/api/auth'
 import { LoginRequest } from '@/types/auth'
-import { Input } from '@/components/common/Input'
+import { CountryCodeSelect, Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
 import randaPlusLogo from '@/assets/logo.png'
 import styles from './Auth.module.css'
+import { COUNTRY_CALLING_CODES } from '@/utils/countryCallingCodes'
 
 type LoginMethod = 'phone' | 'email'
+
+const formatPhoneForApi = (countryCode: string, rawPhone: string) => {
+  const trimmed = rawPhone.trim()
+  if (!trimmed) return ''
+
+  if (trimmed.startsWith('+')) {
+    const digits = trimmed.replace(/[\D]/g, '')
+    return digits ? `+${digits}` : ''
+  }
+
+  const nationalDigits = trimmed.replace(/[\D]/g, '')
+  const countryDigits = countryCode.replace(/[\D]/g, '')
+  if (!countryDigits) return nationalDigits
+  return nationalDigits ? `+${countryDigits}${nationalDigits}` : ''
+}
 
 const Login: React.FC = () => {
   const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
   const [method, setMethod] = useState<LoginMethod>('phone')
-  const [phoneForm, setPhoneForm] = useState({ phoneNumber: '', pin: '' })
+  const [phoneForm, setPhoneForm] = useState({ countryCode: '+250', phoneNumber: '', pin: '' })
   const [emailForm, setEmailForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -164,6 +180,11 @@ const Login: React.FC = () => {
     setGeneralError('')
   }
 
+  const handlePhoneCountryCodeChange = (nextValue: string) => {
+    setPhoneForm((prev) => ({ ...prev, countryCode: nextValue }))
+    setGeneralError('')
+  }
+
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setEmailForm((prev) => ({ ...prev, [name]: value }))
@@ -180,7 +201,8 @@ const Login: React.FC = () => {
     let payload: LoginRequest | null = null
 
     if (method === 'phone') {
-      if (!phoneForm.phoneNumber.trim()) {
+      const normalizedPhone = formatPhoneForApi(phoneForm.countryCode, phoneForm.phoneNumber)
+      if (!normalizedPhone) {
         setErrors({ phoneNumber: t('auth.validation.phoneRequired') })
         return
       }
@@ -190,7 +212,7 @@ const Login: React.FC = () => {
       }
       payload = {
         method: 'phone',
-        phoneNumber: phoneForm.phoneNumber.trim(),
+        phoneNumber: normalizedPhone,
         pin: phoneForm.pin.trim()
       }
     } else {
@@ -414,18 +436,28 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit} className={styles.form}>
           {method === 'phone' ? (
             <>
-              <Input
-                type="tel"
-                name="phoneNumber"
-                label={t('auth.register.phonePlaceholder')}
-                placeholder={t('auth.register.phonePlaceholder')}
-                value={phoneForm.phoneNumber}
-                onChange={handlePhoneChange}
-                error={errors.phoneNumber}
-                required
-                autoComplete="tel"
-                helperText={t('auth.login.phoneHelper')}
-              />
+              <div className={styles['phone-row']}>
+                <CountryCodeSelect
+                  name="countryCode"
+                  label={t('auth.phone.countryCodeLabel')}
+                  value={phoneForm.countryCode}
+                  onChange={handlePhoneCountryCodeChange}
+                  options={COUNTRY_CALLING_CODES}
+                  required
+                />
+
+                <Input
+                  type="tel"
+                  name="phoneNumber"
+                  label={t('auth.register.phoneNumber')}
+                  placeholder={t('auth.register.phonePlaceholder')}
+                  value={phoneForm.phoneNumber}
+                  onChange={handlePhoneChange}
+                  error={errors.phoneNumber}
+                  required
+                  autoComplete="tel-national"
+                />
+              </div>
 
               <Input
                 type="password"
@@ -446,7 +478,7 @@ const Login: React.FC = () => {
               <Input
                 type="email"
                 name="email"
-                label={t('auth.register.emailPlaceholder')}
+                label={t('auth.login.methodEmail')}
                 placeholder={t('auth.register.emailPlaceholder')}
                 value={emailForm.email}
                 onChange={handleEmailChange}

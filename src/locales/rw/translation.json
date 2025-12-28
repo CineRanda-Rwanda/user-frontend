@@ -45,7 +45,8 @@
     "previous": "Ibanjirije",
     "next": "Ikurikira",
     "cancel": "Hagarika",
-    "comingSoon": "Biraje vuba!"
+    "comingSoon": "Biraje vuba!",
+    "search": "Shakisha"
   },
   "animatedCarousel": {
     "defaultTitle": "Ibisohotse vuba",
@@ -356,6 +357,9 @@
       "forgotPin": "Wibagiwe PIN?",
       "forgotPassword": "Wibagiwe ijambo banga?"
     },
+    "phone": {
+      "countryCodeLabel": "Kode y'igihugu"
+    },
     "forgotPin": {
       "title": "Siba PIN ya Randa",
       "subtitleRequest": "Emeza telefone yawe kugirango ubone kode.",
@@ -462,12 +466,12 @@
       "methodEmail": "Imeyili",
       "username": "Izina ukoresha",
       "phoneNumber": "Numero ya telefone",
-      "phonePlaceholder": "urugero: +250783000111",
+      "phonePlaceholder": "urugero: 783000111",
       "usernameHelper": "Inyuguti 3-20, inyuguti, imibare, underscore",
       "pin": "PIN",
       "confirmPin": "Emeza PIN",
       "email": "Imeyili",
-      "emailPlaceholder": "wowe@example.com",
+      "emailPlaceholder": "Email address",
       "password": "Ijambo banga",
       "confirmPassword": "Emeza ijambo banga",
       "passwordHelper": "Byibura inyuguti 8",

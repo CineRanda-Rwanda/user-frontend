@@ -4,14 +4,16 @@ import { FcGoogle } from 'react-icons/fc'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { authAPI } from '@/api/auth'
-import { Input } from '@/components/common/Input'
+import { CountryCodeSelect, Input } from '@/components/common/Input'
 import Button from '@/components/common/Button'
 import randaPlusLogo from '@/assets/logo.png'
 import styles from './Auth.module.css'
+import { COUNTRY_CALLING_CODES } from '@/utils/countryCallingCodes'
 
 type RegisterMethod = 'phone' | 'email'
 type PhoneRegisterForm = {
   username: string
+  countryCode: string
   phoneNumber: string
   pin: string
   confirmPin: string
@@ -33,6 +35,7 @@ const Register: React.FC = () => {
   const [step, setStep] = useState<'register' | 'verifyPhone' | 'verifyEmail'>('register')
   const [phoneForm, setPhoneForm] = useState<PhoneRegisterForm>({
     username: '',
+    countryCode: '+250',
     phoneNumber: '',
     pin: '',
     confirmPin: '',
@@ -50,6 +53,21 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [generalError, setGeneralError] = useState('')
   const generalErrorRef = useRef<HTMLDivElement | null>(null)
+
+  const formatPhoneForApi = (countryCode: string, rawPhone: string) => {
+    const trimmed = rawPhone.trim()
+    if (!trimmed) return ''
+
+    if (trimmed.startsWith('+')) {
+      const digits = trimmed.replace(/[\D]/g, '')
+      return digits ? `+${digits}` : ''
+    }
+
+    const nationalDigits = trimmed.replace(/[\D]/g, '')
+    const countryDigits = countryCode.replace(/[\D]/g, '')
+    if (!countryDigits) return nationalDigits
+    return nationalDigits ? `+${countryDigits}${nationalDigits}` : ''
+  }
 
   useEffect(() => {
     if (!generalError) return
@@ -85,6 +103,11 @@ const Register: React.FC = () => {
     setGeneralError('')
   }
 
+  const handlePhoneCountryCodeChange = (nextValue: string) => {
+    setPhoneForm((prev) => ({ ...prev, countryCode: nextValue }))
+    setGeneralError('')
+  }
+
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setEmailForm((prev) => ({ ...prev, [name]: value }))
@@ -99,7 +122,8 @@ const Register: React.FC = () => {
       setErrors({ username: t('auth.validation.usernameMin') })
       return false
     }
-    if (!phoneForm.phoneNumber.trim()) {
+    const normalizedPhone = formatPhoneForApi(phoneForm.countryCode, phoneForm.phoneNumber)
+    if (!normalizedPhone) {
       setErrors({ phoneNumber: t('auth.validation.phoneRequired') })
       return false
     }
@@ -149,10 +173,11 @@ const Register: React.FC = () => {
     setLoading(true)
     try {
       if (method === 'phone') {
+        const normalizedPhone = formatPhoneForApi(phoneForm.countryCode, phoneForm.phoneNumber)
         await register({
           method: 'phone',
           username: phoneForm.username.trim(),
-          phoneNumber: phoneForm.phoneNumber.trim(),
+          phoneNumber: normalizedPhone,
           pin: phoneForm.pin.trim(),
           preferredChannel: phoneForm.preferredChannel
         })
@@ -187,9 +212,10 @@ const Register: React.FC = () => {
 
     setLoading(true)
     try {
+      const normalizedPhone = formatPhoneForApi(phoneForm.countryCode, phoneForm.phoneNumber)
       await verifyRegistration({
         username: phoneForm.username,
-        phoneNumber: phoneForm.phoneNumber,
+        phoneNumber: normalizedPhone,
         pin: phoneForm.pin,
         verificationCode: phoneVerificationCode
       })
@@ -347,17 +373,28 @@ const Register: React.FC = () => {
                   helperText={t('auth.register.usernameHelper')}
                 />
 
-                <Input
-                  type="tel"
-                  name="phoneNumber"
-                  label={t('auth.register.phonePlaceholder')}
-                  placeholder={t('auth.register.phonePlaceholder')}
-                  value={phoneForm.phoneNumber}
-                  onChange={handlePhoneChange}
-                  error={errors.phoneNumber}
-                  required
-                  autoComplete="tel"
-                />
+                <div className={styles['phone-row']}>
+                  <CountryCodeSelect
+                    name="countryCode"
+                    label={t('auth.phone.countryCodeLabel')}
+                    value={phoneForm.countryCode}
+                    onChange={handlePhoneCountryCodeChange}
+                    options={COUNTRY_CALLING_CODES}
+                    required
+                  />
+
+                  <Input
+                    type="tel"
+                    name="phoneNumber"
+                    label={t('auth.register.phoneNumber')}
+                    placeholder={t('auth.register.phonePlaceholder')}
+                    value={phoneForm.phoneNumber}
+                    onChange={handlePhoneChange}
+                    error={errors.phoneNumber}
+                    required
+                    autoComplete="tel-national"
+                  />
+                </div>
 
                 <Input
                   type="password"
@@ -404,7 +441,7 @@ const Register: React.FC = () => {
                 <Input
                   type="email"
                   name="email"
-                  label={t('auth.register.emailPlaceholder')}
+                  label={t('auth.login.methodEmail')}
                   placeholder={t('auth.register.emailPlaceholder')}
                   value={emailForm.email}
                   onChange={handleEmailChange}

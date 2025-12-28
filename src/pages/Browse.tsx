@@ -30,16 +30,10 @@ const Browse: React.FC = () => {
   const loadContent = async () => {
     try {
       setLoading(true)
-      // Load all content in parallel.
-      const [moviesRes, seriesRes, continueWatchingRes] = await Promise.all([
+      // Load the main rows first (fast perceived navigation).
+      const [moviesRes, seriesRes] = await Promise.all([
         contentAPI.getContentByType('Movie', 1, 20),
         contentAPI.getContentByType('Series', 1, 20),
-        isAuthenticated
-          ? getContinueWatching().catch((error) => {
-              console.error('Error loading continue watching:', error)
-              return [] as WatchHistoryItem[]
-            })
-          : Promise.resolve([] as WatchHistoryItem[])
       ])
 
       // Extract data from responses
@@ -64,7 +58,7 @@ const Browse: React.FC = () => {
       setMovies(safeMovies)
       setSeries(safeSeries)
       
-      setContinueWatching(continueWatchingRes)
+      setContinueWatching([])
     } catch (error) {
       console.error('Error in loadContent:', error)
       toast.error(t('browse.errors.loadFailed'))
@@ -73,6 +67,28 @@ const Browse: React.FC = () => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setContinueWatching([])
+      return
+    }
+
+    let cancelled = false
+    getContinueWatching()
+      .then((items) => {
+        if (cancelled) return
+        setContinueWatching(Array.isArray(items) ? items : [])
+      })
+      .catch(() => {
+        if (cancelled) return
+        setContinueWatching([])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isAuthenticated])
 
   if (loading) {
     return <Loader fullScreen text={t('browse.loading')} />

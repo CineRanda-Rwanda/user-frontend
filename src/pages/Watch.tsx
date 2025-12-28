@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiArrowLeft, FiChevronRight, FiLock, FiPlay, FiUnlock } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
+import Hls from 'hls.js'
 import { contentAPI } from '../api/content'
 import { initiateContentPurchase } from '../api/payment'
 import { Content, Episode } from '../types/content'
@@ -55,6 +56,11 @@ const Watch: React.FC = () => {
   const [streamSource, setStreamSource] = useState('')
   const [streamLoading, setStreamLoading] = useState(false)
   const [streamError, setStreamError] = useState<string | null>(null)
+  const [allowMetaTranslation, setAllowMetaTranslation] = useState(false)
+
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const hlsRef = useRef<Hls | null>(null)
+  const [useHlsJs, setUseHlsJs] = useState(false)
 
   const [autoNextCountdown, setAutoNextCountdown] = useState<number | null>(null)
   const [pendingNextEpisode, setPendingNextEpisode] = useState<{ episode: Episode; seasonNumber: number } | null>(null)
@@ -94,31 +100,34 @@ const Watch: React.FC = () => {
     targetLanguage !== 'rw' && !hasLocalizedText(activeEpisode, 'description', targetLanguage)
 
   const translatedContentTitle = useAutoTranslate(baseContentTitle, targetLanguage, {
-    enabled: shouldTranslateContentTitle,
+    enabled: allowMetaTranslation && shouldTranslateContentTitle,
     source: 'auto',
     hideUntilTranslated: false,
   })
   const translatedContentDescription = useAutoTranslate(baseContentDescription, targetLanguage, {
-    enabled: shouldTranslateContentDescription,
+    enabled: allowMetaTranslation && shouldTranslateContentDescription,
     source: 'auto',
     hideUntilTranslated: false,
   })
   const translatedEpisodeTitle = useAutoTranslate(baseEpisodeTitle, targetLanguage, {
-    enabled: shouldTranslateEpisodeTitle,
+    enabled: allowMetaTranslation && shouldTranslateEpisodeTitle,
     source: 'auto',
     hideUntilTranslated: false,
   })
   const translatedEpisodeDescription = useAutoTranslate(baseEpisodeDescription, targetLanguage, {
-    enabled: shouldTranslateEpisodeDescription,
+    enabled: allowMetaTranslation && shouldTranslateEpisodeDescription,
     source: 'auto',
     hideUntilTranslated: false,
   })
 
-  const translationsReady =
-    translatedContentTitle.ready &&
-    translatedContentDescription.ready &&
-    translatedEpisodeTitle.ready &&
-    translatedEpisodeDescription.ready
+  useEffect(() => {
+    // Reset and defer translation work on every new stream.
+    setAllowMetaTranslation(false)
+    const timer = globalThis.setTimeout(() => setAllowMetaTranslation(true), 2500)
+    return () => {
+      globalThis.clearTimeout(timer)
+    }
+  }, [streamSource, targetLanguage])
 
   const orderedSeasons = useMemo(() => {
     if (!content?.seasons) return []
@@ -524,6 +533,80 @@ const Watch: React.FC = () => {
   const resolvedStreamSource = canPlayCurrent ? streamSource : ''
 
   useEffect(() => {
+    const video = videoRef.current
+
+    // Cleanup any previous HLS instance when stream changes.
+    if (hlsRef.current) {
+      try {
+        hlsRef.current.destroy()
+      } catch {
+        // ignore
+      }
+      hlsRef.current = null
+    }
+
+    setUseHlsJs(false)
+    if (!video) return
+    if (!resolvedStreamSource) return
+
+    const mime = detectMimeType(resolvedStreamSource)
+    if (mime !== 'application/x-mpegURL') return
+
+    // If the browser supports native HLS, keep the simple <source> path.
+    const canNative =
+      video.canPlayType('application/vnd.apple.mpegurl') !== '' ||
+      video.canPlayType('application/x-mpegURL') !== ''
+    if (canNative) return
+
+    if (!Hls.isSupported()) {
+      setStreamError(t('watch.stream.unavailable'))
+      return
+    }
+
+    setUseHlsJs(true)
+    const hls = new Hls({
+      enableWorker: true,
+      backBufferLength: 30,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 60,
+    })
+    hlsRef.current = hls
+
+    hls.on(Hls.Events.ERROR, (_event, data) => {
+      if (data?.fatal) {
+        try {
+          hls.destroy()
+        } catch {
+          // ignore
+        }
+        hlsRef.current = null
+        setUseHlsJs(false)
+        setStreamError(t('watch.stream.unavailable'))
+      }
+    })
+
+    try {
+      hls.loadSource(resolvedStreamSource)
+      hls.attachMedia(video)
+    } catch {
+      setUseHlsJs(false)
+      setStreamError(t('watch.stream.unavailable'))
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        try {
+          hlsRef.current.destroy()
+        } catch {
+          // ignore
+        }
+        hlsRef.current = null
+      }
+      setUseHlsJs(false)
+    }
+  }, [resolvedStreamSource, t])
+
+  useEffect(() => {
     setVideoRefreshKey((prev) => prev + 1)
   }, [resolvedStreamSource])
 
@@ -534,6 +617,11 @@ const Watch: React.FC = () => {
   const handleVideoError = useCallback(() => {
     setStreamError(t('watch.stream.unavailable'))
   }, [t])
+
+  const handleVideoPlay = useCallback(() => {
+    // If the user starts playback, it's safe to let metadata translation run.
+    setAllowMetaTranslation(true)
+  }, [])
 
   const handleSeasonChange = (seasonNumber: number) => {
     const season = orderedSeasons.find((entry) => entry.seasonNumber === seasonNumber)
@@ -570,7 +658,7 @@ const Watch: React.FC = () => {
     }
   }
 
-  if (loadingContent || !translationsReady) {
+  if (loadingContent) {
     return (
       <div className={styles.loadingState}>
         <Loader fullScreen={false} text={t('common.loading')} />
@@ -623,14 +711,16 @@ const Watch: React.FC = () => {
               <video
                 key={videoRefreshKey}
                 className={styles.videoElement}
+                ref={videoRef}
                 playsInline
                 controls
                 preload="metadata"
                 poster={videoPoster}
+                onPlay={handleVideoPlay}
                 onEnded={handleVideoEnded}
                 onError={handleVideoError}
               >
-                {resolvedStreamSource && (
+                {resolvedStreamSource && !useHlsJs && (
                   <source src={resolvedStreamSource} type={detectMimeType(resolvedStreamSource)} />
                 )}
               </video>
