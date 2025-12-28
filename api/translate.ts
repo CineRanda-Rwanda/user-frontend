@@ -1,3 +1,5 @@
+declare const process: { env: Record<string, string | undefined> }
+
 const normalizeBaseUrl = (value?: string) => String(value || '').trim().replace(/\/$/, '')
 
 export default async function handler(req: any, res: any) {
