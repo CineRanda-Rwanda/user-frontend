@@ -66,6 +66,11 @@ const getDefaultCacheTTL = (url: string) => {
   if (url === '/genres' || url === '/categories' || url === '/categories/featured') return 5 * 60_000
   if (url.startsWith('/content/search')) return 30_000
 
+  // Authenticated but navigation-heavy endpoints.
+  if (url === '/watch-history/in-progress') return 20_000
+  if (url === '/watch-history') return 20_000
+  if (url === '/content/unlocked') return 20_000
+
   // Public content details.
   if (/^\/content\/[^/]+$/.test(url)) return 60_000
   if (/^\/content\/series\/[^/]+$/.test(url)) return 60_000
@@ -73,13 +78,25 @@ const getDefaultCacheTTL = (url: string) => {
   return 0
 }
 
+const hashToken = (token?: string | null) => {
+  const raw = String(token || '')
+  if (!raw) return 'anon'
+  // djb2-ish hash, good enough for cache keying (not cryptographic).
+  let hash = 5381
+  for (let i = 0; i < raw.length; i++) {
+    hash = (hash * 33) ^ raw.charCodeAt(i)
+  }
+  return `t${(hash >>> 0).toString(16)}`
+}
+
 const buildCacheKey = (config: InternalAxiosRequestConfig, appLanguage: SupportedAppLanguage, token?: string | null) => {
   const method = String(config.method || 'get').toLowerCase()
   const url = String(config.url || '')
   const params = (config as any).params
   const explicit = (config as any).cacheKey
-  if (explicit) return `${method}:${explicit}:${appLanguage}:${token ? 'auth' : 'anon'}`
-  return `${method}:${String(config.baseURL || '')}${url}?${stableStringify(params)}:${appLanguage}:${token ? 'auth' : 'anon'}`
+  const tokenKey = hashToken(token)
+  if (explicit) return `${method}:${explicit}:${appLanguage}:${tokenKey}`
+  return `${method}:${String(config.baseURL || '')}${url}?${stableStringify(params)}:${appLanguage}:${tokenKey}`
 }
 
 // Request interceptor - Add auth token
