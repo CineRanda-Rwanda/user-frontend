@@ -261,20 +261,24 @@ export const CountryCodeSelect: React.FC<CountryCodeSelectProps> = ({
   }, [filteredOptions, value])
 
   useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
+    const closeIfOutside = (target: EventTarget | null) => {
       if (!isOpen) return
-      const target = event.target as Node
-      if (!wrapperRef.current?.contains(target)) {
+      if (!target) return
+      if (!wrapperRef.current?.contains(target as Node)) {
         setIsOpen(false)
         setQuery('')
       }
     }
 
-    window.addEventListener('mousedown', handlePointerDown)
-    window.addEventListener('touchstart', handlePointerDown, { passive: true })
+    const handleMouseDown = (event: MouseEvent) => closeIfOutside(event.target)
+    const handleTouchStart = (event: TouchEvent) => closeIfOutside(event.target)
+    const touchOptions: AddEventListenerOptions = { passive: true }
+
+    window.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('touchstart', handleTouchStart, touchOptions)
     return () => {
-      window.removeEventListener('mousedown', handlePointerDown)
-      window.removeEventListener('touchstart', handlePointerDown)
+      window.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('touchstart', handleTouchStart, touchOptions)
     }
   }, [isOpen])
 
