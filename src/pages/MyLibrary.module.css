@@ -382,6 +382,10 @@
   letter-spacing: 0.2em;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .partialBadge {
@@ -397,6 +401,10 @@
 }
 
 .primaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   border: none;
   border-radius: 999px;
   background: #f5c518;
@@ -408,6 +416,10 @@
 }
 
 .secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: transparent;
@@ -415,6 +427,10 @@
   padding: 0.75rem 1rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.actionLabel {
+  line-height: 1;
 }
 
 .cardBody {
@@ -611,14 +627,51 @@
     padding-right: 1rem;
   }
 
-  /* 3 posters per row on typical phones */
+  /* 2 posters per row on phones */
   .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
   .card {
     border-radius: 18px;
+  }
+
+  .cardOverlay {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .ownedBadge {
+    top: 0.65rem;
+    right: 0.65rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    padding: 0.3rem 0.55rem;
+    max-width: 72%;
+  }
+
+  .overlayMeta {
+    font-size: 0.8rem;
+    gap: 0.35rem;
+  }
+
+  /* Keep actions compact on small screens */
+  .cardActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    padding: 0.45rem 0.55rem;
+    font-size: 0.75rem;
+    min-width: 40px;
+  }
+
+  .actionLabel {
+    display: none;
   }
 }
 

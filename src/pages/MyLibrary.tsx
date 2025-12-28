@@ -492,14 +492,16 @@ const MyLibrary: React.FC = () => {
                           className={styles.primaryAction}
                           onClick={(event) => handleQuickPlay(event, content)}
                         >
-                          <FiPlay /> {t('myLibrary.actions.watch')}
+                          <FiPlay aria-hidden="true" />
+                          <span className={styles.actionLabel}>{t('myLibrary.actions.watch')}</span>
                         </button>
                         <button
                           type="button"
                           className={styles.secondaryAction}
                           onClick={(event) => handleOpenDetails(event, content._id)}
                         >
-                          {t('myLibrary.actions.details')}
+                          <FiLayers aria-hidden="true" />
+                          <span className={styles.actionLabel}>{t('myLibrary.actions.details')}</span>
                         </button>
                       </div>
                     </div>
