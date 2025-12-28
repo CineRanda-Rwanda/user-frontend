@@ -16,8 +16,28 @@ const buildAcceptLanguage = (lng: SupportedAppLanguage) => {
   return `${lng}, en;q=0.9`
 }
 
+const normalizeApiBaseUrl = (raw: unknown) => {
+  const value = String(raw ?? '').trim().replace(/\/$/, '')
+  if (!value) return ''
+
+  // Accept absolute URLs.
+  if (/^https?:\/\//i.test(value)) return value
+
+  // If a host is provided without scheme, default to https.
+  // This prevents axios from treating it as a relative URL (which would hit the Vercel frontend domain).
+  if (/^[a-z0-9.-]+(?::\d+)?(\/|$)/i.test(value)) {
+    return `https://${value}`.replace(/\/$/, '')
+  }
+
+  // Otherwise (e.g. '/api/v1') return as-is.
+  return value
+}
+
+const resolvedApiBaseUrl =
+  normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5000/api/v1'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: resolvedApiBaseUrl,
   headers: {
     'Content-Type': 'application/json'
   },
@@ -59,8 +79,17 @@ api.interceptors.response.use(
     
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
+    const requestUrl = String(originalRequest?.url || '')
+    const isAuthFlowRequest =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/verify') ||
+      requestUrl.includes('/auth/forgot') ||
+      requestUrl.includes('/auth/reset') ||
+      requestUrl.includes('/auth/google')
+
     // Handle 401 Unauthorized - Try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthFlowRequest) {
       originalRequest._retry = true
 
       try {
@@ -74,7 +103,10 @@ api.interceptors.response.use(
         }
 
         const refreshToken = localStorage.getItem('refreshToken')
-        if (!refreshToken) throw new Error('Missing refresh token')
+        if (!refreshToken) {
+          // No refresh token available; treat as a normal 401.
+          return Promise.reject(error)
+        }
 
         refreshing = (async () => {
           const { data } = await axios.post(

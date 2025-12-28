@@ -11,7 +11,18 @@ import {
   ResetPasswordRequest
 } from '@/types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'
+const normalizeApiBaseUrl = (raw: unknown) => {
+  const value = String(raw ?? '').trim().replace(/\/$/, '')
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  if (/^[a-z0-9.-]+(?::\d+)?(\/|$)/i.test(value)) {
+    return `https://${value}`.replace(/\/$/, '')
+  }
+  return value
+}
+
+const API_BASE_URL =
+  normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5000/api/v1'
 const GOOGLE_OAUTH_BASE_URL = (import.meta.env.VITE_GOOGLE_OAUTH_URL as string | undefined)?.trim()
 
 const getGoogleRedirectUri = () => {
