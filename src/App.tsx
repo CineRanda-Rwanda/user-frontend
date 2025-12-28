@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationsProvider } from './contexts/NotificationsContext'
 import Loader from './components/common/Loader'
 import ScrollToTop from './components/common/ScrollToTop'
+import { prefetchCommonRoutes } from './utils/routePrefetch'
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Auth/Login'))
@@ -53,6 +54,20 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // AppRoutes component that uses the auth context
 const AppRoutes = () => {
   const { t } = useTranslation()
+
+  useEffect(() => {
+    const run = () => prefetchCommonRoutes()
+
+    // Prefetch frequently visited routes during idle time to avoid
+    // Suspense full-screen fallback flashes on navigation.
+    if ('requestIdleCallback' in globalThis) {
+      ;(globalThis as any).requestIdleCallback(run, { timeout: 1500 })
+      return
+    }
+
+    globalThis.setTimeout(run, 800)
+  }, [])
+
   return (
     <div className="app">
       <ScrollToTop />

@@ -18,6 +18,7 @@ import NotificationOverlay from '@/components/notifications/NotificationOverlay'
 import randaPlusLogo from '@/assets/logo.png'
 import { contentAPI } from '@/api/content'
 import { supportedLanguages, type SupportedLanguage } from '@/i18n'
+import { prefetchRoute } from '@/utils/routePrefetch'
 import styles from './Navbar.module.css'
 
 const Navbar: React.FC = () => {
@@ -203,6 +204,8 @@ const Navbar: React.FC = () => {
           <NavLink
             key={link.path}
             to={link.path}
+            onMouseEnter={() => prefetchRoute(link.path)}
+            onFocus={() => prefetchRoute(link.path)}
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
             }
@@ -381,10 +384,20 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <div className={styles.authButtons}>
-            <button className={styles.loginButton} onClick={() => navigate('/login')}>
+            <button
+              className={styles.loginButton}
+              onMouseEnter={() => prefetchRoute('/login')}
+              onFocus={() => prefetchRoute('/login')}
+              onClick={() => navigate('/login')}
+            >
               {t('nav.auth.login')}
             </button>
-            <button className={styles.signupButton} onClick={() => navigate('/register')}>
+            <button
+              className={styles.signupButton}
+              onMouseEnter={() => prefetchRoute('/register')}
+              onFocus={() => prefetchRoute('/register')}
+              onClick={() => navigate('/register')}
+            >
               {t('nav.auth.signUp')}
             </button>
           </div>
@@ -401,6 +414,8 @@ const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 end={link.path === '/'}
+                onMouseEnter={() => prefetchRoute(link.path)}
+                onFocus={() => prefetchRoute(link.path)}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
@@ -411,6 +426,8 @@ const Navbar: React.FC = () => {
             ))}
             <NavLink
               to="/help"
+              onMouseEnter={() => prefetchRoute('/help')}
+              onFocus={() => prefetchRoute('/help')}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
                 isActive ? `${styles.mobileNavLink} ${styles.mobileNavLinkActive}` : styles.mobileNavLink
@@ -424,6 +441,8 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   className={styles.loginButton}
+                  onMouseEnter={() => prefetchRoute('/login')}
+                  onFocus={() => prefetchRoute('/login')}
                   onClick={() => {
                     setIsMobileMenuOpen(false)
                     navigate('/login')
@@ -434,6 +453,8 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   className={styles.signupButton}
+                  onMouseEnter={() => prefetchRoute('/register')}
+                  onFocus={() => prefetchRoute('/register')}
                   onClick={() => {
                     setIsMobileMenuOpen(false)
                     navigate('/register')

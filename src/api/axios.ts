@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'react-toastify'
 
 type SupportedAppLanguage = 'en' | 'fr' | 'rw'
@@ -44,6 +44,44 @@ const api = axios.create({
   timeout: 30000
 })
 
+type CacheEntry = {
+  expiresAt: number
+  response: AxiosResponse
+}
+
+const responseCache = new Map<string, CacheEntry>()
+
+const stableStringify = (value: any): string => {
+  if (value === null || value === undefined) return String(value)
+  if (typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`
+  const keys = Object.keys(value).sort()
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`
+}
+
+const getDefaultCacheTTL = (url: string) => {
+  if (!url) return 0
+  // Public lists and metadata: safe to cache briefly.
+  if (url.startsWith('/content/public/')) return 60_000
+  if (url === '/genres' || url === '/categories' || url === '/categories/featured') return 5 * 60_000
+  if (url.startsWith('/content/search')) return 30_000
+
+  // Public content details.
+  if (/^\/content\/[^/]+$/.test(url)) return 60_000
+  if (/^\/content\/series\/[^/]+$/.test(url)) return 60_000
+
+  return 0
+}
+
+const buildCacheKey = (config: InternalAxiosRequestConfig, appLanguage: SupportedAppLanguage, token?: string | null) => {
+  const method = String(config.method || 'get').toLowerCase()
+  const url = String(config.url || '')
+  const params = (config as any).params
+  const explicit = (config as any).cacheKey
+  if (explicit) return `${method}:${explicit}:${appLanguage}:${token ? 'auth' : 'anon'}`
+  return `${method}:${String(config.baseURL || '')}${url}?${stableStringify(params)}:${appLanguage}:${token ? 'auth' : 'anon'}`
+}
+
 // Request interceptor - Add auth token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -57,6 +95,26 @@ api.interceptors.request.use(
     const appLanguage = normalizeAppLanguage(localStorage.getItem('app.language'))
     if (config.headers) {
       config.headers['Accept-Language'] = buildAcceptLanguage(appLanguage)
+    }
+
+    const method = String(config.method || 'get').toLowerCase()
+    const url = String(config.url || '')
+    const noCache = Boolean((config as any).noCache)
+    const explicitTTL = (config as any).cacheTTL
+    const ttl = typeof explicitTTL === 'number' ? explicitTTL : getDefaultCacheTTL(url)
+
+    if (!noCache && method === 'get' && ttl > 0) {
+      const cacheKey = buildCacheKey(config, appLanguage, token)
+      const existing = responseCache.get(cacheKey)
+      if (existing && existing.expiresAt > Date.now()) {
+        config.adapter = async () => {
+          return existing.response
+        }
+        return config
+      }
+
+      ;(config as any)._cacheKey = cacheKey
+      ;(config as any)._cacheTTL = ttl
     }
 
     return config
@@ -74,6 +132,14 @@ api.interceptors.response.use(
     if (import.meta.env.DEV) {
       console.log('API Response:', response.config.url, response.data)
     }
+
+    const cfg: any = response.config as any
+    const cacheKey: string | undefined = cfg?._cacheKey
+    const cacheTTL: number | undefined = cfg?._cacheTTL
+    if (cacheKey && typeof cacheTTL === 'number' && cacheTTL > 0) {
+      responseCache.set(cacheKey, { expiresAt: Date.now() + cacheTTL, response })
+    }
+
     return response
   },
   async (error: AxiosError) => {
